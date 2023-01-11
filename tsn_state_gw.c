@@ -248,11 +248,11 @@ gw_dmap_state_machine(gw_dmap_state_s *dmap, void *dlpdu,
 			{
 				dmap->State = DMAP_STATE_operation;
 				break;
-			}
+			}
 			else
 			{
 				return FALSE;
-			}
+			}
 			break;
 		default:
 			return FALSE;
