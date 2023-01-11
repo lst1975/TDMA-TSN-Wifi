@@ -7,4 +7,8 @@ Howto Build the Project
 
 BUILD_MODE=debug make
 
+or
+
+make
+
 Email: 980680431@qq.com
