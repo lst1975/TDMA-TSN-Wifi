@@ -5,7 +5,7 @@ Under construction ...
 
 Howto Build the Project
 
-BUILD_MODE=debug make
+BUILD_MODE=run make
 
 or
 
