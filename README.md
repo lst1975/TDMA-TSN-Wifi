@@ -7,7 +7,7 @@ Under construction ...
 # Howto Build the Project
 BUILD_MODE=run make or make
 
-# Email: 
+# Email 
 980680431@qq.com
 
 # Product
