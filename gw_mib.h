@@ -203,7 +203,7 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
   #define DMAP_mib_id_static_AddressTypeFlag_u8                 0
   #define DMAP_mib_id_static_AddressTypeFlag_u16                1 
   #define DMAP_mib_id_static_AddressTypeFlag_u64                2 
-  #define DMAP_mib_id_static_AddressTypeFlag_NONE                3 
+  #define DMAP_mib_id_static_AddressTypeFlag_NONE               3 
 #define DMAP_mib_id_static_MaxPayloadLength                  (DMAP_mib_id_static_MIN+ 2) 
 #define DMAP_mib_id_static_NACKCount                         (DMAP_mib_id_static_MIN+ 3) 
 #define DMAP_mib_id_static_NetworkID                         (DMAP_mib_id_static_MIN+ 4) 
@@ -222,7 +222,7 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
 #define DMAP_mib_id_static_LossRate                          (DMAP_mib_id_static_MIN+15) 
 #define DMAP_mib_id_static_MaxRetry                          (DMAP_mib_id_static_MIN+16) 
 #define DMAP_mib_id_static_SecurityLevel                     (DMAP_mib_id_static_MIN+17) 
-  #define DMAP_mib_id_static_SecurityLevel_None                                0
+  #define DMAP_mib_id_static_SecurityLevel_None                               0
   #define DMAP_mib_id_static_SecurityLevel_Authentication                     1
   #define DMAP_mib_id_static_SecurityLevel_Authentication_MIC32               2
   #define DMAP_mib_id_static_SecurityLevel_Authentication_MIC64               3
@@ -281,13 +281,13 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
   #define DMAP_mib_id_link_LinkType_TxDirection_Transmit             0x00 
   #define DMAP_mib_id_link_LinkType_TxDirection_SharedTransmission   0x20
   #define DMAP_mib_id_link_LinkType_TxDirection_Retransmit           0x40
-  #define DMAP_mib_id_link_LinkType_TxDirection_Receive               0x60
+  #define DMAP_mib_id_link_LinkType_TxDirection_Receive              0x60
 #define DMAP_mib_id_link_LinkType_TxDirection_MASK                   0x60
 
-  #define DMAP_mib_id_link_LinkType_TimeslotType_Beacon                   0x00
+  #define DMAP_mib_id_link_LinkType_TimeslotType_Beacon                  0x00
   #define DMAP_mib_id_link_LinkType_TimeslotType_NACK                    0x04
   #define DMAP_mib_id_link_LinkType_TimeslotType_GACK                    0x08
-  #define DMAP_mib_id_link_LinkType_TimeslotType_ManagementTimeslot       0x0C
+  #define DMAP_mib_id_link_LinkType_TimeslotType_ManagementTimeslot      0x0C
   #define DMAP_mib_id_link_LinkType_TimeslotType_DataTimeslot            0x10
   #define DMAP_mib_id_link_LinkType_TimeslotType_ManagementDataTimeslot  0x14
 #define DMAP_mib_id_link_LinkType_TimeslotType_MASK                      0x1C
@@ -374,7 +374,7 @@ static inline const char *dlmeDeviceState2String(unsigned int state)
 #define DMAP_mib_id_key_KeyAttackCount                       5 
 #define DMAP_mib_id_key_AlarmFlag                            6 
   #define DMAP_mib_id_key_AlarmFlag_Alarm_of_KEY_attaction                0 
-  #define DMAP_mib_id_key_AlarmFlag_Alarm_of_KEY_update_timeout      1 
+  #define DMAP_mib_id_key_AlarmFlag_Alarm_of_KEY_update_timeout           1 
 #define DMAP_mib_id_key_KeyState                             7 
   #define DMAP_mib_id_key_KeyState_Backup                                 0 
   #define DMAP_mib_id_key_KeyState_Using                                  1 
@@ -388,12 +388,12 @@ static inline const char *dlmeDeviceState2String(unsigned int state)
  ************************************************************************************/
 #define DMAP_mib_id_vcrEP_VcrID                                0
 #define DMAP_mib_id_vcrEP_VcrType                              1 
-  #define DMAP_mib_id_vcrEP_VcrType_CLIENT                              0 
-  #define DMAP_mib_id_vcrEP_VcrType_SERVER                1 
-  #define DMAP_mib_id_vcrEP_VcrType_PUBLISHER                2 
+  #define DMAP_mib_id_vcrEP_VcrType_CLIENT                  0 
+  #define DMAP_mib_id_vcrEP_VcrType_SERVER                  1 
+  #define DMAP_mib_id_vcrEP_VcrType_PUBLISHER               2 
   #define DMAP_mib_id_vcrEP_VcrType_SUBSCRIBER              3 
-  #define DMAP_mib_id_vcrEP_VcrType_REPORT_SOURCE              4 
-  #define DMAP_mib_id_vcrEP_VcrType_REPORT_SINK              5
+  #define DMAP_mib_id_vcrEP_VcrType_REPORT_SOURCE           4 
+  #define DMAP_mib_id_vcrEP_VcrType_REPORT_SINK             5
 #define DMAP_mib_id_vcrEP_UapID                                2 
 #define DMAP_mib_id_vcrEP_PeerAddr                             3 
 #define DMAP_mib_id_vcrEP_VcrActiveTime                        4 
