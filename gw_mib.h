@@ -501,7 +501,7 @@ struct tsn_device{
   Unsigned8  PowerSupplyStatus;
   union {
     void *AdDevice;
-    struct sockaddr_in SockAddr;
+    tsn_sockaddr_s SockAddr;
   };
   Unsigned64 SequenceNumber;
   Unsigned8  MachineState;
