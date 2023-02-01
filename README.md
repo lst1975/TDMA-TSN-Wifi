@@ -4,7 +4,7 @@ Use TDMA to implement Time-Sensitive-Network Wifi
 # Project Status
 Under construction ...
 
-# Howto Build the Project
+# How to Build the Project
 BUILD_MODE=run make or make
 
 # Email 
