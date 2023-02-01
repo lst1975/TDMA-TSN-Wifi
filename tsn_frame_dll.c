@@ -1,3 +1,34 @@
+/**************************************************************************************
+ *               TDMA Time-Sensitive-Network Wifi V1.0.1
+ * Copyright (C) 2022 Songtao Liu, 980680431@qq.com.  All Rights Reserved.
+ **************************************************************************************
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * THE ABOVE COPYRIGHT NOTICE AND THIS PERMISSION NOTICE SHALL BE INCLUDED IN ALL
+ * COPIES OR SUBSTANTIAL PORTIONS OF THE SOFTWARE. WHAT'S MORE, A DECLARATION OF 
+ * NGRTOS MUST BE DISPLAYED IN THE FINAL SOFTWARE OR PRODUCT RELEASE. NGRTOS HAS 
+ * NOT ANY LIMITATION OF CONTRIBUTIONS TO IT, WITHOUT ANY LIMITATION OF CODING STYLE, 
+ * DRIVERS, CORE, APPLICATIONS, LIBRARIES, TOOLS, AND ETC. ANY LICENSE IS PERMITTED 
+ * UNDER THE ABOVE LICENSE. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF 
+ * ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO 
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ *
+ **************************************************************************************
+ *                              
+ *                    https://github.com/lst1975/TDMA-TSN-Wifi
+ *                              
+ **************************************************************************************
+ */
 #include "tsn_private.h"
 
 static inline tsn_err_e
@@ -11,17 +42,17 @@ tsn_dlpdu_dllhdr_convert(tsn_buffer_s *b,
   hdr = (tsn_dlpdu_dllhdr_raw_s *)b->ptr;
   TSN_BUFFER_GO(b,2);
 
-	n->type = hdr->type;
-	n->is_segment = hdr->is_segment;
-	n->is_preemption = hdr->is_preemption;
-	n->is_shortaddr = hdr->is_shortaddr;
-	n->segment_count = 0;
-	n->segment_seq = 0;
-	n->length = 0;
-	
-	if (hdr->is_shortaddr)
-	{
-	  if (sysCfg.useShortAddr)
+  n->type = hdr->type;
+  n->is_segment = hdr->is_segment;
+  n->is_preemption = hdr->is_preemption;
+  n->is_shortaddr = hdr->is_shortaddr;
+  n->segment_count = 0;
+  n->segment_seq = 0;
+  n->length = 0;
+  
+  if (hdr->is_shortaddr)
+  {
+    if (sysCfg.useShortAddr)
     { 
       n->addr->AddrType = DMAP_mib_id_static_AddressTypeFlag_u8;
       tsn_buffer_get8(b, &n->addr->AddrU8);
@@ -30,29 +61,29 @@ tsn_dlpdu_dllhdr_convert(tsn_buffer_s *b,
     {
       if (b->len < 2)
         return -TSN_err_tooshort;
-  		n->addr->AddrType = DMAP_mib_id_static_AddressTypeFlag_u16;
+      n->addr->AddrType = DMAP_mib_id_static_AddressTypeFlag_u16;
       tsn_buffer_get16(b, &n->addr->AddrU16);
     }
-	}
-	else
-	{
+  }
+  else
+  {
     if (b->len < 4)
       return -TSN_err_tooshort;
-		n->addr->AddrType = DMAP_mib_id_static_AddressTypeFlag_u64;
+    n->addr->AddrType = DMAP_mib_id_static_AddressTypeFlag_u64;
     tsn_buffer_get64(b, &n->addr->AddrU64);
-	}
+  }
 
   if (b->len < 2)
     return -TSN_err_tooshort;
   tsn_buffer_get16(b, &n->seq);
   
-	if (hdr->is_segment)
-	{
+  if (hdr->is_segment)
+  {
     if (b->len < 2)
       return -TSN_err_tooshort;
     tsn_buffer_get8(b, &n->segment_count);
     tsn_buffer_get8(b, &n->segment_seq);
-	}
+  }
   
   if (b->len < 2)
     return -TSN_err_tooshort;
@@ -61,16 +92,16 @@ tsn_dlpdu_dllhdr_convert(tsn_buffer_s *b,
   if (b->len < sysCfg.fcsLength + n->length)
     return -TSN_err_tooshort;
   
-	return TSN_err_none;
+  return TSN_err_none;
 }
 
 static inline void
 tsn_dlpdu_dllhdr_build(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
 {
   tsn_buffer_put8(b, *(Unsigned8 *)n);
-	if (n->is_shortaddr)
-	{
-	  if (sysCfg.useShortAddr)
+  if (n->is_shortaddr)
+  {
+    if (sysCfg.useShortAddr)
     { 
       tsn_buffer_put8(b, n->addr->AddrU8);
     }
@@ -78,17 +109,17 @@ tsn_dlpdu_dllhdr_build(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
     {
       tsn_buffer_put16(b, n->addr->AddrU16);
     }
-	}
-	else
-	{
+  }
+  else
+  {
     tsn_buffer_put64(b, n->addr->AddrU64);
-	}
+  }
   tsn_buffer_put16(b, n.seq);
-	if (n->is_segment)
-	{
+  if (n->is_segment)
+  {
     tsn_buffer_put8(b, n.segment_count);
     tsn_buffer_put8(b, n.segment_seq);
-	}
+  }
   tsn_buffer_put16(b, n.length);
 }
 
@@ -279,11 +310,11 @@ tsn_dlpdu_dllhdr_print(tsn_dlpdu_dllhdr_s *n)
     tsn_print_addr(&n->addr);
     printf("\tNetworkID: %u\n", n->networkID);
     printf("\tSequence: %u\n", TSN_ntohs(n->seq));
-  	if (hdr->is_segment)
-  	{
+    if (hdr->is_segment)
+    {
       printf("\tSegment Count: %u\n", n->segment_count);
       printf("\tSegment Sequence: %u\n", n->segment_seq);
-  	}
+    }
     printf("\tLength: %u\n", TSN_ntohs(n->length));
   }
 }

@@ -1,10 +1,41 @@
+/**************************************************************************************
+ *               TDMA Time-Sensitive-Network Wifi V1.0.1
+ * Copyright (C) 2022 Songtao Liu, 980680431@qq.com.  All Rights Reserved.
+ **************************************************************************************
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * THE ABOVE COPYRIGHT NOTICE AND THIS PERMISSION NOTICE SHALL BE INCLUDED IN ALL
+ * COPIES OR SUBSTANTIAL PORTIONS OF THE SOFTWARE. WHAT'S MORE, A DECLARATION OF 
+ * NGRTOS MUST BE DISPLAYED IN THE FINAL SOFTWARE OR PRODUCT RELEASE. NGRTOS HAS 
+ * NOT ANY LIMITATION OF CONTRIBUTIONS TO IT, WITHOUT ANY LIMITATION OF CODING STYLE, 
+ * DRIVERS, CORE, APPLICATIONS, LIBRARIES, TOOLS, AND ETC. ANY LICENSE IS PERMITTED 
+ * UNDER THE ABOVE LICENSE. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF 
+ * ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO 
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ *
+ **************************************************************************************
+ *                              
+ *                    https://github.com/lst1975/TDMA-TSN-Wifi
+ *                              
+ **************************************************************************************
+ */
 #include "tsn_private.h"
 
 enum{
-	AD_JOIN_SUCCESS = 0,
-	AD_JOIN_UNMATCHED_NetworkID,
-	AD_JOIN_AUTHENTICATION_Failed,
-	AD_JOIN_EXCEEDED,
+  AD_JOIN_SUCCESS = 0,
+  AD_JOIN_UNMATCHED_NetworkID,
+  AD_JOIN_AUTHENTICATION_Failed,
+  AD_JOIN_EXCEEDED,
 };
 
 struct GACKInfo{
@@ -241,11 +272,11 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   if (req.PhyAddr != n->ADAddr)
     return -TSN_err_malformed;
 
-  ad = tsn_system_netword_find_ad(req.NetworkID, req.PhyAddr);
+  ad = tsn_network_find_ad(req.NetworkID, req.PhyAddr);
   if (ad)
     goto good;
 
-  if (TSN_FALSE == tsn_system_netword_check_ad(req.NetworkID, 
+  if (TSN_FALSE == tsn_network_check_ad(req.NetworkID, 
     req.PhyAddr))
   {
     status = AD_JOIN_AUTHENTICATION_Failed;
@@ -418,7 +449,8 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
     return -TSN_err_invalid;
     
   devMib = TSN_DMAP_mib_device_find_ByShortAddr(ind.ShortAddr);
-  devMib[DMAP_mib_id_device_PowerSupplyStatus].Value.Value_Unsigned8 = ind.PowerSupplyStatus;
+  devMib[DMAP_mib_id_device_PowerSupplyStatus]
+    .Value.Value_Unsigned8 = ind.PowerSupplyStatus;
   return -TSN_err_unsupport;
 }
 
@@ -558,35 +590,37 @@ static const char *__dlpduType2String(unsigned int type)
   return frameTableGateway[type].name;
 }
 
-static inline void
+static inline tsn_err_e
 tsn_adgw_dll_dlpdu2normal(tsn_buffer_s *b, 
   tsn_gw_dlpdu_normal_s *n)
 {
-	n->AdID   = 0;
-	n->ADAddr = 0;
+  n->AdID   = 0;
+  n->ADAddr = 0;
 
   if (b->len < 3)
     return -TSN_err_tooshort;
 
-	tsn_buffer_get8(b, &n->ServID);
-	if (n->ServID > TSN_AD_JOIN_ack)
-	{
+  tsn_buffer_get8(b, &n->ServID);
+  if (n->ServID > TSN_AD_JOIN_ack)
+  {
     if (b->len < 1)
       return -TSN_err_tooshort;
-		tsn_buffer_get8(b, &n->AdID);
-	}
-	else
-	{
+    tsn_buffer_get8(b, &n->AdID);
+  }
+  else
+  {
     if (b->len < 4)
       return -TSN_err_tooshort;
-		tsn_buffer_get64(b, &n->ADAddr);
-	}
+    tsn_buffer_get64(b, &n->ADAddr);
+  }
   if (b->len < 2)
     return -TSN_err_tooshort;
-	tsn_buffer_get16(b, &n->AttrLen);
+  tsn_buffer_get16(b, &n->AttrLen);
   if (b->len < n->AttrLen)
     return -TSN_err_tooshort;
-	n->Attrs = TSN_BUFFER_PTR(b);
+  
+  n->Attrs = TSN_BUFFER_PTR(b);
+  return TSN_err_none;
 }
 
 void
@@ -631,3 +665,4 @@ tsn_dlpdu_process_adgw(tsn_msg_s *msg)
   msg->priv = &n;
   return (*frameTableGateway[n->ServID].func)(msg);
 }
+

@@ -1,3 +1,34 @@
+/**************************************************************************************
+ *               TDMA Time-Sensitive-Network Wifi V1.0.1
+ * Copyright (C) 2022 Songtao Liu, 980680431@qq.com.  All Rights Reserved.
+ **************************************************************************************
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * THE ABOVE COPYRIGHT NOTICE AND THIS PERMISSION NOTICE SHALL BE INCLUDED IN ALL
+ * COPIES OR SUBSTANTIAL PORTIONS OF THE SOFTWARE. WHAT'S MORE, A DECLARATION OF 
+ * NGRTOS MUST BE DISPLAYED IN THE FINAL SOFTWARE OR PRODUCT RELEASE. NGRTOS HAS 
+ * NOT ANY LIMITATION OF CONTRIBUTIONS TO IT, WITHOUT ANY LIMITATION OF CODING STYLE, 
+ * DRIVERS, CORE, APPLICATIONS, LIBRARIES, TOOLS, AND ETC. ANY LICENSE IS PERMITTED 
+ * UNDER THE ABOVE LICENSE. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF 
+ * ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO 
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ *
+ **************************************************************************************
+ *                              
+ *                    https://github.com/lst1975/TDMA-TSN-Wifi
+ *                              
+ **************************************************************************************
+ */
 #include "tsn_private.h"
 
 /* DLME     ---> Data link-layer management entity 
@@ -27,23 +58,23 @@ static tsn_boolean_e DLME_discovery_request(BitField24 bitMap)
 }
 
 enum{
-	DLME_DISCOVERY_CONFIRM_SUCCESS=0,
-	DLME_DISCOVERY_CONFIRM_NO_BEACHON,
+  DLME_DISCOVERY_CONFIRM_SUCCESS=0,
+  DLME_DISCOVERY_CONFIRM_NO_BEACHON,
 };
 struct BeaconDescription{
-	Unsigned24 ChannelIndex;
-	uint16_t BeaconRelativeTimeslotNum;
-	uint8_t ED;
+  Unsigned24 ChannelIndex;
+  uint16_t BeaconRelativeTimeslotNum;
+  uint8_t ED;
 };
 struct DlmeDiscoveryConfirm{
-	uint8_t Status;
-	uint8_t BeaconCount;
-	uint16_t SuperframeLength;
-	uint16_t TimeslotDuration;
-	uint16_t FirstSharedTimeslotNumber;
-	uint8_t SharedTimeslotNumber;
-	TimeData AbsoluteTimeValue;
-	struct BeaconDescription BeaconDescriptionList[0];
+  uint8_t  Status;
+  uint8_t  BeaconCount;
+  uint16_t SuperframeLength;
+  uint16_t TimeslotDuration;
+  uint16_t FirstSharedTimeslotNumber;
+  uint8_t  SharedTimeslotNumber;
+  TimeData AbsoluteTimeValue;
+  struct BeaconDescription BeaconDescriptionList[0];
 };
 static tsn_boolean_e DLME_discovery_confirm(struct DlmeDiscoveryConfirm *cfm)
 {
@@ -89,7 +120,6 @@ static tsn_boolean_e DLME_timesync_response(struct DlmeTimeSyncResponse *rsp)
 static tsn_boolean_e DLME_timesync_indication(struct DlmeTimeSyncIndication *ind)
 {
 }
-
 static tsn_boolean_e DLME_timesync_confirm(struct DlmeTimeSyncResponse *cfm)
 {
 }
@@ -202,32 +232,38 @@ static tsn_boolean_e DLME_device_status_confirm(struct DlmeDeviceStatusConfirm *
  *     |<-------------------- |                   |                         |
  *     |                      |                   |                         |
  ***********************************************************************************/
-struct ChannelConditionInfomation{
-	uint8_t ChannelID;
-	uint8_t LinkQuality;
-	SingleFloat PacketLossRate;
-	uint8_t RetryNumber;
+struct __ChannelConditionInfomation{
+  uint8_t ChannelID;
+  uint8_t LinkQuality;
+  SingleFloat PacketLossRate;
+  uint8_t RetryNumber;
 };
-struct DlmeChannelConditionRequest{
-	uint8_t Count;
-	struct ChannelConditionInfomation ChannelConditionInfo[0];
+typedef struct __ChannelConditionInfomation ChannelConditionInfomation;
+
+struct __DlmeChannelConditionRequest{
+  uint8_t Count;
+  ChannelConditionInfomation ChannelConditionInfo[0];
 };
+typedef struct __DlmeChannelConditionRequest DlmeChannelConditionRequest;
+
 static tsn_boolean_e DLME_channel_condition_request(struct DlmeChannelConditionRequest *req)
 {
 }
-struct DlmeChannelConditionIndication{
-	uint16_t SrcAddr;
-	struct ChannelConditionInfomation ChannelConditionInfo[0];
+struct __DlmeChannelConditionIndication{
+  uint16_t SrcAddr;
+  ChannelConditionInfomation ChannelConditionInfo[0];
 };
+typedef struct __DlmeChannelConditionIndication DlmeChannelConditionIndication;
+
 static tsn_boolean_e DLME_channel_condition_indication(struct DlmeChannelConditionIndication *ind)
 {
 }
 enum{
-	DLME_channel_condition_confirm_SUCCESS = 0,
-	DLME_channel_condition_confirm_FAILURE,
+  DLME_channel_condition_confirm_SUCCESS = 0,
+  DLME_channel_condition_confirm_FAILURE,
 };
 struct DlmeChannelConditionConfirm{
-	uint8_t Status;
+  uint8_t Status;
 };
 static tsn_boolean_e DLME_device_status_confirm(struct DlmeChannelConditionConfirm *cfm)
 {
@@ -273,55 +309,55 @@ static tsn_boolean_e DLME_device_status_confirm(struct DlmeChannelConditionConfi
  *     |                      |                   |                         |
  ***********************************************************************************/
 struct DlmeInformationGetRequest{
-	uint8_t Handle;
-	uint16_t DstAddr;
-	uint8_t AttributeID;
-	uint8_t MemberID;
-	uint16_t FirstStoreIndex;
-	uint16_t Count;
+  uint8_t  Handle;
+  uint16_t DstAddr;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
 };
 static tsn_boolean_e DLME_information_get_request(struct DlmeInformationGetRequest *req)
 {
 }
 struct DlmeInformationGetIndication{
-	uint16_t SrcAddr;
-	uint8_t AttributeID;
-	uint8_t MemberID;
-	uint16_t FirstStoreIndex;
-	uint16_t Count;
+  uint16_t SrcAddr;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
 };
 static tsn_boolean_e DLME_information_get_indication(struct DlmeInformationGetIndication *ind)
 {
 }
 enum{
-	DLME_information_get_response_SUCCESS = 0,
-	DLME_information_get_response_UNSUPPORTED_ATTRIBUTE,
+  DLME_information_get_response_SUCCESS = 0,
+  DLME_information_get_response_UNSUPPORTED_ATTRIBUTE,
 };
 struct DlmeInformationGetResponse{
-	uint16_t DstAddr;
-	uint8_t Status;
-	uint8_t AttributeID;
-	uint8_t MemberID;
-	uint16_t FirstStoreIndex;
-	uint8_t AttributeValue[0];
+  uint16_t DstAddr;
+  uint8_t  Status;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint8_t  AttributeValue[0];
 };
 static tsn_boolean_e DLME_information_get_response(struct DlmeInformationGetResponse *rsp)
 {
 }
 enum{
-	DLME_channel_condition_confirm_SUCCESS = 0,
-	DLME_channel_condition_confirm_FAILURE,
+  DLME_channel_condition_confirm_SUCCESS = 0,
+  DLME_channel_condition_confirm_FAILURE,
 };
 struct DlmeInformationGetConfirm{
-	uint8_t Handle;
-	uint16_t SrcAddr;
-	uint16_t DstAddr;
-	uint8_t Status;
-	uint8_t AttributeID;
-	uint8_t MemberID;
-	uint16_t FirstStoreIndex;
-	uint16_t Count;
-	uint8_t AttributeValue[0];
+  uint8_t  Handle;
+  uint16_t SrcAddr;
+  uint16_t DstAddr;
+  uint8_t  Status;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
+  uint8_t  AttributeValue[0];
 };
 static tsn_boolean_e DLME_information_get_confirm(struct DlmeInformationGetConfirm *cfm)
 {
@@ -367,60 +403,60 @@ static tsn_boolean_e DLME_information_get_confirm(struct DlmeInformationGetConfi
  *     |                      |                   |                         |
  ***********************************************************************************/
 enum{
-	DLME_information_set_option_ADD=0,
-	DLME_information_set_option_DELETE,
-	DLME_information_set_option_UPDATE,
+  DLME_information_set_option_ADD=0,
+  DLME_information_set_option_DELETE,
+  DLME_information_set_option_UPDATE,
 };
 struct DlmeInformationSetRequest{
-	uint8_t Handle;
-	uint16_t DstAddr;
-	uint8_t AttributeOption;
-	uint8_t AttributeID;
-	uint8_t MemberID;
-	uint16_t FirstStoreIndex;
-	uint16_t Count;
-	uint8_t AttributeValue[0];
+  uint8_t  Handle;
+  uint16_t DstAddr;
+  uint8_t  AttributeOption;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
+  uint8_t  AttributeValue[0];
 };
 static tsn_boolean_e DLME_information_set_request(struct DlmeInformationSetRequest *req)
 {
 }
 struct DlmeInformationSetIndication{
-	uint16_t SrcAddr;
-	uint8_t AttributeOption;
-	uint8_t AttributeID;
-	uint8_t MemberID;
-	uint16_t FirstStoreIndex;
-	uint16_t Count;
-	uint8_t AttributeValue[0];
+  uint16_t SrcAddr;
+  uint8_t  AttributeOption;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
+  uint8_t  AttributeValue[0];
 };
 static tsn_boolean_e DLME_information_set_indication(struct DlmeInformationSetIndication *ind)
 {
 }
 enum{
-	DLME_information_set_response_SUCCESS = 0,
-	DLME_information_set_response_UNSUPPORTED_ATTRIBUTE,
-	DLME_information_set_response_INVALID_PARAMETER,
+  DLME_information_set_response_SUCCESS = 0,
+  DLME_information_set_response_UNSUPPORTED_ATTRIBUTE,
+  DLME_information_set_response_INVALID_PARAMETER,
 };
 struct DlmeInformationSetResponse{
-	uint16_t SrcAddr;
-	uint8_t AttributeOption;
-	uint8_t AttributeID;
-	uint8_t MemberID;
-	uint16_t FirstStoreIndex;
-	uint8_t Count;
-	uint8_t Status;
+  uint16_t SrcAddr;
+  uint8_t  AttributeOption;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint8_t  Count;
+  uint8_t  Status;
 };
 static tsn_boolean_e DLME_information_set_response(struct DlmeInformationSetResponse *rsp)
 {
 }
 enum{
-	DLME_information_set_confirm_SUCCESS = 0,
-	DLME_information_set_confirm_UNSUPPORTED_ATTRIBUTE,
-	DLME_information_set_confirm_INVALID_PARAMETER,
+  DLME_information_set_confirm_SUCCESS = 0,
+  DLME_information_set_confirm_UNSUPPORTED_ATTRIBUTE,
+  DLME_information_set_confirm_INVALID_PARAMETER,
 };
 struct DlmeInformationSetConfirm{
-	uint8_t Handle;
-	uint8_t Status;
+  uint8_t Handle;
+  uint8_t Status;
 };
 static tsn_boolean_e DLME_information_set_confirm(struct DlmeInformationSetConfirm *cfm)
 {
@@ -459,10 +495,10 @@ static tsn_boolean_e DLME_information_set_confirm(struct DlmeInformationSetConfi
  *     |                      |                   |                         |
  ***********************************************************************************/
 struct DlmeLeaveRequest{
-	union{
-		uint8_t ShortAddr8;
-		uint16_t ShortAddr16;
-	};
+  union{
+    uint8_t  ShortAddr8;
+    uint16_t ShortAddr16;
+  };
 };
 static tsn_boolean_e DLME_leave_request(struct DlmeLeaveRequest *req)
 {
@@ -482,14 +518,14 @@ static tsn_boolean_e DLME_leave_response(void *rsp)
 {
 }
 enum{
-	DLME_leave_confirm_SUCCESS = 0,
-	DLME_leave_confirm_FAILURE
+  DLME_leave_confirm_SUCCESS = 0,
+  DLME_leave_confirm_FAILURE
 };
 struct DlmeLeaveConfirm{
-	uint8_t Status;
+  uint8_t Status;
 };
 static tsn_boolean_e DLME_leave_confirm(struct DlmeLeaveConfirm *cfm)
 {
 }
-	
+  
 #endif

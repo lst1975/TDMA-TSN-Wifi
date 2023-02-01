@@ -1,54 +1,85 @@
+/**************************************************************************************
+ *               TDMA Time-Sensitive-Network Wifi V1.0.1
+ * Copyright (C) 2022 Songtao Liu, 980680431@qq.com.  All Rights Reserved.
+ **************************************************************************************
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * THE ABOVE COPYRIGHT NOTICE AND THIS PERMISSION NOTICE SHALL BE INCLUDED IN ALL
+ * COPIES OR SUBSTANTIAL PORTIONS OF THE SOFTWARE. WHAT'S MORE, A DECLARATION OF 
+ * NGRTOS MUST BE DISPLAYED IN THE FINAL SOFTWARE OR PRODUCT RELEASE. NGRTOS HAS 
+ * NOT ANY LIMITATION OF CONTRIBUTIONS TO IT, WITHOUT ANY LIMITATION OF CODING STYLE, 
+ * DRIVERS, CORE, APPLICATIONS, LIBRARIES, TOOLS, AND ETC. ANY LICENSE IS PERMITTED 
+ * UNDER THE ABOVE LICENSE. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF 
+ * ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO 
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ *
+ **************************************************************************************
+ *                              
+ *                    https://github.com/lst1975/TDMA-TSN-Wifi
+ *                              
+ **************************************************************************************
+ */
 #ifndef _TSN_GW_DLME_H_
 #define _TSN_GW_DLME_H_
 
 struct DlmeJoinRequest{
-	uint8_t NetworkID;
-	BitField24 Channel;
-	uint64_t PhyAddr;
-	uint64_t SecMaterial;
+  uint8_t NetworkID;
+  BitField24 Channel;
+  uint64_t PhyAddr;
+  uint64_t SecMaterial;
 };
 typedef struct DlmeJoinRequest dlme_join_request_s;
 
 struct DlmeJoinIndication{
-	uint64_t PhyAddr;
-	uint64_t SecMaterial;
-	union {
-		tsn_boolean_e AuthenResult; /* internal use */
-		short_addr_u ShortAddr;
-	};
+  uint64_t PhyAddr;
+  uint64_t SecMaterial;
+  union {
+    tsn_boolean_e AuthenResult; /* internal use */
+    short_addr_u ShortAddr;
+  };
 };
 typedef struct DlmeJoinIndication dlme_join_indication_s;
 
 enum{
-	DLME_JOIN_SUCCESS = 0,
-	DLME_JOIN_UNMATCHED_NetworkID,
-	DLME_JOIN_AUTHENTICATION_Failed,
-	DLME_JOIN_EXCEEDED,
+  DLME_JOIN_SUCCESS = 0,
+  DLME_JOIN_UNMATCHED_NetworkID,
+  DLME_JOIN_AUTHENTICATION_Failed,
+  DLME_JOIN_EXCEEDED,
 };
 struct DlmeJoinResponse{
-	uint8_t Status;
-	uint16_t ShortAddr;
+  uint8_t Status;
+  uint16_t ShortAddr;
 };
 typedef struct DlmeJoinResponse dlme_join_response_s;
 
 struct DlmeJoinConfirm{
-	uint8_t Status;
-	uint16_t ShortAddr;
+  uint8_t Status;
+  uint16_t ShortAddr;
 };
 typedef struct DlmeJoinConfirm dlme_join_confirm_s;
 
 enum{
-	DLME_Device_PowerSupplyStatus_FixedPower = 0,
-	DLME_Device_PowerSupplyStatus_Level_1,  /* | low, insufficiant power supply */
-	DLME_Device_PowerSupplyStatus_Level_2,  /* | */
-	DLME_Device_PowerSupplyStatus_Level_3,  /* | */
-	DLME_Device_PowerSupplyStatus_Level_4,  /* | */
-	DLME_Device_PowerSupplyStatus_Level_5,  /* | */
-	DLME_Device_PowerSupplyStatus_Level_6,  /* | */
-	DLME_Device_PowerSupplyStatus_Level_7,  /* | */
-	DLME_Device_PowerSupplyStatus_Level_8,  /* | */
-	DLME_Device_PowerSupplyStatus_Level_9,  /* | */
-	DLME_Device_PowerSupplyStatus_Level_10, /* | high, sufficiant power supply */
+  DLME_Device_PowerSupplyStatus_FixedPower = 0,
+  DLME_Device_PowerSupplyStatus_Level_1,  /* | low, insufficiant power supply */
+  DLME_Device_PowerSupplyStatus_Level_2,  /* | */
+  DLME_Device_PowerSupplyStatus_Level_3,  /* | */
+  DLME_Device_PowerSupplyStatus_Level_4,  /* | */
+  DLME_Device_PowerSupplyStatus_Level_5,  /* | */
+  DLME_Device_PowerSupplyStatus_Level_6,  /* | */
+  DLME_Device_PowerSupplyStatus_Level_7,  /* | */
+  DLME_Device_PowerSupplyStatus_Level_8,  /* | */
+  DLME_Device_PowerSupplyStatus_Level_9,  /* | */
+  DLME_Device_PowerSupplyStatus_Level_10, /* | high, sufficiant power supply */
 };
 static inline const char *dlmeDevPowerSupplyStatus2String(unsigned int status)
 {
@@ -63,52 +94,52 @@ static inline const char *dlmeDevPowerSupplyStatus2String(unsigned int status)
     return "<Invalid>";
 }
 struct DlmeDeviceStatusRequest{
-	uint8_t PowerSupplyStatus;
+  uint8_t PowerSupplyStatus;
 };
 typedef struct DlmeDeviceStatusRequest dlme_device_status_request_s;
 
 struct DlmeDeviceStatusIndication{
-	uint16_t ShortAddr;
-	uint8_t PowerSupplyStatus;
+  uint16_t ShortAddr;
+  uint8_t PowerSupplyStatus;
 };
 typedef struct DlmeDeviceStatusIndication dlme_device_status_indication_s;
 
 enum{
-	DLME_device_status_confirm_SUCCESS = 0,
-	DLME_device_status_confirm_FAILURE,
+  DLME_device_status_confirm_SUCCESS = 0,
+  DLME_device_status_confirm_FAILURE,
 };
 struct DlmeDeviceStatusConfirm{
-	uint8_t Status;
+  uint8_t Status;
 };
 typedef struct DlmeDeviceStatusConfirm dlme_device_status_confirm_s;
 
 struct DlmeTimeSyncRequest{
-	uint16_t SrcAddr;
-	TimeData FieldDeviceTimeValue;
+  uint16_t SrcAddr;
+  TimeData FieldDeviceTimeValue;
 };
 typedef struct DlmeTimeSyncRequest dlme_time_sync_request_s;
 
 struct DlmeTimeSyncResponse{
-	uint16_t DstAddr;
-	TimeData FieldDeviceTimeValue;
-	TimeData ReceiveTimeValue;
+  uint16_t DstAddr;
+  TimeData FieldDeviceTimeValue;
+  TimeData ReceiveTimeValue;
 };
 typedef struct DlmeTimeSyncResponse dlme_time_sync_response_s;
 
 struct DlmeTimeSyncIndication{
-	uint16_t SrcAddr;
-	TimeData FieldDeviceTimeValue;
+  uint16_t SrcAddr;
+  TimeData FieldDeviceTimeValue;
 };
 typedef struct DlmeTimeSyncIndication dlme_time_sync_indication_s;
 
 enum{
-	DLME_timesync_confirm_SUCCESS=0,
-	DLME_timesync_confirm_OVERTIME,
+  DLME_timesync_confirm_SUCCESS=0,
+  DLME_timesync_confirm_OVERTIME,
 };
 struct DlmeTimeSyncConfirm{
-	uint8_t Status;
-	TimeData FieldDeviceTimeValue;
-	TimeData ReceiveTimeValue;
+  uint8_t Status;
+  TimeData FieldDeviceTimeValue;
+  TimeData ReceiveTimeValue;
 };
 typedef struct DlmeTimeSyncConfirm dlme_time_sync_confirm_s;
 

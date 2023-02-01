@@ -1,14 +1,17 @@
-# TDMA-TSN-WIFI
+# tsn-tdma-wifi
 Use TDMA to implement Time-Sensitive-Network Wifi
 
-# Project Status
 Under construction ...
 
-# How to Build the Project
-BUILD_MODE=run make or make
+Howto Build the Project
 
-# Email 
-980680431@qq.com
+BUILD_MODE=run make
 
-# Product
+or
+
+make
+
+Email: 980680431@qq.com
+
+
 ![mmexport1673463073321](https://user-images.githubusercontent.com/28725147/211893351-387d5814-735e-43ac-bd19-96bd0cc8518b.jpg)

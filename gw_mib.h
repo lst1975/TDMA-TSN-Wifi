@@ -1,3 +1,34 @@
+/**************************************************************************************
+ *               TDMA Time-Sensitive-Network Wifi V1.0.1
+ * Copyright (C) 2022 Songtao Liu, 980680431@qq.com.  All Rights Reserved.
+ **************************************************************************************
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * THE ABOVE COPYRIGHT NOTICE AND THIS PERMISSION NOTICE SHALL BE INCLUDED IN ALL
+ * COPIES OR SUBSTANTIAL PORTIONS OF THE SOFTWARE. WHAT'S MORE, A DECLARATION OF 
+ * NGRTOS MUST BE DISPLAYED IN THE FINAL SOFTWARE OR PRODUCT RELEASE. NGRTOS HAS 
+ * NOT ANY LIMITATION OF CONTRIBUTIONS TO IT, WITHOUT ANY LIMITATION OF CODING STYLE, 
+ * DRIVERS, CORE, APPLICATIONS, LIBRARIES, TOOLS, AND ETC. ANY LICENSE IS PERMITTED 
+ * UNDER THE ABOVE LICENSE. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF 
+ * ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO 
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ *
+ **************************************************************************************
+ *                              
+ *                    https://github.com/lst1975/TDMA-TSN-Wifi
+ *                              
+ **************************************************************************************
+ */
 #ifndef _GW_MIB_H_
 #define _GW_MIB_H_
 
@@ -203,7 +234,7 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
   #define DMAP_mib_id_static_AddressTypeFlag_u8                 0
   #define DMAP_mib_id_static_AddressTypeFlag_u16                1 
   #define DMAP_mib_id_static_AddressTypeFlag_u64                2 
-  #define DMAP_mib_id_static_AddressTypeFlag_NONE               3 
+  #define DMAP_mib_id_static_AddressTypeFlag_NONE                3 
 #define DMAP_mib_id_static_MaxPayloadLength                  (DMAP_mib_id_static_MIN+ 2) 
 #define DMAP_mib_id_static_NACKCount                         (DMAP_mib_id_static_MIN+ 3) 
 #define DMAP_mib_id_static_NetworkID                         (DMAP_mib_id_static_MIN+ 4) 
@@ -222,7 +253,7 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
 #define DMAP_mib_id_static_LossRate                          (DMAP_mib_id_static_MIN+15) 
 #define DMAP_mib_id_static_MaxRetry                          (DMAP_mib_id_static_MIN+16) 
 #define DMAP_mib_id_static_SecurityLevel                     (DMAP_mib_id_static_MIN+17) 
-  #define DMAP_mib_id_static_SecurityLevel_None                               0
+  #define DMAP_mib_id_static_SecurityLevel_None                                0
   #define DMAP_mib_id_static_SecurityLevel_Authentication                     1
   #define DMAP_mib_id_static_SecurityLevel_Authentication_MIC32               2
   #define DMAP_mib_id_static_SecurityLevel_Authentication_MIC64               3
@@ -281,13 +312,13 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
   #define DMAP_mib_id_link_LinkType_TxDirection_Transmit             0x00 
   #define DMAP_mib_id_link_LinkType_TxDirection_SharedTransmission   0x20
   #define DMAP_mib_id_link_LinkType_TxDirection_Retransmit           0x40
-  #define DMAP_mib_id_link_LinkType_TxDirection_Receive              0x60
+  #define DMAP_mib_id_link_LinkType_TxDirection_Receive               0x60
 #define DMAP_mib_id_link_LinkType_TxDirection_MASK                   0x60
 
-  #define DMAP_mib_id_link_LinkType_TimeslotType_Beacon                  0x00
+  #define DMAP_mib_id_link_LinkType_TimeslotType_Beacon                   0x00
   #define DMAP_mib_id_link_LinkType_TimeslotType_NACK                    0x04
   #define DMAP_mib_id_link_LinkType_TimeslotType_GACK                    0x08
-  #define DMAP_mib_id_link_LinkType_TimeslotType_ManagementTimeslot      0x0C
+  #define DMAP_mib_id_link_LinkType_TimeslotType_ManagementTimeslot       0x0C
   #define DMAP_mib_id_link_LinkType_TimeslotType_DataTimeslot            0x10
   #define DMAP_mib_id_link_LinkType_TimeslotType_ManagementDataTimeslot  0x14
 #define DMAP_mib_id_link_LinkType_TimeslotType_MASK                      0x1C
@@ -374,7 +405,7 @@ static inline const char *dlmeDeviceState2String(unsigned int state)
 #define DMAP_mib_id_key_KeyAttackCount                       5 
 #define DMAP_mib_id_key_AlarmFlag                            6 
   #define DMAP_mib_id_key_AlarmFlag_Alarm_of_KEY_attaction                0 
-  #define DMAP_mib_id_key_AlarmFlag_Alarm_of_KEY_update_timeout           1 
+  #define DMAP_mib_id_key_AlarmFlag_Alarm_of_KEY_update_timeout      1 
 #define DMAP_mib_id_key_KeyState                             7 
   #define DMAP_mib_id_key_KeyState_Backup                                 0 
   #define DMAP_mib_id_key_KeyState_Using                                  1 
@@ -388,12 +419,12 @@ static inline const char *dlmeDeviceState2String(unsigned int state)
  ************************************************************************************/
 #define DMAP_mib_id_vcrEP_VcrID                                0
 #define DMAP_mib_id_vcrEP_VcrType                              1 
-  #define DMAP_mib_id_vcrEP_VcrType_CLIENT                  0 
-  #define DMAP_mib_id_vcrEP_VcrType_SERVER                  1 
-  #define DMAP_mib_id_vcrEP_VcrType_PUBLISHER               2 
+  #define DMAP_mib_id_vcrEP_VcrType_CLIENT                              0 
+  #define DMAP_mib_id_vcrEP_VcrType_SERVER                1 
+  #define DMAP_mib_id_vcrEP_VcrType_PUBLISHER                2 
   #define DMAP_mib_id_vcrEP_VcrType_SUBSCRIBER              3 
-  #define DMAP_mib_id_vcrEP_VcrType_REPORT_SOURCE           4 
-  #define DMAP_mib_id_vcrEP_VcrType_REPORT_SINK             5
+  #define DMAP_mib_id_vcrEP_VcrType_REPORT_SOURCE              4 
+  #define DMAP_mib_id_vcrEP_VcrType_REPORT_SINK              5
 #define DMAP_mib_id_vcrEP_UapID                                2 
 #define DMAP_mib_id_vcrEP_PeerAddr                             3 
 #define DMAP_mib_id_vcrEP_VcrActiveTime                        4 

@@ -1,3 +1,34 @@
+/**************************************************************************************
+ *               TDMA Time-Sensitive-Network Wifi V1.0.1
+ * Copyright (C) 2022 Songtao Liu, 980680431@qq.com.  All Rights Reserved.
+ **************************************************************************************
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * THE ABOVE COPYRIGHT NOTICE AND THIS PERMISSION NOTICE SHALL BE INCLUDED IN ALL
+ * COPIES OR SUBSTANTIAL PORTIONS OF THE SOFTWARE. WHAT'S MORE, A DECLARATION OF 
+ * NGRTOS MUST BE DISPLAYED IN THE FINAL SOFTWARE OR PRODUCT RELEASE. NGRTOS HAS 
+ * NOT ANY LIMITATION OF CONTRIBUTIONS TO IT, WITHOUT ANY LIMITATION OF CODING STYLE, 
+ * DRIVERS, CORE, APPLICATIONS, LIBRARIES, TOOLS, AND ETC. ANY LICENSE IS PERMITTED 
+ * UNDER THE ABOVE LICENSE. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF 
+ * ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO 
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES 
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * IN THE SOFTWARE.
+ *
+ **************************************************************************************
+ *                              
+ *                    https://github.com/lst1975/TDMA-TSN-Wifi
+ *                              
+ **************************************************************************************
+ */
 
 /* from valgrind tests */
 
@@ -23,7 +54,7 @@ A million repetitions of "a"
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>	/* for u_int*_t */
+#include <sys/types.h>  /* for u_int*_t */
 #if defined(__sun)
 #include "solarisfixes.h"
 #endif
@@ -35,9 +66,9 @@ A million repetitions of "a"
 #if defined(linux) || defined(__linux__)
 # include <endian.h>
 #else
-#define	LITTLE_ENDIAN	1234	/* least-significant byte first (vax, pc) */
-#define	BIG_ENDIAN	4321	/* most-significant byte first (IBM, net) */
-#define	PDP_ENDIAN	3412	/* LSB first in word, MSW first in long (pdp)*/
+#define  LITTLE_ENDIAN  1234  /* least-significant byte first (vax, pc) */
+#define  BIG_ENDIAN  4321  /* most-significant byte first (IBM, net) */
+#define  PDP_ENDIAN  3412  /* LSB first in word, MSW first in long (pdp)*/
 
 #if defined(__i386__) || defined(__x86_64__) || defined(__amd64__) || \
    defined(vax) || defined(ns32000) || defined(sun386) || \
@@ -53,7 +84,7 @@ A million repetitions of "a"
   defined(__hppa) || defined(__hp9000) || \
   defined(__hp9000s300) || defined(__hp9000s700) || \
   defined (BIT_ZERO_ON_LEFT) || defined(m68k) || defined(__sparc)
-#define BYTE_ORDER	BIG_ENDIAN
+#define BYTE_ORDER  BIG_ENDIAN
 #endif
 #endif /* linux */
 #endif /* BSD */
@@ -83,11 +114,11 @@ A million repetitions of "a"
 
 #if !defined(BYTE_ORDER) || \
   (BYTE_ORDER != BIG_ENDIAN && BYTE_ORDER != LITTLE_ENDIAN)
-	/* you must determine what the correct bit order is for
-	 * your compiler - the next line is an intentional error
-	 * which will force your compiles to bomb until you fix
-	 * the above macros.
-	 */
+  /* you must determine what the correct bit order is for
+   * your compiler - the next line is an intentional error
+   * which will force your compiles to bomb until you fix
+   * the above macros.
+   */
 #error "Undefined or invalid BYTE_ORDER"
 #endif
 
@@ -228,7 +259,7 @@ void SHA1Final(unsigned char digest[20], SHA1_CTX* context)
   c = 0200;
   SHA1Update(context, &c, 1);
   while ((context->count[0] & 504) != 448) {
-  	c = 0000;
+    c = 0000;
     SHA1Update(context, &c, 1);
   }
   SHA1Update(context, finalcount, 8);  /* Should cause a SHA1Transform() */
