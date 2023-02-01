@@ -340,4 +340,39 @@ struct tsn_sockaddr{
 
 typedef struct tsn_sockaddr tsn_sockaddr_s;
 
+static inline tsn_boolean_e
+tsn_sockaddr_isequal(tsn_sockaddr_s *u, struct sockaddr *sa)
+{
+  if (sa->sa_fam != u->sa->sa_fam)
+  {
+    return TSN_FALSE;
+  }
+  else
+  {
+    tsn_sockaddr_s *s = (tsn_sockaddr_s *)sa;
+    s->sa = sa;
+    
+    switch (sa->sa_fam)
+    {
+      case AF_INET:
+        if (u->u.addr4.sin_port != s->u.addr4.sin_port)
+          return TSN_FALSE;
+        if (u->u.addr4.sin_addr.s_addr != s->u.addr4.sin_addr.s_addr)
+          return TSN_FALSE;
+        break;
+        
+      case AF_INET6:
+        if (u->u.addr6.sin6_port != s->u.addr6.sin6_port)
+          return TSN_FALSE;
+        if (memcmp(&u->u.addr6.sin6_addr, &s->u.addr4.sin6_addr, 16))
+          return TSN_FALSE;
+        break;
+        
+      default:
+        return TSN_FALSE;
+    }
+  }
+  return TSN_TRUE;
+}
+
 #endif
