@@ -132,8 +132,14 @@ TSN_device_create(tsn_device_s **_dev,
     TSN_error("Failed to malloc tsn_device_s.\n");    
     return -TSN_err_nomem;
   }
-  TSN_device_init(dev, LongAddress, AdID, DeviceState, 
+  
+  TSN_device_init(
+          dev, 
+          LongAddress, 
+          AdID, 
+          DeviceState, 
           DeviceShortAddress);
+  
   net->Devices[DeviceShortAddress] = dev;
   *_dev = dev;
   return TSN_err_none;

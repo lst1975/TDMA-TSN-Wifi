@@ -318,7 +318,8 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   n->ShortAddr++;
 
 good:  
-  r = make_TSN_AD_JOIN_response(msg, AD_JOIN_SUCCESS, 
+  r = make_TSN_AD_JOIN_response(msg, 
+    AD_JOIN_SUCCESS, 
     dev->AccessDeviceID, 
     dev->DeviceShortAddress);
   if (r != TSN_err_none)

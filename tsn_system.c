@@ -90,8 +90,10 @@ tsn_boolean_e tsn_system_init(void)
     s->AcceptedPhyAddr = NULL;
     s->ShortAddr = 0;
     s->AdID = 0;
+    s->Active = TSN_FALSE;
     s->FDNumber = 0;
     memset(s->Devices, 0, sizeof(s->Devices));
+    INIT_LIST_HEAD(&s->Ads);
   }
   return TSN_TRUE;
 

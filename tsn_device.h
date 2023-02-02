@@ -44,6 +44,7 @@ struct tsn_network{
   uint64_t Active:1;
   uint64_t *AcceptedPhyAddr;
   tsn_device_s *Devices[TSN_ShorAddress_MAX];
+  list_head_s Ads;
 };
 
 tsn_err_e
