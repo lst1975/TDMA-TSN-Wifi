@@ -244,9 +244,9 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
 {
   int status;
   tsn_err_e r;
-  tsn_network_s *s;
+  tsn_network_s *n;
   tsn_buffer_s *b = &msg->b;
-  TSN_DMAP_mib_attribute_s *ad;
+  tsn_device_s *dev;
   tsn_ad_join_request_s req;
   tsn_gw_dlpdu_normal_s *n = (tsn_gw_dlpdu_normal_s *)msg->priv;
 
@@ -272,8 +272,8 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   if (req.PhyAddr != n->ADAddr)
     return -TSN_err_malformed;
 
-  ad = tsn_network_find_ad(req.NetworkID, req.PhyAddr);
-  if (ad)
+  dev = tsn_network_find_ad(req.NetworkID, req.PhyAddr);
+  if (dev != NULL)
     goto good;
 
   if (TSN_FALSE == tsn_network_check_ad(req.NetworkID, 
@@ -289,36 +289,38 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
     goto failed;
   }
   
-  s = &sysCfg.network[req.NetworkID];
-  if (s->AdID + 1 > Unsigned8Max)
+  n = &sysCfg.network[req.NetworkID];
+  if (n->AdID + 1 > Unsigned8Max)
   {
     status = AD_JOIN_EXCEEDED;
     goto failed;
   }
   
-  if (s->ShortAddr + 1 >= Unsigned16Max)
-  {
-    status = AD_JOIN_EXCEEDED;
-    goto failed;
-  }
-  
-  ad = TSN_DMAP_mib_device_create(
-          req.PhyAddr, 
-          s->AdID,
-          DMAP_mib_id_device_DeviceState_Joining,
-          s->ShortAddr);
-  if (ad == NULL)
+  if (n->ShortAddr + 1 >= Unsigned16Max)
   {
     status = AD_JOIN_EXCEEDED;
     goto failed;
   }
 
-  s->AdID++;
-  s->ShortAddr++;
+  r = TSN_device_create(&dev,
+          req.NetworkID, 
+          req.PhyAddr, 
+          n->AdID, 
+          DMAP_mib_id_device_DeviceState_Joining, 
+          n->ShortAddr);
+  if (r != TSN_err_none)
+  {
+    status = AD_JOIN_EXCEEDED;
+    goto failed;
+  }
+
+  n->AdID++;
+  n->ShortAddr++;
 
 good:  
   r = make_TSN_AD_JOIN_response(msg, AD_JOIN_SUCCESS, 
-    ad->AdID, ad->ShortAddr);
+    dev->AccessDeviceID, 
+    dev->DeviceShortAddress);
   if (r != TSN_err_none)
     return r;
   return send_TSN_gw_response(msg);
@@ -583,7 +585,8 @@ static name_number_s frameTableGateway[TSN_dlpdu_type_max]={
 };
 #undef __DECL_F(n)
 
-static const char *__dlpduType2String(unsigned int type)
+static const char *
+__dlpduType2String(unsigned int type)
 {
   if (type >= TSN_dlpdu_type_max)
     return "<UNKONWN>";
