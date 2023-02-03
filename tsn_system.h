@@ -79,9 +79,8 @@ tsn_free_msg(tsn_msg_s *m)
 
 extern tsn_sys_config_s sysCfg;
 
-TimeData tsn_system_time(void);
-tsn_err_e
-tsn_system_get_network(tsn_network_s **net, unsigned int network);
+__TSN_INTERFACE TimeData tsn_system_time(void);
+tsn_err_e tsn_system_get_network(tsn_network_s **net, unsigned int network);
 
 #endif
 

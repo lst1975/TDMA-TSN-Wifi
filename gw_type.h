@@ -32,6 +32,7 @@
 #ifndef _GW_TYPE_H_
 #define _GW_TYPE_H_
 
+#define __TSN_INTERFACE
 #define __TSN_UNUSED __attribute__((unused))
 
 static inline uint64_t __htonll(uint64_t val) 
@@ -364,7 +365,7 @@ tsn_sockaddr_isequal(tsn_sockaddr_s *u, struct sockaddr *sa)
       case AF_INET6:
         if (u->u.addr6.sin6_port != s->u.addr6.sin6_port)
           return TSN_FALSE;
-        if (memcmp(&u->u.addr6.sin6_addr, &s->u.addr4.sin6_addr, 16))
+        if (memcmp(&u->u.addr6.sin6_addr, &s->u.addr6.sin6_addr, 16))
           return TSN_FALSE;
         break;
         

@@ -67,7 +67,7 @@ tsn_sys_config_s sysCfg = {
   .config.AggregationEnableFlag            = TSN_FALSE, 
 };
 
-TimeData tsn_system_time(void)
+__TSN_INTERFACE TimeData tsn_system_time(void)
 {
   struct timeval tv;
   if (gettimeofday(&tv, NULL) < 0)

@@ -32,7 +32,7 @@
 #ifndef __TSN_ENCRYPT_H__
 #define __TSN_ENCRYPT_H__
 
-tsn_boolean_e
+__TSN_INTERFACE tsn_boolean_e
 tsn_network_check_ad(Unsigned8  NetworkID, Unsigned64 PhyAddr);
 
 #endif
