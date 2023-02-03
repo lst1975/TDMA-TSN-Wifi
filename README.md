@@ -1,5 +1,5 @@
-# tsn-tdma-wifi
-Use TDMA to implement Time-Sensitive-Network Wifi
+# TSN-TDMA-WIFI
+Use TDMA to implement WIFI Time-Sensitive-Network
 
 Under construction ...
 
