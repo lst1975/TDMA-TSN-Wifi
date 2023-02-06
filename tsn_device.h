@@ -32,6 +32,8 @@
 #ifndef __TSN_DEVICE_H__
 #define __TSN_DEVICE_H__
 
+#define TSN_ADID_MAX 64
+#define TSN_ADID_INVALID TSN_ADID_MAX
 #define TSN_ShorAddress_MAX 1024
 #define TSN_NetworkID_MAX 8
 

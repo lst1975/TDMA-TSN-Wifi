@@ -34,7 +34,19 @@
 tsn_device_s *
 tsn_network_find_ad(Unsigned8 NetworkID, Unsigned64 PhyAddr)
 {
+  tsn_err_e r;
+  tsn_device_s *dev;
+  tsn_network_s *net;
+
+  r = tsn_system_get_network(&net, NetworkID);
+  if (r != TSN_err_none)
+    return NULL;
+
+  list_for_each_entry(dev,tsn_device_s,&net->Ads,link)
+  {
+    if (dev->LongAddress == PhyAddr)
+      return dev;
+  }
+
   return NULL;
 }
-
-

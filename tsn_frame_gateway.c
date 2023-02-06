@@ -244,12 +244,23 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
 {
   int status;
   tsn_err_e r;
+  tsn_buffer_s *b;
   tsn_network_s *n;
-  tsn_buffer_s *b = &msg->b;
+  tsn_sockaddr_s *s;
   tsn_device_s *dev;
   tsn_ad_join_request_s req;
-  tsn_gw_dlpdu_normal_s *n = (tsn_gw_dlpdu_normal_s *)msg->priv;
+  tsn_gw_dlpdu_normal_s *n;
 
+  s = tsn_system_cfg_ad_find(&msg->from);
+  if (s == NULL)
+  {
+    TSN_event("Received TSN_AD_JOIN_request from unauthorized client: ");
+    tsn_sockaddr_print(&msg->from, "", "\n");
+    return -TSN_err_invalid;
+  }
+  
+  b = &msg->b;
+  n = (tsn_gw_dlpdu_normal_s *)msg->priv;
   if (TSN_BUFFER_LEN(b) != 5)
     return -TSN_err_malformed;
   if (n->AttrLen != 5)
@@ -314,6 +325,7 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
     goto failed;
   }
 
+  dev->SockAddr = s;
   n->AdID++;
   n->ShortAddr++;
 

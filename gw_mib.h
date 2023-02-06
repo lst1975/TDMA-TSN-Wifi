@@ -532,10 +532,11 @@ struct tsn_device{
   Unsigned8  PowerSupplyStatus;
   union {
     void *AdDevice;
-    tsn_sockaddr_s SockAddr;
+    tsn_sockaddr_s *SockAddr;
   };
   Unsigned64 SequenceNumber;
   Unsigned8  MachineState;
+  list_head_s link;
 };
 typedef struct tsn_device tsn_device_s;
 

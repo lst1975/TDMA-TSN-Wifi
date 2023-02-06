@@ -557,7 +557,7 @@ static inline void list_splice_tail_init(ng_list_s *list,
  * @member:  the name of the list_head within the struct.
  */
 #define list_entry(ptr, type, member) \
-  ngrtos_container_of(ptr, type, member)
+  tsn_container_of(ptr, type, member)
 
 /**
  * list_first_entry - get the first element from a list
