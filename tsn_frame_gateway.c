@@ -251,14 +251,6 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   tsn_ad_join_request_s req;
   tsn_gw_dlpdu_normal_s *n;
 
-  s = tsn_system_cfg_ad_find(&msg->from);
-  if (s == NULL)
-  {
-    TSN_event("Received TSN_AD_JOIN_request from unauthorized client: ");
-    tsn_sockaddr_print(&msg->from, "", "\n");
-    return -TSN_err_invalid;
-  }
-  
   b = &msg->b;
   n = (tsn_gw_dlpdu_normal_s *)msg->priv;
   if (TSN_BUFFER_LEN(b) != 5)
@@ -283,6 +275,14 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   if (req.PhyAddr != n->ADAddr)
     return -TSN_err_malformed;
 
+  s = tsn_system_cfg_ad_find(req.NetworkID, &msg->from);
+  if (s == NULL)
+  {
+    TSN_event("Received TSN_AD_JOIN_request from unauthorized client: ");
+    tsn_sockaddr_print(&msg->from, "", "\n");
+    return -TSN_err_invalid;
+  }
+  
   dev = tsn_network_find_ad(req.NetworkID, req.PhyAddr);
   if (dev != NULL)
     goto good;

@@ -81,18 +81,13 @@ tsn_boolean_e tsn_system_init(void)
   int i;
   tsn_network_s *s;
 
-  for (i=0;i<TSN_ADID_MAX;i++)
-  {
-    tsn_sockaddr_s *a = &sysCfg.ads[i];
-    memset(a, 0, sizeof(*a));
-    a->sa = (struct sockaddr *)a;
-  }
-  
   if (tsn_crc_init() != TSN_TRUE)
     goto error;
 
   for (i=0;i<TSN_NetworkID_MAX;i++)
   {
+    int j;
+    
     s = &sysCfg.network[i];
     s->AcceptedPhyAddr = NULL;
     s->ShortAddr = 0;
@@ -101,6 +96,13 @@ tsn_boolean_e tsn_system_init(void)
     s->FDNumber = 0;
     memset(s->Devices, 0, sizeof(s->Devices));
     INIT_LIST_HEAD(&s->Ads);
+
+    for (j=0;j<TSN_ADID_MAX;j++)
+    {
+      tsn_sockaddr_s *a = &s->ads[i];
+      memset(a, 0, sizeof(*a));
+      a->sa = (struct sockaddr *)a;
+    }
   }
   return TSN_TRUE;
 
@@ -118,13 +120,17 @@ tsn_system_get_network(tsn_network_s **net, unsigned int network)
 }
 
 tsn_sockaddr_s *
-tsn_system_cfg_ad_find(tsn_sockaddr_s *s)
+tsn_system_cfg_ad_find(unsigned int network, tsn_sockaddr_s *s)
 {
   int i;
+  tsn_network_s *net;
+
+  if (TSN_err_none != tsn_system_get_network(&net, network))
+    return NULL;
 
   for (i=0;i<TSN_ADID_MAX;i++)
   {
-    tsn_sockaddr_s *a = &sysCfg.ads[i];
+    tsn_sockaddr_s *a = &net->ads[i];
     if (tsn_sockaddr_isequal(a, s))
       return a;
   }
@@ -133,16 +139,22 @@ tsn_system_cfg_ad_find(tsn_sockaddr_s *s)
 }
 
 tsn_boolean_e
-tsn_system_cfg_ad_add(tsn_sockaddr_s *s)
+tsn_system_cfg_ad_add(unsigned int network, tsn_sockaddr_s *s)
 {
   int i;
-  tsn_sockaddr_s *a = tsn_system_cfg_ad_find(s);
+  tsn_network_s *net;
+  tsn_sockaddr_s *a;
+
+  if (TSN_err_none != tsn_system_get_network(&net, network))
+    return NULL;
+
+  a = tsn_system_cfg_ad_find(network, s);
   if (a != NULL)
     return TSN_TRUE;
   
   for (i=0;i<TSN_ADID_MAX;i++)
   {
-    tsn_sockaddr_s *a = &sysCfg.ads[i];
+    tsn_sockaddr_s *a = &net->ads[i];
     if (a->slen)
       continue;
     *a = *s;
@@ -154,9 +166,9 @@ tsn_system_cfg_ad_add(tsn_sockaddr_s *s)
 }
 
 tsn_boolean_e
-tsn_system_cfg_ad_del(tsn_sockaddr_s *s)
+tsn_system_cfg_ad_del(unsigned int network, tsn_sockaddr_s *s)
 {
-  tsn_sockaddr_s *a = tsn_system_cfg_ad_find(s);
+  tsn_sockaddr_s *a = tsn_system_cfg_ad_find(network, s);
   if (a == NULL)
     return TSN_FALSE;
   

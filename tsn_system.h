@@ -49,8 +49,6 @@ struct tsn_sys_config {
   
   tsn_network_s network[TSN_NetworkID_MAX];
   tsn_static_config_s config;
-
-  tsn_sockaddr_s ads[TSN_ADID_MAX];
 };
 typedef struct tsn_sys_config tsn_sys_config_s;
 
@@ -83,11 +81,12 @@ extern tsn_sys_config_s sysCfg;
 
 __TSN_INTERFACE TimeData tsn_system_time(void);
 tsn_err_e tsn_system_get_network(tsn_network_s **net, unsigned int network);
-tsn_sockaddr_s *tsn_system_cfg_ad_find(tsn_sockaddr_s *s);
 void tsn_sockaddr_print(tsn_sockaddr_s *s, const char *head, const char *tail);
 void tsn_sockaddr_salen(tsn_sockaddr_s *s);
-tsn_boolean_e tsn_system_cfg_ad_add(tsn_sockaddr_s *s);
-tsn_boolean_e tsn_system_cfg_ad_del(tsn_sockaddr_s *s);
+
+tsn_sockaddr_s *tsn_system_cfg_ad_find(unsigned int network, tsn_sockaddr_s *s);
+tsn_boolean_e tsn_system_cfg_ad_add(unsigned int network, tsn_sockaddr_s *s);
+tsn_boolean_e tsn_system_cfg_ad_del(unsigned int network, tsn_sockaddr_s *s);
 
 #endif
 
