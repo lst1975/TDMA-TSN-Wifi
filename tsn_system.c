@@ -113,67 +113,16 @@ error:
 tsn_err_e
 tsn_system_get_network(tsn_network_s **net, unsigned int network)
 {
+  tsn_network_s *n;
   if (network >= TSN_NetworkID_MAX)
     return -TSN_err_exceeded;
-  *net = &sysCfg.network[network];
+
+  n = &sysCfg.network[network];
+  if (n->Active != TSN_TRUE)
+    return -TSN_err_existed;
+
+  *net = n;
   return TSN_err_none;
-}
-
-tsn_sockaddr_s *
-tsn_system_cfg_ad_find(unsigned int network, tsn_sockaddr_s *s)
-{
-  int i;
-  tsn_network_s *net;
-
-  if (TSN_err_none != tsn_system_get_network(&net, network))
-    return NULL;
-
-  for (i=0;i<TSN_ADID_MAX;i++)
-  {
-    tsn_sockaddr_s *a = &net->ads[i];
-    if (tsn_sockaddr_isequal(a, s))
-      return a;
-  }
-  
-  return NULL;
-}
-
-tsn_boolean_e
-tsn_system_cfg_ad_add(unsigned int network, tsn_sockaddr_s *s)
-{
-  int i;
-  tsn_network_s *net;
-  tsn_sockaddr_s *a;
-
-  if (TSN_err_none != tsn_system_get_network(&net, network))
-    return NULL;
-
-  a = tsn_system_cfg_ad_find(network, s);
-  if (a != NULL)
-    return TSN_TRUE;
-  
-  for (i=0;i<TSN_ADID_MAX;i++)
-  {
-    tsn_sockaddr_s *a = &net->ads[i];
-    if (a->slen)
-      continue;
-    *a = *s;
-    a->slen = tsn_sockaddr_salen(a);
-    return TSN_TRUE;
-  }
-  
-  return TSN_FALSE;
-}
-
-tsn_boolean_e
-tsn_system_cfg_ad_del(unsigned int network, tsn_sockaddr_s *s)
-{
-  tsn_sockaddr_s *a = tsn_system_cfg_ad_find(network, s);
-  if (a == NULL)
-    return TSN_FALSE;
-  
-  memset(a, 0, sizeof(*a));
-  return TSN_TRUE;
 }
 
 void

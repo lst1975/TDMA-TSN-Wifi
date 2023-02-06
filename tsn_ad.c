@@ -50,3 +50,61 @@ tsn_network_find_ad(Unsigned8 NetworkID, Unsigned64 PhyAddr)
 
   return NULL;
 }
+
+tsn_sockaddr_s *
+tsn_system_cfg_ad_find(unsigned int NetworkID, tsn_sockaddr_s *s)
+{
+  int i;
+  tsn_network_s *net;
+
+  if (TSN_err_none != tsn_system_get_network(&net, NetworkID))
+    return NULL;
+
+  for (i=0;i<TSN_ADID_MAX;i++)
+  {
+    tsn_sockaddr_s *a = &net->ads[i];
+    if (tsn_sockaddr_isequal(a, s))
+      return a;
+  }
+  
+  return NULL;
+}
+
+tsn_boolean_e
+tsn_system_cfg_ad_add(unsigned int NetworkID, tsn_sockaddr_s *s)
+{
+  int i;
+  tsn_network_s *net;
+  tsn_sockaddr_s *a;
+
+  if (TSN_err_none != tsn_system_get_network(&net, NetworkID))
+    return NULL;
+
+  a = tsn_system_cfg_ad_find(NetworkID, s);
+  if (a != NULL)
+    return TSN_TRUE;
+  
+  for (i=0;i<TSN_ADID_MAX;i++)
+  {
+    tsn_sockaddr_s *a = &net->ads[i];
+    if (a->slen)
+      continue;
+    *a = *s;
+    a->slen = tsn_sockaddr_salen(a);
+    net->Active = TSN_TRUE;
+    return TSN_TRUE;
+  }
+  
+  return TSN_FALSE;
+}
+
+tsn_boolean_e
+tsn_system_cfg_ad_del(unsigned int NetworkID, tsn_sockaddr_s *s)
+{
+  tsn_sockaddr_s *a = tsn_system_cfg_ad_find(NetworkID, s);
+  if (a == NULL)
+    return TSN_FALSE;
+  
+  memset(a, 0, sizeof(*a));
+  return TSN_TRUE;
+}
