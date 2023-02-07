@@ -11,8 +11,7 @@ ULB1Dv1: Unlimited License but for one Declaration.
 BUILD_MODE=run make or make
 
 # Software Achitecture for Gateway Device
-![image](https://user-images.githubusercontent.com/28725147/217292495-ca42ebf8-9bb4-43d3-b011-314f7d75abec.png)
-
+![image](https://user-images.githubusercontent.com/28725147/217293279-d7a8dac2-7f0f-419d-b448-00cd3be2000e.png)
 
 # Email
 980680431@qq.com
