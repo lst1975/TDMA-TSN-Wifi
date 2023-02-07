@@ -11,7 +11,7 @@ ULB1Dv1: Unlimited License but for one Declaration.
 BUILD_MODE=run make or make
 
 # Achitecture
-![image](https://user-images.githubusercontent.com/28725147/217135752-37c358ec-bf2f-4ec1-87e0-d881964d2bda.png)
+![image](https://user-images.githubusercontent.com/28725147/217141006-7f2ca5fb-a373-487b-bbad-d1fce40ecd86.png)
 
 
 # Email
