@@ -10,7 +10,7 @@ ULB1Dv1: Unlimited License but for one Declaration.
 
 BUILD_MODE=run make or make
 
-# Achitecture
+# Software Achitecture
 ![image](https://user-images.githubusercontent.com/28725147/217141006-7f2ca5fb-a373-487b-bbad-d1fce40ecd86.png)
 
 
