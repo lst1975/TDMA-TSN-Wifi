@@ -56,6 +56,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_all,
       "The ID of superframe assigned by WIA-FA network administrator.",
       tsn_offsetof(tsn_superframe_s,SuperframeID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_superframe_,
       NumberSlots,
@@ -68,6 +69,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_all,
       "The number of timeslots of superframe on WIA-FA network.",
       tsn_offsetof(tsn_superframe_s,NumberSlots)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_superframe_,
       ActiveFlag,
@@ -82,6 +84,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       "<br/>  0: Deactivated"
       "<br/>  1: Activated",
       tsn_offsetof(tsn_superframe_s,ActiveFlag)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_superframe_,
       ActiveSlot,
@@ -134,6 +137,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_all,
       "The id of DLL.",
       tsn_offsetof(tsn_dll_link_s,LinkID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_link_,
       LinkType,
@@ -160,6 +164,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       "<br/>      100: Data timeslot."
       "<br/>      101: Management and Data timeslot.",
       tsn_offsetof(tsn_dll_link_s,LinkType)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_link_,
       ActiveSlot,
@@ -173,6 +178,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       "The activated ASN (absolute timeslot number), which "
       "is equal [Time-Value/TimeSlotDuration].",
       tsn_offsetof(tsn_dll_link_s,ActiveSlot)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_link_,
       PeerAddr,
@@ -185,6 +191,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_all,
       "The short address of peer device.",
       tsn_offsetof(tsn_dll_link_s,PeerAddr)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_link_,
       RelativeSlotNumber,
@@ -197,6 +204,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_all,
       "The relative timeslot number.",
       tsn_offsetof(tsn_dll_link_s,RelativeSlotNumber)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_link_,
       ChannelIndex,
@@ -209,6 +217,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_all,
       "The index of current channel.",
       tsn_offsetof(tsn_dll_link_s,ChannelIndex)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_link_,
       SuperframeID,
@@ -245,6 +254,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_gw|DMAP_mib_device_fd,
       "The channel index.",
       tsn_offsetof(tsn_channel_s,ChannelID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_channel_condition_,
       LinkQuality,
@@ -257,6 +267,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_gw|DMAP_mib_device_fd,
       "The link quality of channel.",
       tsn_offsetof(tsn_channel_s,LinkQuality)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_channel_condition_,
       PacketLossRate,
@@ -269,6 +280,7 @@ __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
       DMAP_mib_device_gw|DMAP_mib_device_fd,
       "The packet loss rate of channel.",
       tsn_offsetof(tsn_channel_s,PacketLossRate)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_channel_condition_,
       RetryNumber,
@@ -500,8 +512,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
     "<br/>  7: Battery alert level 7."
     "<br/>  8: Battery alert level 8."
     "<br/>  9: Battery alert level 9."
-    "<br/>  10: Battery alert level 10."
-,
+    "<br/>  10: Battery alert level 10.",
     tsn_offsetof(tsn_device_s,PowerSupplyStatus)),
     
   __DECL_MIB_ATTR_OFFSET(
@@ -561,6 +572,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The ID of security KEY.",
       tsn_offsetof(tsn_key_s,KeyID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_device_,
       PeerAddr,
@@ -573,6 +585,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The short address of peer device.",
       tsn_offsetof(tsn_key_s,PeerAddr)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_device_,
       KeyType,
@@ -590,6 +603,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>  3: KEDU, Eencription key for data unicast"
       "<br/>  4: KEDB, Eencription key for data broadcast",
       tsn_offsetof(tsn_key_s,KeyType)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_device_,
       KeyDataValue,
@@ -602,6 +616,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The value of key.",
       tsn_offsetof(tsn_key_s,KeyAttackCount)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_device_,
       KeyActiveSlot,
@@ -614,6 +629,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The ASN (absolute timeslot number in ms) for activating KEY.",
       tsn_offsetof(tsn_key_s,KeyActiveSlot)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_device_,
       KeyAttackCount,
@@ -626,6 +642,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The times of KEY-attacking.",
       tsn_offsetof(tsn_key_s,KeyAttackCount)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_device_,
       AlarmFlag,
@@ -640,6 +657,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>  0: alarm of KEY-attaction"
       "<br/>  1: alarm of KEY-update timeout",
       tsn_offsetof(tsn_key_s,AlarmFlag)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_device_,
       KeyState,
@@ -690,6 +708,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The unique ID inside one device. 0 is for default C/S VCR.",
       tsn_offsetof(tsn_vcrEP_s,VcrID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_vcrEP_,
       VcrType,
@@ -708,6 +727,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>  4: REPORT SOURCE"
       "<br/>  5: REPORT SINK",
       tsn_offsetof(tsn_vcrEP_s,VcrType)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_vcrEP_,
       UapID,
@@ -720,6 +740,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The unique ID of UAP inside one device. 0 is for DMAP.",
       tsn_offsetof(tsn_vcrEP_s,UapID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_vcrEP_,
       PeerAddr,
@@ -732,6 +753,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The short address of peer device or gateway.",
       tsn_offsetof(tsn_vcrEP_s,PeerAddr)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_vcrEP_,
       VcrActiveTime,
@@ -746,6 +768,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "from this time. 0 represents that this VcrEP should be activated "
       "immediatly.",
       tsn_offsetof(tsn_vcrEP_s,VcrActiveTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_vcrEP_,
       DataUpdateRate,
@@ -758,6 +781,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The absolute time to publish pioriodical process data from P/S VcrEP in ms.",
       tsn_offsetof(tsn_vcrEP_s,DataUpdateRate)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_vcrEP_,
       Deadline,
@@ -772,6 +796,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "if DataUpdateRatexDealine ms has elapsed after the last pioriodical process data "
       "response on P/S VcrEP.",
       tsn_offsetof(tsn_vcrEP_s,Deadline)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_vcrEP_,
       WatchdogTime,
@@ -850,6 +875,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The unique UAO ID of one device instance.",
       tsn_offsetof(tsn_supported_uao_description_s,ClassID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_supported_uao_,
       UAOType,
@@ -866,6 +892,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>  2: DI"
       "<br/>  3: DO",
       tsn_offsetof(tsn_supported_uao_description_s,UAOType)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_supported_uao_,
       MaxInputDatalen,
@@ -879,6 +906,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "The maximum input data length in BYTE. "
       "MaxInputDatalen <= 1000 - the length of ASL header (4 bytes).",
       tsn_offsetof(tsn_supported_uao_description_s,MaxInputDatalen)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_supported_uao_,
       MaxOutputDatalen,
@@ -892,6 +920,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "The maximum output data length in BYTE. "
       "MaxOutputDatalen <= 1000 - the length of ASL header (4 bytes).",
       tsn_offsetof(tsn_supported_uao_description_s,MaxOutputDatalen)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_supported_uao_,
       MinDataUpdateRate,
@@ -904,6 +933,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The minimum data update rate (in ms) for pieriodical process data.",
       tsn_offsetof(tsn_supported_uao_description_s,MinDataUpdateRate)),
+      
     __DECL_MIB_ATTR_OFFSET(
       uao_parameter_datatype_mibs,
       DMAP_mib_id_supported_uao_,
@@ -917,6 +947,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The description of UAO input data type.",
       tsn_offsetof(tsn_supported_uao_description_s,SupperInputType)),
+      
     __DECL_MIB_ATTR_OFFSET(
       uao_parameter_datatype_mibs,
       DMAP_mib_id_supported_uao_,
@@ -960,6 +991,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The unique ID of UAO. 0 is used for MIB.",
       tsn_offsetof(tsn_uao_instance_description_s,UAOID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_uao_instance_,
       ClassID,
@@ -973,6 +1005,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "The unique UAO class ID that indicates it is an instance "
       "of an UAO with this classID in SupperUAOList.",
       tsn_offsetof(tsn_uao_instance_description_s,ClassID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_uao_instance_,
       UAPID,
@@ -985,6 +1018,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The unique UAP ID that belong to one specific UAO.",
       tsn_offsetof(tsn_uao_instance_description_s,UAPID)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_uao_instance_,
       AckFlag,
@@ -1000,6 +1034,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>  0: Nessisary to be confirmed."
       "<br/>  1: Unnessisary to be confirmed.",
       tsn_offsetof(tsn_uao_instance_description_s,AckFlag)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_uao_instance_,
       NumberOfInputData,
@@ -1012,6 +1047,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The number of input data.",
       tsn_offsetof(tsn_uao_instance_description_s,NumberOfInputData)),
+      
     __DECL_MIB_ATTR_OFFSET(
       DMAP_mib_id_uao_instance_,
       NumberOfOutputData,
@@ -1024,6 +1060,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The number of output data.",
       tsn_offsetof(tsn_uao_instance_description_s,NumberOfOutputData)),
+      
     __DECL_MIB_ATTR_OFFSET(
       uao_parameter_datatype_mibs,
       DMAP_mib_id_uao_instance_,
@@ -1037,6 +1074,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The data description list of UAO input data.",
       tsn_offsetof(tsn_uao_instance_description_s,ConfiguredInputDataList)),
+      
     __DECL_MIB_ATTR_OFFSET(
       uao_parameter_datatype_mibs,
       DMAP_mib_id_uao_instance_,
@@ -1121,6 +1159,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw,
       "The maximum expired time (in us) whithout receiving any heartbeat messages.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1134,6 +1173,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "0: 8-bits short address; 1: 16-bits short address.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1147,6 +1187,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The maximum DLL payload length compatible with the IEEE 802.11 Physical Layer Specification.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1160,6 +1201,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The number of NACK broadcasts.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1173,6 +1215,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The network id used to indicate each one when mutiple network co-existing.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1189,6 +1232,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>  Bit0-3 : Modulation method."
       "<br/>  Bit4-17: Channel status.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1202,6 +1246,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw|DMAP_mib_device_fd,
       "The time interval of reporting device status from gateway or field devices.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1215,6 +1260,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw|DMAP_mib_device_fd,
       "The time interval of reporting channel status from gateway or field devices.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1230,6 +1276,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "frames from neighbour device for such an interval, it is regarded that the "
       "neighbour deivice has leaven the WIA-FA network.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1243,6 +1290,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The time interval of periodical key updating in hours.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1256,6 +1304,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The value of timeslot in us.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1271,6 +1320,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>  0: Yes."
       "<br/>  1: NO.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1284,6 +1334,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The timeout value of two-way time synchronization.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1297,6 +1348,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw,
       "The number of access device teams.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1310,6 +1362,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw,
       "The expected frame loss rate of WIA-FA network.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1323,6 +1376,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw,
       "The current frame loss rate in an industrial scenario.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1336,6 +1390,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The maximum retransmition times.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1358,6 +1413,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>7: Authentication + Encription + MIC-64"
       "<br/>8: Authentication + Encription + MIC-128",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1371,6 +1427,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The interval (in minutes) to report statistics of attacks to devices.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1384,6 +1441,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The maximum KEY attacking times permitted.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1397,6 +1455,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The interval of repeated periodical alarm reports.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1410,6 +1469,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The number of trusted channel on one link.",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     __DECL_MIB_ATTR_OFFSET(
       NULL,
       DMAP_mib_id_static_,
@@ -1425,6 +1485,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       "<br/>  0: Disabled;"
       "<br/>  1: Eabled;",
       tsn_offsetof(tsn_static_config_s,PriGwFailureTime)),
+      
     /***********************************************************************************
      * GB/T26790.2-2015, 6.7.1.2.2, Page 35 
      *           Struct Attributes 
@@ -1443,6 +1504,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The description list of superframes.",
       tsn_offsetof(tsn_static_config_s,SuperframeList)),
+      
     __DECL_MIB_ATTR_OFFSET(
       link_mibs,
       DMAP_mib_id_list_,
@@ -1456,6 +1518,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The description list of DLLs.",
       tsn_offsetof(tsn_static_config_s,DllLinkList)),
+      
     __DECL_MIB_ATTR_OFFSET(
       channel_condition_mibs,
       DMAP_mib_id_list_,
@@ -1469,6 +1532,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw|DMAP_mib_device_fd,
       "The statistics record list of channel status.",
       tsn_offsetof(tsn_static_config_s,ChannelConditionList)),
+      
     __DECL_MIB_ATTR_OFFSET(
       device_mibs,
       DMAP_mib_id_list_,
@@ -1482,6 +1546,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The description list of WIA-FA devices.",
       tsn_offsetof(tsn_static_config_s,DeviceList)),
+      
     __DECL_MIB_ATTR_OFFSET(
       key_mibs,
       DMAP_mib_id_list_,
@@ -1495,6 +1560,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_all,
       "The description list of KEYs.",
       tsn_offsetof(tsn_static_config_s,KeyList)),
+      
     __DECL_MIB_ATTR_OFFSET(
       vcrEP_mibs,
       DMAP_mib_id_list_,
@@ -1508,6 +1574,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw|DMAP_mib_device_fd,
       "The description list of VCRs.",
       tsn_offsetof(tsn_static_config_s,VCRList)),
+      
     __DECL_MIB_ATTR_OFFSET(
       supported_uao_description_mibs,
       DMAP_mib_id_list_,
@@ -1521,6 +1588,7 @@ TSN_DMAP_mib_attribute_s device_mibs[13]={
       DMAP_mib_device_gw|DMAP_mib_device_fd,
       "The list of UAOs supported by the field devices.",
       tsn_offsetof(tsn_static_config_s,SupportedUAOList)),
+      
     __DECL_MIB_ATTR_OFFSET(
       uao_instance_description_mibs,
       DMAP_mib_id_list_,
