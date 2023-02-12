@@ -283,7 +283,7 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
     return -TSN_err_invalid;
   }
   
-  dev = tsn_network_find_ad(req.NetworkID, req.PhyAddr);
+  dev = tsn_network_ad_find_by_PhyAddr(req.NetworkID, req.PhyAddr);
   if (dev != NULL)
     goto good;
 

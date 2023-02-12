@@ -33,7 +33,7 @@
 #define __TSN_AD_H__
 
 tsn_boolean_e
-tsn_network_find_ad(Unsigned8 NetworkID, Unsigned64 PhyAddr);
+tsn_network_ad_find_by_PhyAddr(Unsigned8 NetworkID, Unsigned64 PhyAddr);
 
 tsn_sockaddr_s *tsn_system_cfg_ad_find(unsigned int NetworkID, tsn_sockaddr_s *s);
 tsn_boolean_e tsn_system_cfg_ad_add(unsigned int NetworkID, tsn_sockaddr_s *s);

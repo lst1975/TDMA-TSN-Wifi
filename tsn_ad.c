@@ -32,7 +32,7 @@
 #include "tsn_private.h"
 
 tsn_device_s *
-tsn_network_find_ad(Unsigned8 NetworkID, Unsigned64 PhyAddr)
+tsn_network_ad_find_by_PhyAddr(Unsigned8 NetworkID, Unsigned64 PhyAddr)
 {
   tsn_err_e r;
   tsn_device_s *dev;
