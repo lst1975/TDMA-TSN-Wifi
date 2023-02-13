@@ -1751,7 +1751,7 @@ TSN_DMAP_mib_init(void)
 {
   TSN_DMAP_mib_attribute_s * dstMib = __TSN_DMAP_mib_create(sizeof(dmap_mibs_table));
   if (dstMib == NULL)
-    return TSN_FAIL;
+    return TSN_FALSE;
   TSN_DMAP_mib_get.data = dstMib;
   TSN_DMAP_mib_set.data = dstMib;
   tsn_dstMib.mibs = dstMib;
@@ -1832,7 +1832,8 @@ confirm:
 int
 TSN_DMAP_mib_shortAddr_type(void)
 {
-  return tsn_dstMib.mibs[DMAP_mib_id_static_AddressTypeFlag].Value.value_Unsigned8 ? 
-    DMAP_mib_id_static_AddressTypeFlag_u16 : 
-      DMAP_mib_id_static_AddressTypeFlag_u8;
+  return tsn_dstMib.mibs[DMAP_mib_id_static_AddressTypeFlag]
+    .Value.value_Unsigned8 ? 
+        DMAP_mib_id_static_AddressTypeFlag_u16 : 
+          DMAP_mib_id_static_AddressTypeFlag_u8;
 }

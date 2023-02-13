@@ -82,21 +82,21 @@ TSN_device_init(tsn_device_s *dev,
   Unsigned8 DeviceState, 
   Unsigned16 DeviceShortAddress)
 {
-  dev->Version = 2022;
-  dev->LongAddress = LongAddress;
-  dev->NumberOfSuperframeUAO = 1;
-  dev->NumberOfConfiguredUAO = 1;
-  dev->TransmitDelay = 1200; /* in us */
-  dev->TimeValue = tsn_system_time(); /* in us */
-  dev->DeviceShortAddress = DeviceShortAddress;
+  dev->Version                = 2022;
+  dev->LongAddress            = LongAddress;
+  dev->NumberOfSuperframeUAO  = 1;
+  dev->NumberOfConfiguredUAO  = 1;
+  dev->TransmitDelay          = 1200; /* in us */
+  dev->TimeValue              = tsn_system_time(); /* in us */
+  dev->DeviceShortAddress     = DeviceShortAddress;
   dev->AggregationSupportFlag = TSN_FALSE;
-  dev->ProbeTime = 2; /*in default superframe*/
-  dev->RedundantDeviceFlag = TSN_FALSE;
-  dev->AccessDeviceID = AdID;
-  dev->DeviceState = DeviceState;
-  dev->PowerSupplyStatus = DMAP_mib_id_device_PowerSupplyStatus_Fixed;
-  dev->MachineState = DMAP_STATE_init;
-  dev->SequenceNumber = 0;
+  dev->ProbeTime              = 2; /*in default superframe*/
+  dev->RedundantDeviceFlag    = TSN_FALSE;
+  dev->AccessDeviceID         = AdID;
+  dev->DeviceState            = DeviceState;
+  dev->PowerSupplyStatus      = DMAP_mib_id_device_PowerSupplyStatus_Fixed;
+  dev->MachineState           = DMAP_STATE_init;
+  dev->SequenceNumber         = 0;
 }
 
 tsn_err_e
