@@ -465,7 +465,7 @@ __wia_epoll_process_events(tsn_sys_config_s *sys,
     if ((revents & EPOLLIN) && rev->active) 
     {
       rev->ready = TSN_TRUE;
-      rev->available = TSN_FALSE;
+      rev->available = TSN_TRUE;
 
 #if (TSN_HAVE_EPOLLRDHUP)
       if (revents & EPOLLRDHUP) 
@@ -492,7 +492,7 @@ __wia_epoll_process_events(tsn_sys_config_s *sys,
         continue;
       }
 
-      wev->ready = 1;
+      wev->ready = TSN_TRUE;
       wev->handler(wev);
     }
   }
