@@ -45,7 +45,7 @@ struct DlmeJoinIndication{
   uint64_t SecMaterial;
   union {
     tsn_boolean_e AuthenResult; /* internal use */
-    short_addr_u ShortAddr;
+    tsn_addr_u ShortAddr;
   };
 };
 typedef struct DlmeJoinIndication dlme_join_indication_s;
