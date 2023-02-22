@@ -83,8 +83,6 @@ typedef struct list_head list_head_s;
 extern "C" {
 #endif
 
-#include "ng_defs.h"
-
 #define __config_UseLIST_Poison 0
 
 struct ng_list {
