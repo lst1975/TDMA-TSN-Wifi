@@ -63,6 +63,10 @@
 #ifndef  __GW_LIST_H__
 #define  __GW_LIST_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ngrtos_WRITE_ONCE(a,v)        ((a) = (v))
 #define ngrtos_READ_ONCE(v)           (v)
 
@@ -76,24 +80,12 @@ struct list_head {
 typedef struct list_head list_head_s;
 /* SPDX-License-Identifier: GPL-2.0 */
 
-#ifndef __ngRTOS_LIST_H__
-#define __ngRTOS_LIST_H__
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define __config_UseLIST_Poison 0
-
-struct ng_list {
-  struct ng_list *next, *prev;
-};
-typedef struct ng_list ng_list_s;
 
 #if __config_UseLIST_Poison  
 #define __list_poison_entry(entry) {  \
-    (entry)->next = LIST_POISON1; \
-    (entry)->prev = LIST_POISON2; \
+  (entry)->next = LIST_POISON1; \
+  (entry)->prev = LIST_POISON2; \
 }
 #else
 #define __list_poison_entry(entry) (void)(entry)
@@ -113,7 +105,7 @@ typedef struct ng_list ng_list_s;
 #define LIST_ENTRY_INIT() { LIST_POISON1, LIST_POISON1 }
 
 #define LIST_HEAD(name) \
-  ng_list_s name = LIST_HEAD_INIT(name)
+  list_head_s name = LIST_HEAD_INIT(name)
 
 /**
  * INIT_LIST_HEAD - Initialize a list_head structure
@@ -122,7 +114,7 @@ typedef struct ng_list ng_list_s;
  * Initializes the list_head to point to itself.  If it is a list header,
  * the result is an empty list.
  */
-static inline void INIT_LIST_HEAD(ng_list_s *list)
+static inline void INIT_LIST_HEAD(list_head_s *list)
 {
   ngrtos_WRITE_ONCE(list->next, list);
   ngrtos_WRITE_ONCE(list->prev, list);
@@ -134,9 +126,9 @@ static inline void INIT_LIST_HEAD(ng_list_s *list)
  * This is only for internal list manipulation where we know
  * the prev/next entries already!
  */
-static inline void __list_add(ng_list_s *_new,
-            ng_list_s *prev,
-            ng_list_s *next)
+static inline void __list_add(list_head_s *_new,
+            list_head_s *prev,
+            list_head_s *next)
 {
   next->prev = _new;
   _new->next = next;
@@ -152,7 +144,7 @@ static inline void __list_add(ng_list_s *_new,
  * Insert a new entry after the specified head.
  * This is good for implementing stacks.
  */
-static inline void list_add_head(ng_list_s *_new, ng_list_s *head)
+static inline void list_add_head(list_head_s *_new, list_head_s *head)
 {
   __list_add(_new, head, head->next);
 }
@@ -166,7 +158,7 @@ static inline void list_add_head(ng_list_s *_new, ng_list_s *head)
  * Insert a new entry before the specified head.
  * This is useful for implementing queues.
  */
-static inline void list_add_tail(ng_list_s *_new, ng_list_s *head)
+static inline void list_add_tail(list_head_s *_new, list_head_s *head)
 {
   __list_add(_new, head->prev, head);
 }
@@ -178,7 +170,7 @@ static inline void list_add_tail(ng_list_s *_new, ng_list_s *head)
  *
  * Insert a new entry before the specified element.
  */
-static inline void list_add_before(ng_list_s *_new, ng_list_s *el)
+static inline void list_add_before(list_head_s *_new, list_head_s *el)
 {
   __list_add(_new, el->prev, el);
 }
@@ -190,7 +182,7 @@ static inline void list_add_before(ng_list_s *_new, ng_list_s *el)
  *
  * Insert a new entry after the specified element.
  */
-static inline void list_add_after(ng_list_s *_new, ng_list_s *el)
+static inline void list_add_after(list_head_s *_new, list_head_s *el)
 {
   __list_add(_new, el, el->next);
 }
@@ -199,7 +191,7 @@ static inline void list_add_after(ng_list_s *_new, ng_list_s *el)
  * list_empty - tests whether a list is empty
  * @head: the list to test.
  */
-static inline int list_empty(const ng_list_s *head)
+static inline int list_empty(const list_head_s *head)
 {
   return ngrtos_READ_ONCE(head->next) == head;
 }
@@ -211,13 +203,13 @@ static inline int list_empty(const ng_list_s *head)
  * This is only for internal list manipulation where we know
  * the prev/next entries already!
  */
-static inline void __list_del(ng_list_s * prev, ng_list_s * next)
+static inline void __list_del(list_head_s * prev, list_head_s * next)
 {
   next->prev = prev;
   ngrtos_WRITE_ONCE(prev->next, next);
 }
 
-static inline void __list_del_entry(ng_list_s *entry)
+static inline void __list_del_entry(list_head_s *entry)
 {
   __list_del(entry->prev, entry->next);
 }
@@ -228,7 +220,7 @@ static inline void __list_del_entry(ng_list_s *entry)
  * Note: list_empty() on entry does not return true after this, the entry is
  * in an undefined state.
  */
-static inline void list_del(ng_list_s *entry)
+static inline void list_del(list_head_s *entry)
 {
   __list_del_entry(entry);
   __list_poison_entry(entry);
@@ -241,8 +233,8 @@ static inline void list_del(ng_list_s *entry)
  *
  * If @old was empty, it will be overwritten.
  */
-static inline void list_replace(ng_list_s *old,
-        ng_list_s *_new)
+static inline void list_replace(list_head_s *old,
+        list_head_s *_new)
 {
   _new->next = old->next;
   _new->next->prev = _new;
@@ -257,8 +249,8 @@ static inline void list_replace(ng_list_s *old,
  *
  * If @old was empty, it will be overwritten.
  */
-static inline void list_replace_init(ng_list_s *old,
-             ng_list_s *_new)
+static inline void list_replace_init(list_head_s *old,
+             list_head_s *_new)
 {
   list_replace(old, _new);
   INIT_LIST_HEAD(old);
@@ -269,10 +261,10 @@ static inline void list_replace_init(ng_list_s *old,
  * @entry1: the location to place entry2
  * @entry2: the location to place entry1
  */
-static inline void list_swap(ng_list_s *entry1,
-           ng_list_s *entry2)
+static inline void list_swap(list_head_s *entry1,
+           list_head_s *entry2)
 {
-  ng_list_s *pos = entry2->prev;
+  list_head_s *pos = entry2->prev;
 
   list_del(entry2);
   list_replace(entry1, entry2);
@@ -285,7 +277,7 @@ static inline void list_swap(ng_list_s *entry1,
  * list_del_init - deletes entry from list and reinitialize it.
  * @entry: the element to delete from the list.
  */
-static inline void list_del_init(ng_list_s *entry)
+static inline void list_del_init(list_head_s *entry)
 {
   __list_del_entry(entry);
   INIT_LIST_HEAD(entry);
@@ -296,7 +288,7 @@ static inline void list_del_init(ng_list_s *entry)
  * @list: the entry to move
  * @head: the head that will precede our entry
  */
-static inline void list_move(ng_list_s *list, ng_list_s *head)
+static inline void list_move(list_head_s *list, list_head_s *head)
 {
   __list_del_entry(list);
   list_add(list, head);
@@ -307,8 +299,8 @@ static inline void list_move(ng_list_s *list, ng_list_s *head)
  * @list: the entry to move
  * @head: the head that will follow our entry
  */
-static inline void list_move_tail(ng_list_s *list,
-          ng_list_s *head)
+static inline void list_move_tail(list_head_s *list,
+          list_head_s *head)
 {
   __list_del_entry(list);
   list_add_tail(list, head);
@@ -323,9 +315,9 @@ static inline void list_move_tail(ng_list_s *list,
  * Move all entries between @first and including @last before @head.
  * All three entries must belong to the same linked list.
  */
-static inline void list_bulk_move_tail(ng_list_s *head,
-               ng_list_s *first,
-               ng_list_s *last)
+static inline void list_bulk_move_tail(list_head_s *head,
+               list_head_s *first,
+               list_head_s *last)
 {
   first->prev->next = last->next;
   last->next->prev = first->prev;
@@ -342,7 +334,7 @@ static inline void list_bulk_move_tail(ng_list_s *head,
  * @list: the entry to test
  * @head: the head of the list
  */
-static inline int list_is_first(const ng_list_s *list, const ng_list_s *head)
+static inline int list_is_first(const list_head_s *list, const list_head_s *head)
 {
   return list->prev == head;
 }
@@ -352,7 +344,7 @@ static inline int list_is_first(const ng_list_s *list, const ng_list_s *head)
  * @list: the entry to test
  * @head: the head of the list
  */
-static inline int list_is_last(const ng_list_s *list, const ng_list_s *head)
+static inline int list_is_last(const list_head_s *list, const list_head_s *head)
 {
   return list->next == head;
 }
@@ -362,7 +354,7 @@ static inline int list_is_last(const ng_list_s *list, const ng_list_s *head)
  * @list: the entry to test
  * @head: the head of the list
  */
-static inline int list_is_head(const ng_list_s *list, const ng_list_s *head)
+static inline int list_is_head(const list_head_s *list, const list_head_s *head)
 {
   return list == head;
 }
@@ -371,9 +363,9 @@ static inline int list_is_head(const ng_list_s *list, const ng_list_s *head)
  * list_rotate_left - rotate the list to the left
  * @head: the head of the list
  */
-static inline void list_rotate_left(ng_list_s *head)
+static inline void list_rotate_left(list_head_s *head)
 {
-  ng_list_s *first;
+  list_head_s *first;
 
   if (!list_empty(head)) {
     first = head->next;
@@ -388,8 +380,8 @@ static inline void list_rotate_left(ng_list_s *head)
  *
  * Rotates list so that @list becomes the new front of the list.
  */
-static inline void list_rotate_to_front(ng_list_s *list,
-          ng_list_s *head)
+static inline void list_rotate_to_front(list_head_s *list,
+          list_head_s *head)
 {
   /*
    * Deletes the list head from the list denoted by @head and
@@ -403,15 +395,15 @@ static inline void list_rotate_to_front(ng_list_s *list,
  * list_is_singular - tests whether a list has just one entry.
  * @head: the list to test.
  */
-static inline int list_is_singular(const ng_list_s *head)
+static inline int list_is_singular(const list_head_s *head)
 {
   return !list_empty(head) && (head->next == head->prev);
 }
 
-static inline void __list_cut_position(ng_list_s *list,
-    ng_list_s *head, ng_list_s *entry)
+static inline void __list_cut_position(list_head_s *list,
+    list_head_s *head, list_head_s *entry)
 {
-  ng_list_s *new_first = entry->next;
+  list_head_s *new_first = entry->next;
   list->next = head->next;
   list->next->prev = list;
   list->prev = entry;
@@ -434,8 +426,8 @@ static inline void __list_cut_position(ng_list_s *list,
  * losing its data.
  *
  */
-static inline void list_cut_position(ng_list_s *list,
-    ng_list_s *head, ng_list_s *entry)
+static inline void list_cut_position(list_head_s *list,
+    list_head_s *head, list_head_s *entry)
 {
   if (list_empty(head))
     return;
@@ -461,9 +453,9 @@ static inline void list_cut_position(ng_list_s *list,
  * If @entry == @head, all entries on @head are moved to
  * @list.
  */
-static inline void list_cut_before(ng_list_s *list,
-           ng_list_s *head,
-           ng_list_s *entry)
+static inline void list_cut_before(list_head_s *list,
+           list_head_s *head,
+           list_head_s *entry)
 {
   if (head->next == entry) {
     INIT_LIST_HEAD(list);
@@ -477,12 +469,12 @@ static inline void list_cut_before(ng_list_s *list,
   entry->prev = head;
 }
 
-static inline void __list_splice(const ng_list_s *list,
-         ng_list_s *prev,
-         ng_list_s *next)
+static inline void __list_splice(const list_head_s *list,
+         list_head_s *prev,
+         list_head_s *next)
 {
-  ng_list_s *first = list->next;
-  ng_list_s *last = list->prev;
+  list_head_s *first = list->next;
+  list_head_s *last = list->prev;
 
   first->prev = prev;
   prev->next = first;
@@ -496,8 +488,8 @@ static inline void __list_splice(const ng_list_s *list,
  * @list: the new list to add.
  * @head: the place to add it in the first list.
  */
-static inline void list_splice(const ng_list_s *list,
-        ng_list_s *head)
+static inline void list_splice(const list_head_s *list,
+        list_head_s *head)
 {
   if (!list_empty(list))
     __list_splice(list, head, head->next);
@@ -508,8 +500,8 @@ static inline void list_splice(const ng_list_s *list,
  * @list: the new list to add.
  * @head: the place to add it in the first list.
  */
-static inline void list_splice_tail(ng_list_s *list,
-        ng_list_s *head)
+static inline void list_splice_tail(list_head_s *list,
+        list_head_s *head)
 {
   if (!list_empty(list))
     __list_splice(list, head->prev, head);
@@ -522,8 +514,8 @@ static inline void list_splice_tail(ng_list_s *list,
  *
  * The list at @list is reinitialised
  */
-static inline void list_splice_init(ng_list_s *list,
-            ng_list_s *head)
+static inline void list_splice_init(list_head_s *list,
+            list_head_s *head)
 {
   if (!list_empty(list)) {
     __list_splice(list, head, head->next);
@@ -539,8 +531,8 @@ static inline void list_splice_init(ng_list_s *list,
  * Each of the lists is a queue.
  * The list at @list is reinitialised
  */
-static inline void list_splice_tail_init(ng_list_s *list,
-           ng_list_s *head)
+static inline void list_splice_tail_init(list_head_s *list,
+           list_head_s *head)
 {
   if (!list_empty(list)) {
     __list_splice(list, head->prev, head);
@@ -550,7 +542,7 @@ static inline void list_splice_tail_init(ng_list_s *list,
 
 /**
  * list_entry - get the struct for this entry
- * @ptr:  the &ng_list_s pointer.
+ * @ptr:  the &list_head_s pointer.
  * @type:  the type of the struct this is embedded in.
  * @member:  the name of the list_head within the struct.
  */
@@ -588,8 +580,8 @@ static inline void list_splice_tail_init(ng_list_s *list,
  * Note that if the list is empty, it returns NULL.
  */
 #define list_first_entry_or_null(ptr, type, member) ({ \
-  ng_list_s *head__ = (ptr); \
-  ng_list_s *pos__ = ngrtos_READ_ONCE(head__->next); \
+  list_head_s *head__ = (ptr); \
+  list_head_s *pos__ = ngrtos_READ_ONCE(head__->next); \
   pos__ != head__ ? list_entry(pos__, type, member) : NULL; \
 })
 
@@ -637,7 +629,7 @@ static inline void list_splice_tail_init(ng_list_s *list,
 
 /**
  * list_for_each  -  iterate over a list
- * @pos:  the &ng_list_s to use as a loop cursor.
+ * @pos:  the &list_head_s to use as a loop cursor.
  * @head:  the head for your list.
  */
 #define list_for_each(pos, head) \
@@ -645,7 +637,7 @@ static inline void list_splice_tail_init(ng_list_s *list,
 
 /**
  * list_for_each_continue - continue iteration over a list
- * @pos:  the &ng_list_s to use as a loop cursor.
+ * @pos:  the &list_head_s to use as a loop cursor.
  * @head:  the head for your list.
  *
  * Continue to iterate over a list, continuing after the current position.
@@ -655,7 +647,7 @@ static inline void list_splice_tail_init(ng_list_s *list,
 
 /**
  * list_for_each_prev  -  iterate over a list backwards
- * @pos:  the &ng_list_s to use as a loop cursor.
+ * @pos:  the &list_head_s to use as a loop cursor.
  * @head:  the head for your list.
  */
 #define list_for_each_prev(pos, head) \
@@ -771,7 +763,7 @@ static inline void list_splice_tail_init(ng_list_s *list,
     
 #define list_cmp_add_before(ele, type, head, member, cmp, data) \
       do { \
-        ng_list_s *c;  \
+        list_head_s *c;  \
         list_for_each(c, head) \
         { \
           type *t = list_entry(c,type,member); \
@@ -783,7 +775,7 @@ static inline void list_splice_tail_init(ng_list_s *list,
     
 #define list_cmp_add_after(ele, type, head, member, cmp, data) \
       do { \
-        ng_list_s *c;  \
+        list_head_s *c;  \
         list_for_each(c, head) \
         { \
           type *t = list_entry(c,type,member); \
@@ -793,7 +785,7 @@ static inline void list_splice_tail_init(ng_list_s *list,
         list_add_after(&(ele)->member, c); \
       } while(0)
 
-static inline ng_list_s *list_first(ng_list_s *head)
+static inline list_head_s *list_first(list_head_s *head)
 {
   return head->next;
 }
