@@ -188,10 +188,10 @@ make_TSN_NACK_indication(tsn_msg_s *msg,
     switch (addType)
     {
       case DMAP_mib_id_static_AddressTypeFlag_u8:
-        tsn_buffer_put8(b, nack[i].Addr.AddrU8);
+        tsn_buffer_put8(b, nack[i].AddrU8);
         break;
       case DMAP_mib_id_static_AddressTypeFlag_u16:
-        tsn_buffer_put16(b, nack[i].Addr.AddrU16);
+        tsn_buffer_put16(b, nack[i].AddrU16);
         break;
       case DMAP_mib_id_static_AddressTypeFlag_u64:
       default:
@@ -224,7 +224,7 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
   tsn_buffer_put8(b, DataType);
   tsn_buffer_put8(b, Priority);
   tsn_buffer_put16(b, PayloadLength);
-  tsn_buffer_putlen(b, Payload, PayloadLength);
+  tsn_buffer_putlen(b, Payload.data, PayloadLength);
   
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
@@ -233,7 +233,7 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
     printf("\tVCR ID: %u\n",  VCR_ID);
     printf("\tDataType: %s\n", get_DLDE_DataType(DataType));
     printf("\tPriority: %s\n", get_DLDE_DataPriority(Priority));
-    printf("\tPayload Length: %s\n", PayloadLength);
+    printf("\tPayload Length: %u\n", PayloadLength);
   }
 
   return TSN_err_none;
@@ -245,7 +245,7 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   int status;
   tsn_err_e r;
   tsn_buffer_s *b;
-  tsn_network_s *n;
+  tsn_network_s *net;
   tsn_sockaddr_s *s;
   tsn_device_s *dev;
   tsn_ad_join_request_s req;
@@ -300,14 +300,14 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
     goto failed;
   }
   
-  n = &sysCfg.network[req.NetworkID];
-  if (n->AdID + 1 > Unsigned8Max)
+  net = &sysCfg.network[req.NetworkID];
+  if (net->AdID + 1 > Unsigned8Max)
   {
     status = AD_JOIN_EXCEEDED;
     goto failed;
   }
   
-  if (n->ShortAddr + 1 >= Unsigned16Max)
+  if (net->ShortAddr + 1 >= Unsigned16Max)
   {
     status = AD_JOIN_EXCEEDED;
     goto failed;
@@ -316,9 +316,9 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   r = TSN_device_create(&dev,
           req.NetworkID, 
           req.PhyAddr, 
-          n->AdID, 
+          net->AdID, 
           DMAP_mib_id_device_DeviceState_Joining, 
-          n->ShortAddr);
+          net->ShortAddr);
   if (r != TSN_err_none)
   {
     status = AD_JOIN_EXCEEDED;
@@ -326,8 +326,8 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   }
 
   dev->SockAddr = s;
-  n->AdID++;
-  n->ShortAddr++;
+  net->AdID++;
+  net->ShortAddr++;
 
 good:  
   r = make_TSN_AD_JOIN_response(msg, 
@@ -400,10 +400,16 @@ do_TSN_DLDE_DATA_indication(tsn_msg_s *msg)
     printf("\tPayloadLength: %u.\n", s.PayloadLength);
   }
   
-  if (s->DataType != TSN_DLDE_DATA_TRANSMIT_INDICATION_DataType_DATA)
+  if (s.DataType != TSN_DLDE_DATA_TRANSMIT_INDICATION_DataType_DATA)
     return -TSN_err_unsupport;
     
   return send_TSN_gw_data(msg);
+}
+
+static tsn_err_e
+__gw_dmap_T1_receive_dlme_join_indication(tsn_msg_s *msg, dlme_join_indication_s *ind)
+{
+  return TSN_err_none;
 }
 
 static tsn_err_e 
@@ -416,7 +422,7 @@ do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
     return -TSN_err_tooshort;
 
   tsn_buffer_get64(b, &ind.PhyAddr);
-  if (sysCfg.SecurityLevel != DMAP_mib_id_static_SecurityLevel_None)
+  if (sysCfg.config.SecurityLevel != DMAP_mib_id_static_SecurityLevel_None)
   {
     if (TSN_BUFFER_LEN(b) < 8)
       return -TSN_err_tooshort;
@@ -427,7 +433,7 @@ do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
     ind.SecMaterial = 0;
   }
   
-  return gw_dmap_T1_receive_dlme_join_indication(msg, &ind);
+  return __gw_dmap_T1_receive_dlme_join_indication(msg, &ind);
 }
 
 static tsn_err_e 
@@ -439,6 +445,7 @@ do_TSN_DLME_JOIN_response(tsn_msg_s *msg)
 static tsn_err_e 
 do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
 {
+#if 0
   tsn_buffer_s *b = &msg->b;
   TSN_DMAP_mib_attribute_s *devMib;
   dlme_device_status_indication_s ind;
@@ -448,13 +455,13 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
 
   TSN_event("Received TSN_DLME_DEV_STATUS_indication.\n");
 
-  tsn_buffer_get8(b, &ind.ShortAddr);
-  tsn_buffer_get16(b, &ind.PowerSupplyStatus);
+  tsn_buffer_get16(b, &ind.ShortAddr);
+  tsn_buffer_get8(b, &ind.PowerSupplyStatus);
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
     printf("\tTSN_DLME_DEV_STATUS_indication.\n");
-    printf("\tShortAddr: %u.\n", ind.srcAddr);
+    printf("\tShortAddr: %u.\n", ind.ShortAddr);
     printf("\tPowerSupplyStatus: %s(%u).\n", 
       dlmeDevPowerSupplyStatus2String(ind.PowerSupplyStatus), 
       ind.PowerSupplyStatus);
@@ -467,6 +474,7 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
   devMib[DMAP_mib_id_device_PowerSupplyStatus]
     .Value.Value_Unsigned8 = ind.PowerSupplyStatus;
   return -TSN_err_unsupport;
+#endif  
 }
 
 static tsn_err_e 
@@ -486,14 +494,14 @@ do_TSN_DLME_Time_Sync_indication(tsn_msg_s *msg)
 
   TSN_event("Received TSN_DLME_Time_Sync_indication.\n");
 
-  tsn_buffer_get8(b, &ind.ShortAddr);
+  tsn_buffer_get16(b, &ind.SrcAddr);
   tsn_buffer_get64(b, &ind.FieldDeviceTimeValue);
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
     printf("\tTSN_DLME_Time_Sync_indication.\n");
-    printf("\tShortAddr: %u.\n", ind.srcAddr);
-    printf("\tFieldDeviceTimeValue: %ull.\n", 
+    printf("\tSrcAddr: %u.\n", ind.SrcAddr);
+    printf("\tFieldDeviceTimeValue: %"PRIu64".\n", 
       ind.FieldDeviceTimeValue);
   }
   
@@ -566,7 +574,19 @@ do_TSN_SECURITY_ALARM_indication(tsn_msg_s *msg)
   return -TSN_err_unsupport;
 }
 
-#define __DECL_F(n) [FRAME_TYPE_ ## n] = { \
+static tsn_err_e 
+do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
+{
+  return -TSN_err_unsupport;
+}
+
+static tsn_err_e 
+do_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg)
+{
+  return -TSN_err_unsupport;
+}
+
+#define __DECL_F(n) [TSN_ ## n] = { \
   .number=TSN_ ## n, \
   .name=#n, \
   .func=do_TSN_ ## n, \
@@ -596,7 +616,7 @@ static name_number_s frameTableGateway[TSN_dlpdu_type_max]={
   __DECL_F(KEY_UPDATE_confirm),
   __DECL_F(SECURITY_ALARM_indication),
 };
-#undef __DECL_F(n)
+#undef __DECL_F
 
 static const char *
 __dlpduType2String(unsigned int type)
@@ -664,7 +684,7 @@ tsn_dlpdu_process_adgw(tsn_msg_s *msg)
   tsn_buffer_s *b = &msg->b;
   tsn_gw_dlpdu_normal_s n;
 
-  TSN_event("Received dlpdu packet from AD.\n",);
+  TSN_event("Received dlpdu packet from AD.\n");
 
   r = tsn_adgw_dll_dlpdu2normal(b, &n);
   if (TSN_err_none != r)
@@ -676,9 +696,9 @@ tsn_dlpdu_process_adgw(tsn_msg_s *msg)
     return -TSN_err_unsupport;
 
   TSN_debug("Processing packet: %s.\n", 
-    __dlpduType2String(n->ServID));
+    __dlpduType2String(n.ServID));
 
   msg->priv = &n;
-  return (*frameTableGateway[n->ServID].func)(msg);
+  return (*frameTableGateway[n.ServID].func)(msg);
 }
 
