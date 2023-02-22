@@ -129,13 +129,13 @@ void
 tsn_sockaddr_print(tsn_sockaddr_s *s, const char *head, const char *tail)
 {
   char ipstr[INET6_ADDRSTRLEN];
-  printf("%s%s%s", head, inet_ntop(s->sa_fam, s, ipstr, 
-    s->sa_fam == AF_INET ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN, tail);
+  printf("%s%s%s", head, inet_ntop(s->sa->sa_family, s, ipstr, 
+    s->sa->sa_family == AF_INET ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN), tail);
 }
 
-void
+int
 tsn_sockaddr_salen(tsn_sockaddr_s *s)
 {
-  return s->sa_fam == AF_INET ? sizeof(s->u.addr4) : sizeof(s->u.addr6));
+  return s->sa->sa_family == AF_INET ? sizeof(s->u.addr4) : sizeof(s->u.addr6);
 }
 

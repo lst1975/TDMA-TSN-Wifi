@@ -82,7 +82,7 @@ extern tsn_sys_config_s sysCfg;
 __TSN_INTERFACE TimeData tsn_system_time(void);
 tsn_err_e tsn_system_get_network(tsn_network_s **net, unsigned int network);
 void tsn_sockaddr_print(tsn_sockaddr_s *s, const char *head, const char *tail);
-void tsn_sockaddr_salen(tsn_sockaddr_s *s);
+int tsn_sockaddr_salen(tsn_sockaddr_s *s);
 
 #endif
 
