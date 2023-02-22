@@ -35,7 +35,7 @@
 struct name_number{
   int number;
   const char *name;
-  tsn_err_e (*func)(void *raw, tsn_buffer_s *b);
+  tsn_err_e (*func)(tsn_msg_s *msg);
 };
 typedef struct name_number name_number_s;
 
