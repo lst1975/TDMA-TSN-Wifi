@@ -63,7 +63,7 @@ tsn_system_cfg_ad_find(unsigned int NetworkID, tsn_sockaddr_s *s)
   for (i=0;i<TSN_ADID_MAX;i++)
   {
     tsn_sockaddr_s *a = &net->ads[i];
-    if (tsn_sockaddr_isequal(a, s))
+    if (tsn_sockaddr_isequal(a, (struct sockaddr *)s))
       return a;
   }
   
@@ -78,7 +78,7 @@ tsn_system_cfg_ad_add(unsigned int NetworkID, tsn_sockaddr_s *s)
   tsn_sockaddr_s *a;
 
   if (TSN_err_none != tsn_system_get_network(&net, NetworkID))
-    return NULL;
+    return TSN_FALSE;
 
   a = tsn_system_cfg_ad_find(NetworkID, s);
   if (a != NULL)
