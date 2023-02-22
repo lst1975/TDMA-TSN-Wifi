@@ -52,6 +52,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <endian.h>
+#include <inttypes.h>
 
 #include "gw_base.h"
 #include "gw_type.h"
@@ -61,14 +62,20 @@
 
 #include "gw_list.h"
 #include "gw_buffer.h"
-#include "gw_number.h"
 #include "gw_mib.h"
 #include "gw_addr.h"
 #include "gw_log.h"
 #include "gw_state.h"
 #include "tsn_device.h"
 #include "tsn_system.h"
+#include "gw_number.h"
 #include "tsn_epoll.h"
 #include "tsn_udp.h"
+#include "tsn_frame_gateway.h"
+#include "tsn_gw_dlde.h"
+#include "tsn_ad.h"
+#include "tsn_encrypt.h"
+#include "tsn_gw_dlme.h"
+#include "tsn_state_gw.h"
 
 #endif
