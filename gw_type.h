@@ -344,7 +344,7 @@ typedef struct tsn_sockaddr tsn_sockaddr_s;
 static inline tsn_boolean_e
 tsn_sockaddr_isequal(tsn_sockaddr_s *u, struct sockaddr *sa)
 {
-  if (sa->sa_fam != u->sa->sa_fam)
+  if (sa->sa_family != u->sa->sa_family)
   {
     return TSN_FALSE;
   }
@@ -353,7 +353,7 @@ tsn_sockaddr_isequal(tsn_sockaddr_s *u, struct sockaddr *sa)
     tsn_sockaddr_s *s = (tsn_sockaddr_s *)sa;
     s->sa = sa;
     
-    switch (sa->sa_fam)
+    switch (sa->sa_family)
     {
       case AF_INET:
         if (u->u.addr4.sin_port != s->u.addr4.sin_port)
