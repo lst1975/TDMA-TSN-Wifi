@@ -145,4 +145,6 @@ struct NAckIndication_addru16 {
 typedef struct NAckIndication_addru8  tsn_nack_indication_addru8_s;
 typedef struct NAckIndication_addru16 tsn_nack_indication_addru16_s;
 
+tsn_err_e tsn_dlpdu_process_adgw(tsn_msg_s *msg);
+
 #endif
