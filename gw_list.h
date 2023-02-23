@@ -70,8 +70,13 @@ extern "C" {
 #define ngrtos_WRITE_ONCE(a,v)        ((a) = (v))
 #define ngrtos_READ_ONCE(v)           (v)
 
+#if defined(__LP64__) || defined(__amd64) 
 #define LIST_POISON1 ((list_head_s *)(uintptr_t)0xabababababababab)
 #define LIST_POISON2 ((list_head_s *)(uintptr_t)0xcdcdcdcdcdcdcdcd)
+#else
+#define LIST_POISON1 ((list_head_s *)(uintptr_t)0xabababab)
+#define LIST_POISON2 ((list_head_s *)(uintptr_t)0xcdcdcdcd)
+#endif
 
 struct list_head {
   struct list_head *next;
