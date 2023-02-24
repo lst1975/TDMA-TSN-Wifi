@@ -193,13 +193,16 @@ static tsn_boolean_e DLME_join_confirm(struct DlmeJoinConfirm *cfm)
  *     |<-------------------- |                   |                         |
  *     |                      |                   |                         |
  ***********************************************************************************/
-static tsn_boolean_e DLME_device_status_request(struct DlmeDeviceStatusRequest *req)
+static tsn_boolean_e 
+DLME_device_status_request(struct DlmeDeviceStatusRequest *req)
 {
 }
-static tsn_boolean_e DLME_device_status_indication(struct DlmeDeviceStatusIndication *ind)
+static tsn_boolean_e 
+DLME_device_status_indication(struct DlmeDeviceStatusIndication *ind)
 {
 }
-static tsn_boolean_e DLME_device_status_confirm(struct DlmeDeviceStatusConfirm *cfm)
+static tsn_boolean_e 
+DLME_device_status_confirm(struct DlmeDeviceStatusConfirm *cfm)
 {
 }
 
@@ -246,7 +249,8 @@ struct __DlmeChannelConditionRequest{
 };
 typedef struct __DlmeChannelConditionRequest DlmeChannelConditionRequest;
 
-static tsn_boolean_e DLME_channel_condition_request(struct DlmeChannelConditionRequest *req)
+static tsn_boolean_e 
+DLME_channel_condition_request(struct DlmeChannelConditionRequest *req)
 {
 }
 struct __DlmeChannelConditionIndication{
@@ -255,7 +259,8 @@ struct __DlmeChannelConditionIndication{
 };
 typedef struct __DlmeChannelConditionIndication DlmeChannelConditionIndication;
 
-static tsn_boolean_e DLME_channel_condition_indication(struct DlmeChannelConditionIndication *ind)
+static tsn_boolean_e 
+DLME_channel_condition_indication(struct DlmeChannelConditionIndication *ind)
 {
 }
 enum{
@@ -265,7 +270,8 @@ enum{
 struct DlmeChannelConditionConfirm{
   uint8_t Status;
 };
-static tsn_boolean_e DLME_device_status_confirm(struct DlmeChannelConditionConfirm *cfm)
+static tsn_boolean_e 
+DLME_device_status_confirm(struct DlmeChannelConditionConfirm *cfm)
 {
 }
 
@@ -316,7 +322,8 @@ struct DlmeInformationGetRequest{
   uint16_t FirstStoreIndex;
   uint16_t Count;
 };
-static tsn_boolean_e DLME_information_get_request(struct DlmeInformationGetRequest *req)
+static tsn_boolean_e 
+DLME_information_get_request(struct DlmeInformationGetRequest *req)
 {
 }
 struct DlmeInformationGetIndication{
@@ -326,7 +333,8 @@ struct DlmeInformationGetIndication{
   uint16_t FirstStoreIndex;
   uint16_t Count;
 };
-static tsn_boolean_e DLME_information_get_indication(struct DlmeInformationGetIndication *ind)
+static tsn_boolean_e 
+DLME_information_get_indication(struct DlmeInformationGetIndication *ind)
 {
 }
 enum{
@@ -341,7 +349,8 @@ struct DlmeInformationGetResponse{
   uint16_t FirstStoreIndex;
   uint8_t  AttributeValue[0];
 };
-static tsn_boolean_e DLME_information_get_response(struct DlmeInformationGetResponse *rsp)
+static tsn_boolean_e 
+DLME_information_get_response(struct DlmeInformationGetResponse *rsp)
 {
 }
 enum{
@@ -359,7 +368,8 @@ struct DlmeInformationGetConfirm{
   uint16_t Count;
   uint8_t  AttributeValue[0];
 };
-static tsn_boolean_e DLME_information_get_confirm(struct DlmeInformationGetConfirm *cfm)
+static tsn_boolean_e 
+DLME_information_get_confirm(struct DlmeInformationGetConfirm *cfm)
 {
 }
 
@@ -417,7 +427,8 @@ struct DlmeInformationSetRequest{
   uint16_t Count;
   uint8_t  AttributeValue[0];
 };
-static tsn_boolean_e DLME_information_set_request(struct DlmeInformationSetRequest *req)
+static tsn_boolean_e 
+DLME_information_set_request(struct DlmeInformationSetRequest *req)
 {
 }
 struct DlmeInformationSetIndication{
@@ -429,7 +440,8 @@ struct DlmeInformationSetIndication{
   uint16_t Count;
   uint8_t  AttributeValue[0];
 };
-static tsn_boolean_e DLME_information_set_indication(struct DlmeInformationSetIndication *ind)
+static tsn_boolean_e 
+DLME_information_set_indication(struct DlmeInformationSetIndication *ind)
 {
 }
 enum{
@@ -446,7 +458,8 @@ struct DlmeInformationSetResponse{
   uint8_t  Count;
   uint8_t  Status;
 };
-static tsn_boolean_e DLME_information_set_response(struct DlmeInformationSetResponse *rsp)
+static tsn_boolean_e 
+DLME_information_set_response(struct DlmeInformationSetResponse *rsp)
 {
 }
 enum{
@@ -458,7 +471,8 @@ struct DlmeInformationSetConfirm{
   uint8_t Handle;
   uint8_t Status;
 };
-static tsn_boolean_e DLME_information_set_confirm(struct DlmeInformationSetConfirm *cfm)
+static tsn_boolean_e 
+DLME_information_set_confirm(struct DlmeInformationSetConfirm *cfm)
 {
 }
 

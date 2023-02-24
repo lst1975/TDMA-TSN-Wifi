@@ -407,7 +407,8 @@ do_TSN_DLDE_DATA_indication(tsn_msg_s *msg)
 }
 
 static tsn_err_e
-__gw_dmap_T1_receive_dlme_join_indication(tsn_msg_s *msg, dlme_join_indication_s *ind)
+__gw_dmap_T1_receive_dlme_join_indication(
+  tsn_msg_s *msg, dlme_join_indication_s *ind)
 {
   return TSN_err_none;
 }
@@ -468,7 +469,7 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
     TSN_error("Reived packet from unknown AD.\n");
     if (sysCfg.logError)
     {
-      tsn_sockaddr_print(&msg->from, "", "");
+      tsn_sockaddr_print(&msg->from, "AD IP Address is ", "\n");
     }
     return -TSN_err_existed;
   }

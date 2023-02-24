@@ -29,8 +29,8 @@
  *                              
  **************************************************************************************
  */
-#ifndef _GW_STATE_H__
-#define _GW_STATE_H__
+#ifndef __GW_STATE_H__
+#define __GW_STATE_H__
 
 #define TSN_FieldDevice_MAX 1024
 
