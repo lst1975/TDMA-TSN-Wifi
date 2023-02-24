@@ -445,9 +445,10 @@ do_TSN_DLME_JOIN_response(tsn_msg_s *msg)
 static tsn_err_e 
 do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
 {
-#if 0
+  int NetworkID;
+  tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
-  TSN_DMAP_mib_attribute_s *devMib;
+  tsn_device_s *dev;
   dlme_device_status_indication_s ind;
 
   if (TSN_BUFFER_LEN(b) < 3)
@@ -458,23 +459,28 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
   tsn_buffer_get16(b, &ind.ShortAddr);
   tsn_buffer_get8(b, &ind.PowerSupplyStatus);
 
-  if (sysCfg.dumpPacket || sysCfg.logDebug)
-  {
-    printf("\tTSN_DLME_DEV_STATUS_indication.\n");
-    printf("\tShortAddr: %u.\n", ind.ShortAddr);
-    printf("\tPowerSupplyStatus: %s(%u).\n", 
-      dlmeDevPowerSupplyStatus2String(ind.PowerSupplyStatus), 
-      ind.PowerSupplyStatus);
-  }
-
   if (ind.PowerSupplyStatus > DMAP_mib_id_device_PowerSupplyStatus_MAX)
     return -TSN_err_invalid;
     
-  devMib = TSN_DMAP_mib_device_find_ByShortAddr(ind.ShortAddr);
-  devMib[DMAP_mib_id_device_PowerSupplyStatus]
-    .Value.Value_Unsigned8 = ind.PowerSupplyStatus;
-  return -TSN_err_unsupport;
-#endif  
+  NetworkID = tsn_network_id_by_Sockaddr(&msg->from);
+  if (NetworkID == TSN_NetworkID_MAX)
+  {
+    TSN_error("Reived packet from unknown AD.\n");
+    if (sysCfg.logError)
+    {
+      tsn_sockaddr_print(&msg->from, "", "");
+    }
+    return -TSN_err_existed;
+  }
+  r = TSN_device_find_ByShortAddr(&dev, NetworkID, ind.ShortAddr);
+  if (r != TSN_err_none)
+  {
+    TSN_error("Not find FD device with short address %u.\n", ind.ShortAddr);
+    return -TSN_err_existed;
+  }
+
+  dev->PowerSupplyStatus = ind.PowerSupplyStatus;
+  return TSN_err_none;
 }
 
 static tsn_err_e 

@@ -51,6 +51,27 @@ tsn_network_ad_find_by_PhyAddr(Unsigned8 NetworkID, Unsigned64 PhyAddr)
   return NULL;
 }
 
+int
+tsn_network_id_by_Sockaddr(tsn_sockaddr_s *s)
+{
+  int i;
+
+  for (i=0;i<TSN_NetworkID_MAX;i++)
+  {
+    int j;
+    tsn_network_s *n;
+
+    n = &sysCfg.network[i];
+    for (j=0;j<TSN_ADID_MAX;j++)
+    {
+      tsn_sockaddr_s *a = &n->ads[i];
+      if (tsn_sockaddr_isequal(a, (struct sockaddr *)s))
+        return i;
+    }
+  }
+  return TSN_NetworkID_MAX;
+}
+
 tsn_sockaddr_s *
 tsn_system_cfg_ad_find(unsigned int NetworkID, tsn_sockaddr_s *s)
 {
