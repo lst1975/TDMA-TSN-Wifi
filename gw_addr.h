@@ -104,7 +104,7 @@ tsn_set_deviceID(Unsigned64 longAddr, Unsigned64 ID)
 static inline void
 tsn_print_longaddr(Unsigned64 longAddr)
 {
-  Unsigned8 *a = (Unsigned8 *)longAddr;
+  Unsigned8 *a = (Unsigned8 *)&longAddr;
   printf("\t64 bits long addr: 0x%X%X%X%X%X%X%X%X\n", 
     (tsn_uint_t)a[0],(tsn_uint_t)a[1],(tsn_uint_t)a[2],
     (tsn_uint_t)a[3],(tsn_uint_t)a[4],(tsn_uint_t)a[5],
