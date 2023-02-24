@@ -63,17 +63,18 @@ ___make_TSN_Buffer(tsn_buffer_s *b, int len)
 {
   if (b->size < len)
   {
+    Unsigned8 *uptr;
+    
     if (b->data != NULL)
     {
       free(b->data);
       b->data = NULL;
     }
-    b->data = malloc(len);
-    if (b->data == NULL)
+
+    uptr = (Unsigned8 *)malloc(len);
+    if (uptr == NULL)
       return -TSN_err_nomem;
-    b->size = 15;
-    b->ptr = b->data;
-    b->len = 0;
+    tsn_buffer_init(b, uptr, len);
   }
   else
   {
