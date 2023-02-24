@@ -44,6 +44,12 @@ typedef struct tsn_buffer tsn_buffer_s;
 #define TSN_BUFFER_PTR(b) (b)->ptr
 #define TSN_BUFFER_LEN(b) (b)->len
 
+static inline void tsn_buffer_empty(tsn_buffer_s *b)
+{
+  b->ptr   = b->data = NULL;
+  b->len   = b->size = 0;
+}
+
 static inline void tsn_buffer_reinit(tsn_buffer_s *b)
 {
   b->ptr   = b->data;
