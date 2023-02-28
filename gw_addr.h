@@ -32,13 +32,14 @@
 #ifndef __GW_ADDR_H_
 #define __GW_ADDR_H_
 
-#define TSN_LongAddr_VendorID_Mask   TSN_htonll(0xffffff0000000000)
-#define TSN_LongAddr_DeviceType_Mask TSN_htonll(0x000000ffff000000)
-  #define TSN_LongAddr_DeviceType_GateWay  TSN_htonll(0x0000000000000000)
-  #define TSN_LongAddr_DeviceType_Access   TSN_htonll(0x0000000001000000)
-  #define TSN_LongAddr_DeviceType_Field     TSN_htonll(0x0000000002000000)
-  #define TSN_LongAddr_DeviceType_HandHeld TSN_htonll(0x0000000003000000)
-#define TSN_LongAddr_DeviceID_Mask   TSN_htonll(0x0000000000ffffff)
+#define ___TSN_htonll(x) x
+#define TSN_LongAddr_VendorID_Mask         ___TSN_htonll(0xffffff0000000000)
+#define TSN_LongAddr_DeviceType_Mask       ___TSN_htonll(0x000000ffff000000)
+  #define TSN_LongAddr_DeviceType_GateWay  ___TSN_htonll(0x0000000000000000)
+  #define TSN_LongAddr_DeviceType_Access   ___TSN_htonll(0x0000000001000000)
+  #define TSN_LongAddr_DeviceType_Field    ___TSN_htonll(0x0000000002000000)
+  #define TSN_LongAddr_DeviceType_HandHeld ___TSN_htonll(0x0000000003000000)
+#define TSN_LongAddr_DeviceID_Mask         ___TSN_htonll(0x0000000000ffffff)
 
 static inline tsn_boolean_e
 tsn_is_gateway(Unsigned64 longAddr)
@@ -58,7 +59,7 @@ tsn_is_Field(Unsigned64 longAddr)
 static inline tsn_boolean_e
 tsn_is_HandHeld(Unsigned64 longAddr)
 {
-  return (longAddr & TSN_LongAddr_DeviceType_Mask) | TSN_LongAddr_DeviceType_HandHeld;
+  return (longAddr & TSN_LongAddr_DeviceType_Mask) == TSN_LongAddr_DeviceType_HandHeld;
 }
 static inline Unsigned64
 tsn_get_deviceType(Unsigned64 longAddr)

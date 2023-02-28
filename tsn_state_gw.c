@@ -275,7 +275,7 @@ gw_dmap_state_machine(gw_dmap_state_s *dmap, void *dlpdu,
       }
       else
       {
-        return FALSE;
+        return TSN_FALSE;
       }
       break;
     default:
