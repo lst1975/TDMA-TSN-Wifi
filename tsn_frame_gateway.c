@@ -254,9 +254,9 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
 
   b = &msg->b;
   n = (tsn_gw_dlpdu_normal_s *)msg->priv;
-  if (TSN_BUFFER_LEN(b) != 5)
+  if (TSN_BUFFER_LEN(b) != 9)
     return -TSN_err_malformed;
-  if (n->AttrLen != 5)
+  if (n->AttrLen != 9)
     return -TSN_err_malformed;
   
   TSN_event("Received TSN_AD_JOIN_request.\n");
@@ -517,6 +517,18 @@ do_TSN_DLME_Time_Sync_indication(tsn_msg_s *msg)
 }
 
 static tsn_err_e 
+do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
+{
+  return -TSN_err_unsupport;
+}
+
+static tsn_err_e 
+do_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg)
+{
+  return -TSN_err_unsupport;
+}
+
+static tsn_err_e 
 do_TSN_DLME_Time_Sync_response(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
@@ -578,18 +590,6 @@ do_TSN_KEY_UPDATE_confirm(tsn_msg_s *msg)
 
 static tsn_err_e 
 do_TSN_SECURITY_ALARM_indication(tsn_msg_s *msg)
-{
-  return -TSN_err_unsupport;
-}
-
-static tsn_err_e 
-do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
-{
-  return -TSN_err_unsupport;
-}
-
-static tsn_err_e 
-do_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
