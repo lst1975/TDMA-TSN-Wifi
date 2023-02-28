@@ -103,8 +103,9 @@ tsn_set_deviceID(Unsigned64 longAddr, Unsigned64 ID)
 }
 
 static inline void
-tsn_print_longaddr(Unsigned64 longAddr)
+tsn_print_longaddr(Unsigned64 __longAddr)
 {
+  Unsigned64 longAddr = TSN_htonll(__longAddr);
   Unsigned8 *a = (Unsigned8 *)&longAddr;
   printf("\t64 bits long addr: 0x%X%X%X%X%X%X%X%X\n", 
     (tsn_uint_t)a[0],(tsn_uint_t)a[1],(tsn_uint_t)a[2],
@@ -113,10 +114,10 @@ tsn_print_longaddr(Unsigned64 longAddr)
   printf("\t\tVendorID: %X%X%X\n", 
     (tsn_uint_t)a[0],(tsn_uint_t)a[1],(tsn_uint_t)a[2]);
   printf("\t\tDeviceType: %s\n", 
-    tsn_is_gateway(longAddr) ? "Gateway" : 
-    tsn_is_Access(longAddr) ? "Access" :
-    tsn_is_Field(longAddr) ? "Field" :
-    tsn_is_HandHeld(longAddr) ? "Held" : "Unknown");
+    tsn_is_gateway(__longAddr) ? "Gateway" : 
+    tsn_is_Access(__longAddr) ? "Access" :
+    tsn_is_Field(__longAddr) ? "Field" :
+    tsn_is_HandHeld(__longAddr) ? "Held" : "Unknown");
   printf("\t\tDeviceID: %X%X%X\n", 
     (tsn_uint_t)a[5],(tsn_uint_t)a[6],(tsn_uint_t)a[7]);
 }
