@@ -33,7 +33,15 @@
 #define __TSN_STATE_GW_H__
 
 tsn_err_e 
-gw_dmap_T1_receive_dlme_join_indication(void *dlpdu, 
+gw_dmap_T1_receive_dlme_join_indication(
+  tsn_msg_s *msg, 
+  tsn_device_s *dmap, 
   dlme_join_indication_s *ind);
+
+tsn_boolean_e 
+gw_dmap_T1_receive_authentication_response(
+ tsn_msg_s *msg, 
+ tsn_device_s *dmap, 
+ DlmeJoinIndication *ind);
 
 #endif

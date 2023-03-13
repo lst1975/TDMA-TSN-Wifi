@@ -139,7 +139,7 @@ TSN_device_create(tsn_device_s **_dev,
           AdID, 
           DeviceState, 
           DeviceShortAddress);
-  if (AdID == TSN_ADID_INVALID)
+  if (AdID != TSN_ADID_INVALID)
   {
     list_add_tail(&dev->link, &net->Ads);
   }
@@ -147,8 +147,25 @@ TSN_device_create(tsn_device_s **_dev,
   {
     __list_poison_entry(&dev->link);
   }
-  
+  dev->Network = network;
   net->Devices[DeviceShortAddress] = dev;
   *_dev = dev;
+  return TSN_err_none;
+}
+
+tsn_err_e
+TSN_device_destroy(tsn_device_s *dev)
+{
+  tsn_err_e r;
+  tsn_network_s *net;
+  
+  r = tsn_system_get_network(&net, dev->Network);
+  if (r != TSN_err_none)
+    return r;
+
+  list_del(&dev->link);
+  net->Devices[dev->DeviceShortAddress] = NULL;
+  free(dev);
+  
   return TSN_err_none;
 }

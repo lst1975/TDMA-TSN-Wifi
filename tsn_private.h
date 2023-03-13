@@ -66,6 +66,7 @@
 #include "gw_addr.h"
 #include "gw_log.h"
 #include "gw_state.h"
+#include "tsn_resource.h"
 #include "tsn_device.h"
 #include "tsn_system.h"
 #include "gw_number.h"

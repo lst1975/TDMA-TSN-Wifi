@@ -60,11 +60,11 @@ enum {
   TSN_DLME_INFO_GET_confirm,      /* ad --> gw */
   TSN_DLME_INFO_SET_request,      /* gw --> ad */
   TSN_DLME_INFO_SET_confirm,      /* ad --> gw */
-  TSN_DLME_LEAVE_request,          /* gw --> ad */
+  TSN_DLME_LEAVE_request,         /* gw --> ad */
   TSN_KEY_ESTABLISH_request,      /* gw --> ad */
   TSN_KEY_ESTABLISH_confirm,      /* ad --> gw */
   TSN_KEY_UPDATE_request,         /* gw --> ad */
-  TSN_KEY_UPDATE_confirm,          /* ad --> gw */
+  TSN_KEY_UPDATE_confirm,         /* ad --> gw */
   TSN_SECURITY_ALARM_indication,  /* ad --> gw */
   TSN_dlpdu_type_max,             
 };
@@ -146,5 +146,10 @@ typedef struct NAckIndication_addru8  tsn_nack_indication_addru8_s;
 typedef struct NAckIndication_addru16 tsn_nack_indication_addru16_s;
 
 tsn_err_e tsn_dlpdu_process_adgw(tsn_msg_s *msg);
+tsn_err_e make_TSN_DLME_JOIN_response(tsn_msg_s *msg, 
+  Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr);
+tsn_err_e make_TSN_information_set_request(tsn_msg_s *msg, 
+  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  tsn_buffer *data);
 
 #endif

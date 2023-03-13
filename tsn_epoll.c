@@ -645,7 +645,7 @@ tsn_unix_recv(tsn_connection_s *c, tsn_msg_s *m)
   do 
   {
     if (c->addr.slen)
-      n = recvfrom(c->fd, b->ptr, b->size, 0, c->addr.sa, &c->addr.slen);
+      n = recvfrom(c->fd, b->ptr, b->size, 0, c->client.sa, &c->client.slen);
     else
       n = recv(c->fd, b->ptr, b->size, 0);
 

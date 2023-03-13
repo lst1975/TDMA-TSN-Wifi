@@ -30,23 +30,52 @@
  *                              
  **************************************************************************************
  */
+#include "tsn_private.h"
+
+struct _res_shortaddr{
+  uint16_t ShortAddr;
+  list_head_s link;
+};
+typedef struct _res_shortaddr TsnShortAddr;
+
+struct _res_shortaddr_s{
+  uint16_t ShortAddr;
+  list_head_s head;
+};
+typedef struct _res_shortaddr_s tsn_short_addr_s;
+
+static TsnShortAddr tsn_shoraddr_array[Unsigned16Max];
+
+static tsn_short_addr_s tsn_shoraddr_list = {
+  .ShortAddr = 0,
+  .head = LIST_HEAD_INIT(tsn_shoraddr_list.head),
+};
+ 
 tsn_boolean_e 
-TSN_AllocateShortAddr(Unsigned64 LongAddr, short_addr_u *Addr)
+TSN_AllocateShortAddr(uint16_t *Addr)
 {
-  TSN_DMAP_mib_attribute_s *mib, *attr;
-  
-  mib = TSN_DMAP_mib_device_list_by_LongAddr(LongAddr);
-  if (mib == NULL)
-    return TSN_FAILURE;
-  
-  attr = &mib[DMAP_mib_id_device_DeviceShortAddress];
-  Addr->AddrType = TSN_DMAP_mib_shortAddr_type();
-  if (Addr->AddrType == DMAP_mib_id_static_AddressTypeFlag_u16) 
-    Addr->AddrU16 = attr.Value.value_Unsigned16;
-  else if (Addr->AddrType == DMAP_mib_id_static_AddressTypeFlag_u8) 
-    Addr->AddrU8 = attr.Value.value_Unsigned8;
-  else 
-    return TSN_FAILURE;
-  
-  return TSN_SUCCESS;
+  tsn_short_addr_s *s = &tsn_shoraddr_list;
+  if (s->ShortAddr >= Unsigned16Max - 1)
+  {
+    TsnShortAddr *a;
+    if (list_empty(&s->head))
+      return TSN_FALSE;
+    list_first_entry(a, TsnShortAddr, &s->head);
+    list_del(&a->link);
+    *Addr = a->ShortAddr;
+  }
+  else
+  {
+    *Addr = ++s->ShortAddr;
+  }
+  return TSN_TRUE;
 }
+
+void 
+TSN_FreeShortAddr(uint16_t Addr)
+{
+  tsn_short_addr_s *s = &tsn_shoraddr_list;
+  TsnShortAddr *a = &tsn_shoraddr_array[Addr];
+  list_add_tail(&a->link, &s->head);
+}
+

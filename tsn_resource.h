@@ -29,56 +29,10 @@
  *                              
  **************************************************************************************
  */
-#ifndef __TSN_DEVICE_H__
-#define __TSN_DEVICE_H__
+#ifndef __TSN_RESOURCE_H__
+#define __TSN_RESOURCE_H__
 
-#define TSN_ADID_MAX 64
-#define TSN_ADID_INVALID TSN_ADID_MAX
-#define TSN_ShorAddress_MAX 1024
-#define TSN_NetworkID_MAX 8
-
-typedef struct tsn_network tsn_network_s;
-
-struct tsn_network{
-  uint64_t AdID:8;
-  uint64_t FDNumber:24;
-  uint64_t Active:1;
-  uint64_t *AcceptedPhyAddr;
-  tsn_device_s *Devices[TSN_ShorAddress_MAX];
-  list_head_s Ads;
-  tsn_sockaddr_s ads[TSN_ADID_MAX];
-};
-
-tsn_err_e
-TSN_device_find_ByLongAddr(
-  tsn_device_s **_dev, 
-  unsigned int network, 
-  Unsigned64 PhyAddr);
-
-tsn_err_e
-TSN_device_find_ByShortAddr(
-  tsn_device_s **_dev, 
-  unsigned int network, 
-  Unsigned16 ShortAddress);
-
-void
-TSN_device_init(
-  tsn_device_s *dev,
-  Unsigned64 LongAddress, 
-  Unsigned8 AdID, 
-  Unsigned8 DeviceState, 
-  Unsigned16 DeviceShortAddress);
-
-tsn_err_e
-TSN_device_create(
-  tsn_device_s **_dev,
-  unsigned int network, 
-  Unsigned64 LongAddress, 
-  Unsigned8 AdID, 
-  Unsigned8 DeviceState, 
-  Unsigned16 DeviceShortAddress);
-
-tsn_err_e
-TSN_device_destroy(tsn_device_s *dev);
+tsn_boolean_e TSN_AllocateShortAddr(uint16_t *Addr);
+void TSN_FreeShortAddr(uint16_t Addr);
 
 #endif

@@ -194,7 +194,24 @@ TSN_DMAP_mib_entry_get_data(TSN_DMAP_mib_attribute_s *mib)
   }
 }
 
-#define __DECL_MIB_ATTR_OFFSET(defaultEntry,prefix,id,dataType,mi,mx,permission,mibType,dftValue,devices,description,offset) { \
+#define __DECL_MIB_ATTR_OFFSET(prefix,id,dataType,mi,mx,permission,mibType,dftValue,devices,description,offset) { \
+  .Name        = #id, \
+  .Description = description, \
+  .AttributeID = prefix ## id, \
+  .MibType     = mibType, \
+  .DataType    = DATA_TYPE_ ## dataType, \
+  .Access      = permission, \
+  .Device      = devices, \
+  .ValueMin    = mi, \
+  .ValueMax    = mx, \
+  .Value.value_##dataType  = dftValue, \
+  .DefaultValueStatic = (uint64_t)dftValue, \
+  .DefaultEntryAddr   = NULL, \
+  .DefaultEntryCount  = 0, \
+  .Offset             = offset, \
+}
+    
+#define __DECL_MIB_ATTR_OFFSET_LIST(defaultEntry,prefix,id,dataType,mi,mx,permission,mibType,dftValue,devices,description,offset) { \
   .Name        = #id, \
   .Description = description, \
   .AttributeID = prefix ## id, \
@@ -207,9 +224,10 @@ TSN_DMAP_mib_entry_get_data(TSN_DMAP_mib_attribute_s *mib)
   .Value.value_##dataType  = dftValue, \
   .DefaultValueStatic = (uint64_t)dftValue, \
   .DefaultEntryAddr   = defaultEntry, \
-  .Offset      = offset, \
+  .DefaultEntryCount  = sizeof(defaultEntry)/sizeof(TSN_DMAP_mib_attribute_s), \
+  .Offset             = offset, \
 }
-    
+        
 static inline tsn_boolean_e
 TSN_DMAP_mib_entry_isreadable(const TSN_DMAP_mib_attribute_s *mib)
 {
@@ -234,7 +252,7 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
   #define DMAP_mib_id_static_AddressTypeFlag_u8                 0
   #define DMAP_mib_id_static_AddressTypeFlag_u16                1 
   #define DMAP_mib_id_static_AddressTypeFlag_u64                2 
-  #define DMAP_mib_id_static_AddressTypeFlag_NONE                3 
+  #define DMAP_mib_id_static_AddressTypeFlag_NONE               3 
 #define DMAP_mib_id_static_MaxPayloadLength                  (DMAP_mib_id_static_MIN+ 2) 
 #define DMAP_mib_id_static_NACKCount                         (DMAP_mib_id_static_MIN+ 3) 
 #define DMAP_mib_id_static_NetworkID                         (DMAP_mib_id_static_MIN+ 4) 
@@ -534,9 +552,10 @@ struct tsn_device{
     void *AdDevice;
     tsn_sockaddr_s *SockAddr;
   };
+  list_head_s link;
   Unsigned64 SequenceNumber;
   Unsigned8  MachineState;
-  list_head_s link;
+  Unsigned8  Network;
 };
 typedef struct tsn_device tsn_device_s;
 
@@ -615,15 +634,20 @@ struct tsn_static_config{
   Unsigned8   AlarmReportDuration;
   Unsigned8   ChannelNumber;
   Unsigned8   AggregationEnableFlag;
-  tsn_superframe_s *SuperframeList;
-  tsn_dll_link_s   *DllLinkList;
-  tsn_channel_s    *ChannelConditionList;
+  tsn_superframe_s SuperframeList;
+  tsn_dll_link_s   DllLinkList;
+  tsn_channel_s    ChannelConditionList;
   tsn_device_s     *DeviceList;
   tsn_key_s        *KeyList;
-  tsn_vcrEP_s      *VCRList;
-  tsn_supported_uao_description_s *SupportedUAOList;
-  tsn_uao_instance_description_s  *ConfiguredUAOList;
+  tsn_vcrEP_s      VCRList;
+  tsn_supported_uao_description_s SupportedUAOList;
+  tsn_uao_instance_description_s  ConfiguredUAOList;
 };
 typedef struct tsn_static_config tsn_static_config_s;
 
+const char *dmap_mib_AttributeID2string(int attrID);
+const char *dmap_mib_MemberID2string(int attrID, int memberID);
+
 #endif
+
+

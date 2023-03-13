@@ -303,7 +303,7 @@ tsn_data_is_equal(int type, void *value1, void *value2, size_t len)
 #define tsn_container_of(ptr, type, member) (type *)((char *)(ptr) - tsn_offsetof(type,member) )
 
 #define tsn_log(type, fmt, ...) (void)(0)
-#define tsn_assert(con) do { if (!(con)) TSN_error("Assert failed"); } while(0)
+#define tsn_assert(con) do { if (!(con)) TSN_error("Assert failed"); } while(1)
 
 typedef tsn_err_e (*tsn_primative_f)(void *);
 struct tsn_primative{

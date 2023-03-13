@@ -45,7 +45,7 @@ struct DlmeJoinIndication{
   uint64_t SecMaterial;
   union {
     tsn_boolean_e AuthenResult; /* internal use */
-    tsn_addr_u ShortAddr;
+    tsn_boolean_e AddrResult; /* internal use */
   };
 };
 typedef struct DlmeJoinIndication dlme_join_indication_s;
@@ -142,5 +142,178 @@ struct DlmeTimeSyncConfirm{
   TimeData ReceiveTimeValue;
 };
 typedef struct DlmeTimeSyncConfirm dlme_time_sync_confirm_s;
+
+enum{
+  DLME_information_get_response_SUCCESS = 0,
+  DLME_information_get_response_UNSUPPORTED_ATTRIBUTE,
+};
+struct DlmeInformationGetResponse{
+  uint16_t DstAddr;
+  uint8_t  Status;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint8_t  AttributeValue[0];
+};
+typedef struct DlmeInformationGetResponse dlme_information_get_response_s;
+
+enum{
+  DLME_channel_condition_confirm_SUCCESS = 0,
+  DLME_channel_condition_confirm_FAILURE,
+};
+struct DlmeInformationGetConfirm{
+  uint8_t  Handle;
+  uint16_t SrcAddr;
+  uint16_t DstAddr;
+  uint8_t  Status;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
+  uint8_t  AttributeValue[0];
+};
+typedef struct DlmeInformationGetConfirm dlme_information_get_confirm_s;
+
+/***********************************************************************************
+ * GB/T26790.2-2015, 8.3.8, Page 73
+ *                   INFORMATION set
+ *
+ * used by Gateway device to set attributes for field devices
+ *
+ ************************************************************************************
+ *
+ *  GW-DMAP                 AD-DLL              FD-DLL                    FD-DMAP
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-INFO-SET.request |                   |                         |
+ *     |   -----------------> |                   |                         |
+ *     |                      | information set   |                         |
+ *     |                      |  request frame    |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   | DLME-INFO-SET.indication|
+ *     |                      |                   |------------------------>|
+ *     |                      |                   |                         |
+ *     |                      |                   |  DLME-INFO-SET.response |
+ *     |                      |                   |<------------------------|
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |  information set  |                         |
+ *     |                      |   response frame  |                         |
+ *     |                      | <-----------------|                         |
+ *     |                      |                   |                         |
+ *     |                      |        GACK       |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-INFO-SET.confirm |                   |                         |
+ *     |<-------------------- |                   |                         |
+ *     |                      |                   |                         |
+ ***********************************************************************************/
+enum{
+  DLME_information_set_option_ADD=0,
+  DLME_information_set_option_DELETE,
+  DLME_information_set_option_UPDATE,
+};
+
+static inline const char *dlme_info_op2string(int id)
+{
+  switch (id) {
+    case DLME_information_set_option_ADD:
+      return "ADD";
+    case DLME_information_set_option_DELETE:
+      return "DELETE";
+    case DLME_information_set_option_UPDATE:
+      return "UPDATE";
+    default:
+      return "<Unknown>"
+  }
+}
+
+struct DlmeInformationSetRequest{
+  uint16_t DstAddr;
+  uint8_t  AttributeOption;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
+  uint8_t  AttributeValue[0];
+};
+typedef struct DlmeInformationSetRequest dlme_information_set_request_s;
+
+struct DlmeInformationSetIndication{
+  uint16_t SrcAddr;
+  uint8_t  AttributeOption;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
+  uint8_t  AttributeValue[0];
+};
+typedef struct DlmeInformationSetIndication dlme_information_set_indication_s;
+
+enum{
+  DLME_information_set_response_SUCCESS = 0,
+  DLME_information_set_response_UNSUPPORTED_ATTRIBUTE,
+  DLME_information_set_response_INVALID_PARAMETER,
+};
+struct DlmeInformationSetResponse{
+  uint16_t SrcAddr;
+  uint8_t  AttributeOption;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint8_t  Count;
+  uint8_t  Status;
+};
+typedef struct DlmeInformationSetResponse dlme_information_set_response_s;
+
+enum{
+  DLME_information_set_confirm_SUCCESS = 0,
+  DLME_information_set_confirm_UNSUPPORTED_ATTRIBUTE,
+  DLME_information_set_confirm_INVALID_PARAMETER,
+};
+struct DlmeInformationSetConfirm{
+  uint8_t Handle;
+  uint8_t Status;
+};
+typedef struct DlmeInformationSetConfirm dlme_information_set_confirm_s;
+
+static inline tsn_boolean_e 
+DLME_information_set_request(tsn_msg_s *msg, 
+  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  tsn_buffer *b)
+{
+  if (make_TSN_information_set_request(msg, req, AdID, b) != TSN_err_none)
+    return TSN_FALSE;
+
+  tsn_send_udp_msg(msg);
+  return TSN_TRUE;
+}
+
+static inline tsn_boolean_e 
+DLME_information_set_indication(tsn_msg_s *msg, 
+  dlme_information_set_indication_s *ind, Unsigned8 AdID, 
+  tsn_buffer *b)
+{
+  return TSN_FALSE;
+}
+static inline tsn_boolean_e 
+DLME_information_set_response(tsn_msg_s *msg, 
+  dlme_information_set_response_s *rsp, Unsigned8 AdID, 
+  tsn_buffer *b)
+{
+  return TSN_FALSE;
+}
+static inline tsn_boolean_e 
+DLME_information_set_confirm(tsn_msg_s *msg, 
+  dlme_information_set_confirm_s *cfm, Unsigned8 AdID, 
+  tsn_buffer *b)
+{
+  return TSN_FALSE;
+}
 
 #endif

@@ -30,7 +30,14 @@
  **************************************************************************************
  */
 tsn_boolean_e 
-TSN_Authentication(uint64_t PhyAddr, uint64_t SecMaterial)
+TSN_Authentication(tsn_msg_s *msg, tsn_device_s *dmap, 
+   DlmeJoinIndication *ind)
 {
-  return TSN_SUCCESS;
+  uint64_t PhyAddr     = ind->PhyAddr;
+  uint64_t SecMaterial = ind->SecMaterial;
+
+  // TODO
+  
+  ind->AuthenResult  = TSN_SUCCESS;
+  return gw_dmap_T1_receive_authentication_response(msg, dmap, ind);
 }

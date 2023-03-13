@@ -240,6 +240,72 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
   return TSN_err_none;
 }
 
+tsn_err_e 
+make_TSN_information_set_request(tsn_msg_s *msg, 
+  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  tsn_buffer *data)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  int AttrLen = sizeof(*req)+TSN_BUFFER_LEN(data);
+  
+  r = ___make_TSN_Buffer(b, 4+AttrLen);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make TSN_information_set_request.\n");
+
+  tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
+  tsn_buffer_put8(b, AdID);
+  tsn_buffer_put16(b, AttrLen);
+  tsn_buffer_putlen(b, req, sizeof(*req));
+  tsn_buffer_putlen(b, data->data, data->len);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("SN_information_set_request.\n");
+    printf("\tAdID: %u\n", AdID);
+    printf("\tAttrLen: %u\n",  AttrLen);
+    printf("\tDstAddr: %u\n", req->DstAddr);
+    printf("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
+    printf("\tAttributeID: %s\n", dmap_mib_AttributeID2string(req->AttributeID));
+    printf("\tMemberID: %s\n", dmap_mib_MemberID2string(req->AttributeID, MemberID));
+    printf("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
+    printf("\tCount: %u\n", req->Count);
+  }
+  return TSN_err_none;
+}
+
+tsn_err_e 
+make_TSN_DLME_JOIN_response(tsn_msg_s *msg, 
+  Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr)
+{
+  tsn_err_e r;
+  tsn_gw_dlpdu_normal_s *n;
+  tsn_buffer_s *b = &msg->b;
+
+  r = ___make_TSN_Buffer(b, 7);
+  if (TSN_err_none != r)
+    return r;
+  
+  n = (tsn_gw_dlpdu_normal_s *)msg->priv;
+  tsn_buffer_put8(b, TSN_DLME_JOIN_response);
+  tsn_buffer_put8(b, AdID);
+  if (Status == DLME_JOIN_SUCCESS)
+  {
+    tsn_buffer_put16(b, 3);
+    tsn_buffer_put8(b, Status);
+    tsn_buffer_put16(b, ShortAddr);
+  }
+  else
+  {
+    tsn_buffer_put16(b, 1);
+    tsn_buffer_put8(b, Status);
+  }
+  
+  return TSN_err_none;
+}
+
 static tsn_err_e 
 do_TSN_AD_JOIN_request(tsn_msg_s *msg)
 {
@@ -251,6 +317,7 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   tsn_device_s *dev;
   tsn_ad_join_request_s req;
   tsn_gw_dlpdu_normal_s *n;
+  Unsigned16 ShortAddr;
 
   b = &msg->b;
   n = (tsn_gw_dlpdu_normal_s *)msg->priv;
@@ -302,13 +369,13 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   }
   
   net = &sysCfg.network[req.NetworkID];
-  if (net->AdID + 1 > Unsigned8Max)
+  if (net->AdID + 1 > TSN_ADID_MAX)
   {
     status = AD_JOIN_EXCEEDED;
     goto failed;
   }
   
-  if (net->ShortAddr + 1 >= Unsigned16Max)
+  if (TSN_AllocateShortAddr(&ShortAddr) != TSN_TRUE)
   {
     status = AD_JOIN_EXCEEDED;
     goto failed;
@@ -319,7 +386,7 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
           req.PhyAddr, 
           net->AdID, 
           DMAP_mib_id_device_DeviceState_Joining, 
-          net->ShortAddr);
+          ShortAddr);
   if (r != TSN_err_none)
   {
     status = AD_JOIN_EXCEEDED;
@@ -328,7 +395,6 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
 
   dev->SockAddr = s;
   net->AdID++;
-  net->ShortAddr++;
 
 good:  
   r = make_TSN_AD_JOIN_response(msg, 
@@ -407,13 +473,6 @@ do_TSN_DLDE_DATA_indication(tsn_msg_s *msg)
   return send_TSN_gw_data(msg);
 }
 
-static tsn_err_e
-__gw_dmap_T1_receive_dlme_join_indication(
-  tsn_msg_s *msg, dlme_join_indication_s *ind)
-{
-  return TSN_err_none;
-}
-
 static tsn_err_e 
 do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
 {
@@ -435,7 +494,7 @@ do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
     ind.SecMaterial = 0;
   }
   
-  return __gw_dmap_T1_receive_dlme_join_indication(msg, &ind);
+  return gw_dmap_T1_receive_dlme_join_indication(msg, NULL, &ind);
 }
 
 static tsn_err_e 
@@ -513,18 +572,6 @@ do_TSN_DLME_Time_Sync_indication(tsn_msg_s *msg)
       ind.FieldDeviceTimeValue);
   }
   
-  return -TSN_err_unsupport;
-}
-
-static tsn_err_e 
-do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
-{
-  return -TSN_err_unsupport;
-}
-
-static tsn_err_e 
-do_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg)
-{
   return -TSN_err_unsupport;
 }
 
