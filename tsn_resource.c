@@ -55,7 +55,7 @@ tsn_boolean_e
 TSN_AllocateShortAddr(uint16_t *Addr)
 {
   tsn_short_addr_s *s = &tsn_shoraddr_list;
-  if (s->ShortAddr >= Unsigned16Max - 1)
+  if (s->ShortAddr >= TSN_ShorAddress_MAX - 1)
   {
     TsnShortAddr *a;
     if (list_empty(&s->head))
@@ -72,10 +72,16 @@ TSN_AllocateShortAddr(uint16_t *Addr)
 }
 
 void 
-TSN_FreeShortAddr(uint16_t Addr)
+TSN_FreeShortAddr(uint16_t *_Addr)
 {
+  uint16_t Addr = *_Addr;
+
+  if (Addr == TSN_ShorAddress_INVALID)
+    return;
+  
   tsn_short_addr_s *s = &tsn_shoraddr_list;
   TsnShortAddr *a = &tsn_shoraddr_array[Addr];
   list_add_tail(&a->link, &s->head);
+  *_Addr = TSN_ShorAddress_INVALID;
 }
 

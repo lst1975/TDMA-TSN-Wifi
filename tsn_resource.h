@@ -33,6 +33,6 @@
 #define __TSN_RESOURCE_H__
 
 tsn_boolean_e TSN_AllocateShortAddr(uint16_t *Addr);
-void TSN_FreeShortAddr(uint16_t Addr);
+void TSN_FreeShortAddr(uint16_t *Addr);
 
 #endif

@@ -163,8 +163,11 @@ TSN_device_destroy(tsn_device_s *dev)
   if (r != TSN_err_none)
     return r;
 
+  tsn_assert(dev->DeviceShortAddress != TSN_ShorAddress_INVALID);
+  
   list_del(&dev->link);
   net->Devices[dev->DeviceShortAddress] = NULL;
+  TSN_FreeShortAddr(&dev->DeviceShortAddress);
   free(dev);
   
   return TSN_err_none;

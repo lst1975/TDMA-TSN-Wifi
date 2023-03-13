@@ -269,7 +269,7 @@ make_TSN_information_set_request(tsn_msg_s *msg,
     printf("\tDstAddr: %u\n", req->DstAddr);
     printf("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
     printf("\tAttributeID: %s\n", dmap_mib_AttributeID2string(req->AttributeID));
-    printf("\tMemberID: %s\n", dmap_mib_MemberID2string(req->AttributeID, MemberID));
+    printf("\tMemberID: %s\n", dmap_mib_MemberID2string(req->AttributeID, req->MemberID));
     printf("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
     printf("\tCount: %u\n", req->Count);
   }
