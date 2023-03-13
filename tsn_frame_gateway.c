@@ -241,6 +241,41 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
 }
 
 tsn_err_e 
+make_TSN_information_get_request(tsn_msg_s *msg, 
+  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  tsn_buffer *data __TSN_UNUSED)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  int AttrLen = sizeof(*req);
+  
+  r = ___make_TSN_Buffer(b, 4+AttrLen);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make TSN_information_set_request.\n");
+
+  tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
+  tsn_buffer_put8(b, AdID);
+  tsn_buffer_put16(b, AttrLen);
+  tsn_buffer_putlen(b, req, sizeof(*req));
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("TSN_information_get_request.\n");
+    printf("\tAdID: %u\n", AdID);
+    printf("\tAttrLen: %u\n",  AttrLen);
+    printf("\tDstAddr: %u\n", req->DstAddr);
+    printf("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
+    printf("\tAttributeID: %s\n", dmap_mib_AttributeID2string(req->AttributeID));
+    printf("\tMemberID: %s\n", dmap_mib_MemberID2string(req->AttributeID, req->MemberID));
+    printf("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
+    printf("\tCount: %u\n", req->Count);
+  }
+  return TSN_err_none;
+}
+
+tsn_err_e 
 make_TSN_information_set_request(tsn_msg_s *msg, 
   dlme_information_set_request_s *req, Unsigned8 AdID, 
   tsn_buffer *data)
@@ -263,7 +298,7 @@ make_TSN_information_set_request(tsn_msg_s *msg,
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("SN_information_set_request.\n");
+    printf("TSN_information_set_request.\n");
     printf("\tAdID: %u\n", AdID);
     printf("\tAttrLen: %u\n",  AttrLen);
     printf("\tDstAddr: %u\n", req->DstAddr);
@@ -602,7 +637,28 @@ do_TSN_DLME_INFO_SET_request(tsn_msg_s *msg)
 static tsn_err_e 
 do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+  dlme_information_set_confirm_s cfm;
+
+  TSN_event("Received TSN_DLME_INFO_SET_confirm.\n");
+
+  if (TSN_BUFFER_LEN(b) < sizeof(cfm))
+    return -TSN_err_tooshort;
+  
+  tsn_buffer_get8(b, &cfm.Status);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("\tStatus: %s.\n", dlme_info_set_cfm_status2string(cfm.Status));
+  }
+
+  if (cfm.Status != DLME_information_set_confirm_SUCCESS)
+    return -TSN_err_system;
+
+  if (TSN_TRUE != gw_dmap_T5_receive_information_set_confirm(msg, ))
+    return -TSN_err_system;
+  else
+    return TSN_err_none;
 }
 
 static tsn_err_e 

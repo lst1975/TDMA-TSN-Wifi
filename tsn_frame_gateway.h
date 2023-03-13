@@ -151,5 +151,8 @@ tsn_err_e make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
 tsn_err_e make_TSN_information_set_request(tsn_msg_s *msg, 
   dlme_information_set_request_s *req, Unsigned8 AdID, 
   tsn_buffer *data);
+tsn_err_e make_TSN_information_get_request(tsn_msg_s *msg, 
+  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  tsn_buffer *data __TSN_UNUSED);
 
 #endif

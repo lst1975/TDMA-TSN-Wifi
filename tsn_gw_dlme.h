@@ -277,10 +277,24 @@ enum{
   DLME_information_set_confirm_INVALID_PARAMETER,
 };
 struct DlmeInformationSetConfirm{
-  uint8_t Handle;
   uint8_t Status;
 };
 typedef struct DlmeInformationSetConfirm dlme_information_set_confirm_s;
+
+static const char *dlme_info_set_cfm_status2string(uint8_t Status)
+{
+  switch (Status)
+  {
+    case DLME_information_set_confirm_SUCCESS:
+      return "SUCCESS";
+    case DLME_information_set_confirm_UNSUPPORTED_ATTRIBUTE:
+      return "UNSUPPORTED ATTRIBUTE";
+    case DLME_information_set_confirm_INVALID_PARAMETER:
+      return "INVALID PARAMETER";
+    default:
+      return "<UNKNOWN>";
+  }
+}
 
 static inline tsn_boolean_e 
 DLME_information_set_request(tsn_msg_s *msg, 

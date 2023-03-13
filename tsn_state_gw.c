@@ -83,6 +83,13 @@ gw_dmap_T1_receive_dlme_join_indication(tsn_msg_s *msg,
 }
 
 tsn_boolean_e 
+gw_dmap_T5_receive_information_set_confirm(tsn_msg_s *msg, 
+   tsn_device_s *dmap, dlme_information_set_confirm_s *cfm)
+{
+  return gw_dmap_state_machine(msg, dmap, DMAP_TRIGGER_T5_ResAlloc, cfm);
+}
+
+tsn_boolean_e 
 gw_dmap_T0_DmapInitializationDone(tsn_msg_s *msg, 
    tsn_device_s *dmap)
 {
