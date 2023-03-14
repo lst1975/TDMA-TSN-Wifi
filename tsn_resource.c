@@ -44,7 +44,7 @@ struct _res_shortaddr_s{
 };
 typedef struct _res_shortaddr_s tsn_short_addr_s;
 
-static TsnShortAddr tsn_shoraddr_array[Unsigned16Max];
+static TsnShortAddr tsn_shoraddr_array[TSN_ShorAddress_MAX];
 
 static tsn_short_addr_s tsn_shoraddr_list = {
   .ShortAddr = 0,
@@ -60,7 +60,7 @@ TSN_AllocateShortAddr(uint16_t *Addr)
     TsnShortAddr *a;
     if (list_empty(&s->head))
       return TSN_FALSE;
-    list_first_entry(a, TsnShortAddr, &s->head);
+    a = list_first_entry(&s->head, TsnShortAddr, link);
     list_del(&a->link);
     *Addr = a->ShortAddr;
   }

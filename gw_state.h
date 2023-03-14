@@ -49,13 +49,12 @@ typedef enum tsn_dmap_state tsn_dmap_state_e;
 
 enum tsn_dmap_trigger{
   DMAP_TRIGGER_T0,
-  DMAP_TRIGGER_T1,
+  DMAP_TRIGGER_T1_join,
   DMAP_TRIGGER_T1_auth,
-  DMAP_TRIGGER_T1_addr,
-  DMAP_TRIGGER_T2,
+  DMAP_TRIGGER_T2_addr,
   DMAP_TRIGGER_T3,
-  DMAP_TRIGGER_T4,
-  DMAP_TRIGGER_T5_ResAlloc,
+  DMAP_TRIGGER_T4_ResAlloc,
+  DMAP_TRIGGER_T5_infoSetConfirm,
   DMAP_TRIGGER_T6,
   DMAP_TRIGGER_T7,
   DMAP_TRIGGER_T8,

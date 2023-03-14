@@ -245,6 +245,7 @@ struct DlmeInformationSetRequest{
 typedef struct DlmeInformationSetRequest dlme_information_set_request_s;
 
 struct DlmeInformationSetIndication{
+  uint16_t Handle;
   uint16_t SrcAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;
@@ -261,6 +262,7 @@ enum{
   DLME_information_set_response_INVALID_PARAMETER,
 };
 struct DlmeInformationSetResponse{
+  uint16_t Handle;
   uint16_t SrcAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;
@@ -277,6 +279,7 @@ enum{
   DLME_information_set_confirm_INVALID_PARAMETER,
 };
 struct DlmeInformationSetConfirm{
+  uint16_t Handle;
   uint8_t Status;
 };
 typedef struct DlmeInformationSetConfirm dlme_information_set_confirm_s;

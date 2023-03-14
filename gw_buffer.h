@@ -94,7 +94,7 @@ static inline void tsn_buffer_put32(tsn_buffer_s *b, Unsigned32 v)
 
 static inline void tsn_buffer_put64(tsn_buffer_s *b, Unsigned64 v)
 {
-  *(Unsigned64*)b->ptr = TSN_htonll(v);
+  *(Unsigned32*)b->ptr = TSN_htonll(v);
   b->ptr += 8;
   b->len += 8;
 }

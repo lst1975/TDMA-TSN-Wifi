@@ -35,7 +35,7 @@
 #define TSN_ADID_MAX 64
 #define TSN_ADID_INVALID TSN_ADID_MAX
 #define TSN_ShorAddress_MAX 1024
-#define TSN_ShorAddress_INVALID ((uint16_t)(-1))
+#define TSN_ShorAddress_INVALID ((uint16_t)(0))
 #define TSN_NetworkID_MAX 8
 
 typedef struct tsn_network tsn_network_s;
