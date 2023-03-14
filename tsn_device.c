@@ -97,6 +97,7 @@ TSN_device_init(tsn_device_s *dev,
   dev->PowerSupplyStatus      = DMAP_mib_id_device_PowerSupplyStatus_Fixed;
   dev->MachineState           = DMAP_STATE_init;
   dev->SequenceNumber         = 0;
+  dev->Flags                  = 0;
 }
 
 tsn_err_e

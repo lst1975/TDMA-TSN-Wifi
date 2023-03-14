@@ -41,9 +41,11 @@ struct tsn_sys_config {
   uint64_t logWarn: 1;
   uint64_t logError: 1;
   uint64_t fcsLength: 3;
-  uint64_t devType:3;
-  uint64_t Connections:6;
-  uint64_t Events:6;
+  uint64_t devType: 3;
+  uint64_t Connections: 6;
+  uint64_t Events: 6;
+  uint64_t Initialized: 1;
+  uint64_t State: 3;
   list_head_s posted_accept_events;
   list_head_s posted_events;
   

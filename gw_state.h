@@ -40,8 +40,8 @@ enum tsn_dmap_state{
   DMAP_STATE_join,
   DMAP_STATE_join_authenticating,
   DMAP_STATE_join_allocatingShortAddress,
-  DMAP_STATE_operation,
   DMAP_STATE_resource_allocation,
+  DMAP_STATE_operation,
   DMAP_STATE_leave,
   DMAP_STATE_end
 };

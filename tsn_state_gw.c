@@ -31,12 +31,7 @@
  */
 #include "tsn_private.h"
 
-static tsn_boolean_e 
-gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dev, 
-   tsn_dmap_trigger_e trigger, void *dlpdu);
-
 /* DMAP ---> Device Management Application Process */
-
 static inline tsn_boolean_e 
 __DLME_join_response(tsn_msg_s *msg, Unsigned8 AdID, 
   Unsigned8 Status, Unsigned16 ShortAddr)
@@ -59,14 +54,14 @@ tsn_boolean_e
 gw_dmap_T1_receive_authentication_response(tsn_msg_s *msg, 
    tsn_device_s *dmap, DlmeJoinIndication *ind)
 {
-  return gw_dmap_state_machine(msg, dmap, DMAP_TRIGGER_T1_auth, ind);
+  return __gw_dmap_state_machine(msg, dmap, DMAP_TRIGGER_T1_auth, ind);
 }
 
 tsn_boolean_e 
 gw_dmap_T1_receive_allocate_address_response(tsn_msg_s *msg, 
    tsn_device_s *dmap, DlmeJoinIndication *ind)
 {
-  return gw_dmap_state_machine(msg, dmap, DMAP_TRIGGER_T2_addr, ind);
+  return __gw_dmap_state_machine(msg, dmap, DMAP_TRIGGER_T2_addr, ind);
 }
 
 tsn_err_e 
@@ -79,21 +74,21 @@ gw_dmap_T1_receive_dlme_join_indication(tsn_msg_s *msg,
   r = TSN_device_find_ByLongAddr(&dev, ind->, ind->PhyAddr);
   if (r != TSN_err_none)
     return r;
-  return gw_dmap_state_machine(msg, dev, DMAP_TRIGGER_T1_join, ind);
+  return __gw_dmap_state_machine(msg, dev, DMAP_TRIGGER_T1_join, ind);
 }
 
 tsn_boolean_e 
 gw_dmap_T5_receive_information_set_confirm(tsn_msg_s *msg, 
    tsn_device_s *dmap, dlme_information_set_confirm_s *cfm)
 {
-  return gw_dmap_state_machine(msg, dmap, DMAP_TRIGGER_T5_infoSetConfirm, cfm);
+  return __gw_dmap_state_machine(msg, dmap, DMAP_TRIGGER_T5_infoSetConfirm, cfm);
 }
 
 tsn_boolean_e 
 gw_dmap_T0_DmapInitializationDone(tsn_msg_s *msg, 
    tsn_device_s *dmap)
 {
-  return gw_dmap_state_machine(dmap, DMAP_TRIGGER_T0, ind);
+  return __gw_dmap_state_machine(msg, dmap, DMAP_TRIGGER_T0, NULL);
 }
 
 /***********************************************************************************
@@ -134,9 +129,9 @@ gw_dmap_T0_DmapInitializationDone(tsn_msg_s *msg,
  *
  ***********************************************************************************/
 #define DLME_STATE_information_set_handle_mask           0xF000
-#define DLME_STATE_information_set_DeviceList       0x0000
-#define DLME_STATE_information_set_SuperframeList   0x1000
-#define DLME_STATE_information_set_DllLinkList      0x2000
+#define DLME_STATE_information_set_DeviceList       0x1000
+#define DLME_STATE_information_set_SuperframeList   0x2000
+#define DLME_STATE_information_set_DllLinkList      0x4000
 static tsn_boolean_e 
 gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap, 
    tsn_dmap_trigger_e trigger, void *dlpdu)
@@ -232,12 +227,12 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
         }
       }
       __DLME_join_response(msg,TSN_AD_JOIN_ACK_SUCCESS, dmap->DeviceShortAddress);
-      dmap->MachineState = DMAP_STATE_operation;
+      dmap->MachineState = DMAP_STATE_resource_allocation;
+      trigger = DMAP_TRIGGER_T4_ResAlloc;
       /* FALLTHROUGH */
       
-    case DMAP_STATE_operation:
-      if (trigger != DMAP_TRIGGER_T2_addr)
-        return TSN_FALSE;
+    case DMAP_STATE_resource_allocation:
+      if (trigger == DMAP_TRIGGER_T4_ResAlloc)
       {
         tsn_buffer b;
         DlmeInformationSetRequest req;
@@ -252,6 +247,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           req.FirstStoreIndex = TSN_htons(dmap->DeviceShortAddress);
           req.Count           = TSN_htons(1);
           DeviceState  = DMAP_mib_id_device_DeviceState_AllocatingResources;
+          dmap->Flags |= DLME_STATE_information_set_DeviceList;
           tsn_buffer_set(&b, &DeviceState, 1);
           DLME_information_set_request(msg, &req, dmap->AccessDeviceID, &b);
 
@@ -269,6 +265,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           req.MemberID        = DMAP_mib_id_ALL;
           req.FirstStoreIndex = TSN_htons(dmap->DeviceShortAddress);
           req.Count           = TSN_htons(1);
+          dmap->Flags |= DLME_STATE_information_set_SuperframeList;
 
           s.SuperframeID = c->SuperframeID;
           s.NumberSlots  = TSN_htons(c->NumberSlots);
@@ -291,6 +288,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           req.MemberID        = DMAP_mib_id_ALL;
           req.FirstStoreIndex = TSN_htons(dmap->DeviceShortAddress);
           req.Count           = TSN_htons(1);
+          dmap->Flags |= DLME_STATE_information_set_DllLinkList;
 
           s.LinkID               = TSN_htons(c->LinkID);
           s.LinkType             = c->LinkType;
@@ -304,16 +302,13 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
 
           TSN_event("Try to send DllLinkList.\n");
         }
+        
+        return TSN_TRUE;
       }
-    
-      dmap->MachineState = DMAP_STATE_resource_allocation;
-      break;
-      
-    case DMAP_STATE_resource_allocation:
-      /* DLME-INFO-SET.confirm() */
-      if (trigger != DMAP_TRIGGER_T5_infoSetConfirm)
-        return TSN_FALSE;
+
+      if (trigger == DMAP_TRIGGER_T5_infoSetConfirm)
       {
+        /* DLME-INFO-SET.confirm() */
         dlme_information_set_confirm_s *cfm;
 
         cfm = (dlme_information_set_confirm_s *)dlpdu;
@@ -326,23 +321,39 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
         switch (cfm->Handle & DLME_STATE_information_set_handle_mask) 
         {
           case DLME_STATE_information_set_DeviceList:
+            dmap->Flags &= ~DLME_STATE_information_set_DeviceList;
             break;
           case DLME_STATE_information_set_SuperframeList:
+            dmap->Flags &= ~DLME_STATE_information_set_SuperframeList;
             break;
           case DLME_STATE_information_set_DllLinkList:
+            dmap->Flags &= ~DLME_STATE_information_set_DllLinkList;
             break;
           default:
             dmap->MachineState = DMAP_STATE_end;
             return TSN_FALSE;
         }
+        if (!dmap->Flags)
+          dmap->MachineState = DMAP_STATE_operation;
+
+        return TSN_TRUE;
       }
       break;
       
+    case DMAP_STATE_operation:
+      break;
+      
+    case DMAP_STATE_leave:
+      break;
+      
+    case DMAP_STATE_end:
+      break;
+      
     default:
-      return FALSE;
+      return TSN_FALSE;
   }
 
-  return TRUE;
+  return TSN_TRUE;
 }
 
 /***********************************************************************************
@@ -373,34 +384,35 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
  *
  ***********************************************************************************/
 tsn_boolean_e 
-__gw_dmap_state_machine(gw_dmap_state_s *dmap_gw, void *dlpdu, 
-tsn_dmap_trigger_e trigger)
+__gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap, 
+   tsn_dmap_trigger_e trigger, void *dlpdu)
 {
-  switch (dmap_gw->State)
+  switch (sysCfg.sState)
   {
     case DMAP_STATE_init:
       if (trigger == DMAP_TRIGGER_T0)
-        dmap_gw->State = DMAP_STATE_active;
-      return TRUE;
+        sysCfg.State = DMAP_STATE_active;
+      return TSN_TRUE;
+      
     case DMAP_STATE_active:
-      if (trigger > DMAP_TRIGGER_T0
-        || trigger < DMAP_TRIGGER_MAX)
-        return gw_dmap_state_machine(NULL, dlpdu, trigger);
-      return FALSE;
+      if (trigger > DMAP_TRIGGER_T0 || trigger < DMAP_TRIGGER_MAX)
+        return gw_dmap_state_machine(msg, dmap, trigger, dlpdu);
+      return TSN_FALSE;
+      
     default:
-      return FALSE;
+      return TSN_FALSE;
   }
 }
 
 tsn_boolean_e
 TSN_IsDmapInitializationDone(void)
 {
-  return tsn_gateway.Initialized;
+  return sysCfg.Initialized;
 }
 
 void
 TSN_SetDmapInitializationDone(void)
 {
-  tsn_gateway.Initialized = TSN_TRUE;
+  sysCfg.Initialized = TSN_TRUE;
 }
 

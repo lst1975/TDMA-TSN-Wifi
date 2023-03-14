@@ -586,7 +586,7 @@ do_TSN_DLME_CHAN_COND_indication(tsn_msg_s *msg)
 }
 
 static tsn_err_e 
-do_TSN_DLME_Time_Sync_indication(tsn_msg_s *msg)
+do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
 {
   tsn_buffer_s *b = &msg->b;
   dlme_time_sync_indication_s ind;
@@ -611,7 +611,7 @@ do_TSN_DLME_Time_Sync_indication(tsn_msg_s *msg)
 }
 
 static tsn_err_e 
-do_TSN_DLME_Time_Sync_response(tsn_msg_s *msg)
+do_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }

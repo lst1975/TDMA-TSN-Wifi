@@ -556,6 +556,7 @@ struct tsn_device{
   Unsigned64 SequenceNumber;
   Unsigned8  MachineState;
   Unsigned8  Network;
+  Unsigned16 Flags;
 };
 typedef struct tsn_device tsn_device_s;
 
