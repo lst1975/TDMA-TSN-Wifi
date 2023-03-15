@@ -54,11 +54,20 @@ struct tsn_sys_config {
 };
 typedef struct tsn_sys_config tsn_sys_config_s;
 
+#define TSN_HANDLE_MAX 256
+#define TSN_HANDLE_INVALID ((uint16_t)(-1))
+
+typedef void (*tsn_msg_f)(tsn_msg_s *m);
+
 struct tsn_msg {
   list_head_s link;
   tsn_buffer_s b;
   tsn_sockaddr_s from;
   void *priv;
+  tsn_msg_f cb;
+  TimeData stamp;
+  uint16_t handle;
+  uint8_t isInQ;
 };
 typedef struct tsn_msg tsn_msg_s;
 
@@ -69,6 +78,10 @@ tsn_create_msg(void *priv, int len)
   if (m == NULL)
     return NULL;
   m->priv = priv;
+  m->handle = TSN_HANDLE_INVALID;
+  m->isInQ = TSN_FALSE;
+  m->stamp = 0;
+  m->cb = NULL;
   tsn_buffer_init(&m->b, (Unsigned8 *)(m+1), len);
   return m;
 }

@@ -69,6 +69,7 @@
 #include "tsn_resource.h"
 #include "tsn_device.h"
 #include "tsn_system.h"
+#include "tsn_handle.h"
 #include "gw_number.h"
 #include "tsn_epoll.h"
 #include "tsn_udp.h"

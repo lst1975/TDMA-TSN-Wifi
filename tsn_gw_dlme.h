@@ -234,6 +234,7 @@ static inline const char *dlme_info_op2string(int id)
 }
 
 struct DlmeInformationSetRequest{
+  uint16_t Handle;
   uint16_t DstAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;

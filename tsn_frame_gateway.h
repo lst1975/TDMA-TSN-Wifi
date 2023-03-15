@@ -149,10 +149,10 @@ tsn_err_e tsn_dlpdu_process_adgw(tsn_msg_s *msg);
 tsn_err_e make_TSN_DLME_JOIN_response(tsn_msg_s *msg, 
   Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr);
 tsn_err_e make_TSN_information_set_request(tsn_msg_s *msg, 
-  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  void *_req, Unsigned8 AdID, 
   tsn_buffer *data);
 tsn_err_e make_TSN_information_get_request(tsn_msg_s *msg, 
-  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  void *_req, Unsigned8 AdID, 
   tsn_buffer *data __TSN_UNUSED);
 
 #endif

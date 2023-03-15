@@ -242,12 +242,16 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
 
 tsn_err_e 
 make_TSN_information_get_request(tsn_msg_s *msg, 
-  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  void *_req, Unsigned8 AdID, 
   tsn_buffer *data __TSN_UNUSED)
 {
+  int AttrLen;
   tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
-  int AttrLen = sizeof(*req);
+  dlme_information_set_request_s *req;
+
+  req = (dlme_information_set_request_s *)_req;
+  AttrLen = sizeof(*req);
   
   r = ___make_TSN_Buffer(b, 4+AttrLen);
   if (TSN_err_none != r)
@@ -277,12 +281,16 @@ make_TSN_information_get_request(tsn_msg_s *msg,
 
 tsn_err_e 
 make_TSN_information_set_request(tsn_msg_s *msg, 
-  dlme_information_set_request_s *req, Unsigned8 AdID, 
+  void *_req, Unsigned8 AdID, 
   tsn_buffer *data)
 {
+  int AttrLen;
   tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
-  int AttrLen = sizeof(*req)+TSN_BUFFER_LEN(data);
+  dlme_information_set_request_s *req;
+
+  req = (dlme_information_set_request_s *)_req;
+  AttrLen = sizeof(*req)+TSN_BUFFER_LEN(data);
   
   r = ___make_TSN_Buffer(b, 4+AttrLen);
   if (TSN_err_none != r)
@@ -637,7 +645,10 @@ do_TSN_DLME_INFO_SET_request(tsn_msg_s *msg)
 static tsn_err_e 
 do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
 {
+  int NetworkID;
+  tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
+  tsn_device_s *dev;
   dlme_information_set_confirm_s cfm;
 
   TSN_event("Received TSN_DLME_INFO_SET_confirm.\n");
@@ -645,17 +656,39 @@ do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
   if (TSN_BUFFER_LEN(b) < sizeof(cfm))
     return -TSN_err_tooshort;
   
+  tsn_buffer_get16(b, &cfm.Handle);
   tsn_buffer_get8(b, &cfm.Status);
 
+  if (cfm.Handle >= TSN_ShorAddress_INVALID)
+    return -TSN_err_invalid;
+    
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
+    printf("\tHandle: %u.\n", cfm.Handle);
     printf("\tStatus: %s.\n", dlme_info_set_cfm_status2string(cfm.Status));
   }
 
   if (cfm.Status != DLME_information_set_confirm_SUCCESS)
     return -TSN_err_system;
 
-  if (TSN_TRUE != gw_dmap_T5_receive_information_set_confirm(msg, ))
+  NetworkID = tsn_network_id_by_Sockaddr(&msg->from);
+  if (NetworkID == TSN_NetworkID_MAX)
+  {
+    TSN_error("Reived packet from unknown AD.\n");
+    if (sysCfg.logError)
+    {
+      tsn_sockaddr_print(&msg->from, "AD IP Address is ", "\n");
+    }
+    return -TSN_err_existed;
+  }
+  r = TSN_device_find_ByShortAddr(&dev, NetworkID, cfm.Handle);
+  if (r != TSN_err_none)
+  {
+    TSN_error("Not find FD device with short address %u.\n", cfm.Handle);
+    return -TSN_err_existed;
+  }
+
+  if (TSN_TRUE != gw_dmap_T5_receive_information_set_confirm(msg, dev, &cfm))
     return -TSN_err_system;
   else
     return TSN_err_none;

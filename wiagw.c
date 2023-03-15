@@ -133,6 +133,7 @@ int main(int argc, char **argv)
       TSN_warn("Failed to wia_epoll_process_events().\n");
       TSN_error("(%d): %m.\n", errno, errno);
     }
+    TSN_CheckHandle();
   }
   
   ret = EXIT_SUCCESS;
