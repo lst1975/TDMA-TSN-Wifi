@@ -171,6 +171,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           return TSN_FALSE;
         }
         dmap->MachineState = DMAP_STATE_join_authenticating;
+        return gw_dmap_T1_receive_authentication_response(msg, dmap, ind);
       }
       break;
       

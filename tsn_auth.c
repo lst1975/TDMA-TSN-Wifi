@@ -39,5 +39,5 @@ TSN_Authentication(tsn_msg_s *msg, tsn_device_s *dmap,
   // TODO
   
   ind->AuthenResult  = TSN_SUCCESS;
-  return gw_dmap_T1_receive_authentication_response(msg, dmap, ind);
+  return TSN_TRUE;
 }
