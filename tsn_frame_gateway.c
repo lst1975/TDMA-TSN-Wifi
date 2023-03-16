@@ -713,7 +713,7 @@ do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
 
   TSN_event("Received TSN_DLME_INFO_GET_confirm.\n");
 
-  tsn_buffer_get8(b, &cfm.Handle);
+  tsn_buffer_get16(b, &cfm.Handle);
   tsn_buffer_get16(b, &cfm.SrcAddr);
   tsn_buffer_get8(b, &cfm.Status);
   tsn_buffer_get8(b, &cfm.AttributeID);
