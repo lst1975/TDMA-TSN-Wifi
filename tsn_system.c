@@ -40,7 +40,7 @@ tsn_sys_config_s sysCfg = {
   .logWarn      = TSN_TRUE,
   .logError     = TSN_TRUE,
   .Initialized  = TSN_FALSE,
-  .State        = DMAP_STATE_init;
+  .State        = DMAP_STATE_init,
   .fcsLength    = 2,
   .devType      = DMAP_mib_device_gw,
   .Connections  = 32,
@@ -92,7 +92,6 @@ tsn_boolean_e tsn_system_init(void)
     
     s = &sysCfg.network[i];
     s->AcceptedPhyAddr = NULL;
-    s->ShortAddr = 0;
     s->AdID = 0;
     s->Active = TSN_FALSE;
     s->FDNumber = 0;

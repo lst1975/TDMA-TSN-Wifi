@@ -42,7 +42,7 @@ tsn_boolean_e
 gw_dmap_T1_receive_authentication_response(
  tsn_msg_s *msg, 
  tsn_device_s *dmap, 
- DlmeJoinIndication *ind);
+ dlme_join_indication_s *ind);
 
 tsn_boolean_e 
 gw_dmap_T5_receive_information_set_confirm(

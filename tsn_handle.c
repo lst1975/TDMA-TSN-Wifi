@@ -46,9 +46,9 @@ struct _res_handle_s{
 };
 typedef struct _res_handle_s tsn_handle_s;
 
-static TsnShortAddr tsn_handle_array[TSN_HANDLE_MAX];
+static TsnHandle tsn_handle_array[TSN_HANDLE_MAX];
 
-static tsn_short_addr_s tsn_handle_list = {
+static tsn_handle_s tsn_handle_list = {
   .Handle = 0,
   .head = LIST_HEAD_INIT(tsn_handle_list.head),
 };
@@ -81,14 +81,14 @@ __TSN_FreeHandle(uint16_t *_Handle)
   if (Handle == TSN_HANDLE_INVALID)
     return;
   
-  tsn_short_addr_s *s = &tsn_handle_list;
-  TsnShortAddr *a = &tsn_handle_array[Handle];
+  tsn_handle_s *s = &tsn_handle_list;
+  TsnHandle *a = &tsn_handle_array[Handle];
   list_add_tail(&a->link, &s->head);
   *_Handle = TSN_HANDLE_INVALID;
 }
 
-static tsn_msg_s  *tsn_handle_array[TSN_HANDLE_MAX]={0};
-static list_head_s tsn_handle_list = LIST_HEAD_INIT(tsn_handle_list);
+static tsn_msg_s* tsn_handle_msg_array[TSN_HANDLE_MAX]={0};
+static list_head_s tsn_handle_msg_list = LIST_HEAD_INIT(tsn_handle_msg_list);
  
 tsn_boolean_e 
 TSN_AllocateHandle(tsn_msg_s *msg)
@@ -96,8 +96,8 @@ TSN_AllocateHandle(tsn_msg_s *msg)
   if (TSN_FALSE == __TSN_AllocateHandle(&msg->handle))
     return TSN_FALSE;
 
-  tsn_handle_array[msg->handle] = msg;
-  list_add_tail(&msg->link, &tsn_handle_list);
+  tsn_handle_msg_array[msg->handle] = msg;
+  list_add_tail(&msg->link, &tsn_handle_msg_list);
   msg->stamp = tsn_system_time();
   return TSN_TRUE;
 }
@@ -109,7 +109,7 @@ TSN_FreeHandle(tsn_msg_s *msg)
     return;
   if (msg->isInQ == TSN_FALSE)
     return;
-  tsn_handle_array[msg->handle] = NULL;
+  tsn_handle_msg_array[msg->handle] = NULL;
   list_del(&msg->link);
   __TSN_FreeHandle(&msg->handle);
 }
@@ -118,7 +118,7 @@ tsn_msg_s *
 TSN_GetMsgByHandle(uint16_t Handle)
 {
   TimeData stamp;
-  tsn_msg_s *msg = tsn_handle_array[Handle];
+  tsn_msg_s *msg = tsn_handle_msg_array[Handle];
   if (msg == NULL)
     return NULL;
   stamp = tsn_system_time();
@@ -137,12 +137,18 @@ TSN_CheckHandle(void)
     tsn_msg_s *msg = TSN_GetMsgByHandle(i);
     if (msg == NULL)
     {
-      msg = tsn_handle_array[i];
+      msg = tsn_handle_msg_array[i];
       if (msg == NULL)
         continue;
-      TSN_FreeHandle(i);
+      TSN_FreeHandle(msg);
       if (msg->cb != NULL)
         msg->cb(msg);
     }
   }
+}
+
+void
+TSN_HandleListInit(void)
+{
+  memset(&tsn_handle_msg_array[0], 0, sizeof(tsn_handle_msg_array));
 }

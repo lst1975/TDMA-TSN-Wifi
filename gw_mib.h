@@ -68,6 +68,7 @@ struct DmapMibSetRequest{
   Unsigned16 Count;
   Unsigned8  AttributeValue[0];
 };
+typedef struct DmapMibSetRequest TsnDmapMibSetRequestS;
 #define DmapMibSetRequest_FirstStoreIndex_Type 0xF000
 #define DmapMibSetRequest_FirstStoreIndex_SuperframeID 1
 #define DmapMibSetRequest_FirstStoreIndex_LinkID       2
@@ -85,6 +86,7 @@ struct DmapMibSetConfirm{
   Unsigned8 Handle;
   Unsigned8 Status;
 };
+typedef struct DmapMibSetConfirm TsnDmapMibSetConfirmS;
 enum{
   DMAP_mib_set_confirm_SUCCESS=0,
   DMAP_mib_set_confirm_INVALID_ATTRIBUTE,

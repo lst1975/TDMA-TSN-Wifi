@@ -29,9 +29,10 @@
  *                              
  **************************************************************************************
  */
+#include "tsn_private.h"
 tsn_boolean_e 
 TSN_Authentication(tsn_msg_s *msg, tsn_device_s *dmap, 
-   DlmeJoinIndication *ind)
+  dlme_join_indication_s *ind)
 {
   uint64_t PhyAddr     = ind->PhyAddr;
   uint64_t SecMaterial = ind->SecMaterial;
@@ -39,5 +40,5 @@ TSN_Authentication(tsn_msg_s *msg, tsn_device_s *dmap,
   // TODO
   
   ind->AuthenResult  = TSN_SUCCESS;
-  return TSN_TRUE;
+  return TSN_SUCCESS;
 }

@@ -36,6 +36,7 @@ tsn_boolean_e TSN_AllocateHandle(tsn_msg_s *msg);
 void TSN_FreeHandle(tsn_msg_s *msg);
 tsn_msg_s *TSN_GetMsgByHandle(uint16_t Handle);
 void TSN_CheckHandle(void);
+void TSN_HandleListInit(void);
 
 #endif
 

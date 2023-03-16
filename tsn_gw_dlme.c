@@ -157,7 +157,7 @@ static tsn_boolean_e DLME_timesync_confirm(struct DlmeTimeSyncResponse *cfm)
 static tsn_boolean_e DLME_join_request(struct DlmeJoinRequest *req)
 {
 }
-static tsn_boolean_e DLME_join_indication(DlmeJoinIndication *ind)
+static tsn_boolean_e DLME_join_indication(struct DlmeJoinIndication *ind)
 {
 }
 static tsn_boolean_e DLME_join_response(struct DlmeJoinResponse *rsp)
@@ -235,42 +235,17 @@ DLME_device_status_confirm(struct DlmeDeviceStatusConfirm *cfm)
  *     |<-------------------- |                   |                         |
  *     |                      |                   |                         |
  ***********************************************************************************/
-struct __ChannelConditionInfomation{
-  uint8_t ChannelID;
-  uint8_t LinkQuality;
-  SingleFloat PacketLossRate;
-  uint8_t RetryNumber;
-};
-typedef struct __ChannelConditionInfomation ChannelConditionInfomation;
 
-struct __DlmeChannelConditionRequest{
-  uint8_t Count;
-  ChannelConditionInfomation ChannelConditionInfo[0];
-};
-typedef struct __DlmeChannelConditionRequest DlmeChannelConditionRequest;
-
-static tsn_boolean_e 
+static tsn_boolean_e
 DLME_channel_condition_request(struct DlmeChannelConditionRequest *req)
 {
 }
-struct __DlmeChannelConditionIndication{
-  uint16_t SrcAddr;
-  ChannelConditionInfomation ChannelConditionInfo[0];
-};
-typedef struct __DlmeChannelConditionIndication DlmeChannelConditionIndication;
 
 static tsn_boolean_e 
 DLME_channel_condition_indication(struct DlmeChannelConditionIndication *ind)
 {
 }
-enum{
-  DLME_channel_condition_confirm_SUCCESS = 0,
-  DLME_channel_condition_confirm_FAILURE,
-};
-struct DlmeChannelConditionConfirm{
-  uint8_t Status;
-};
-static tsn_boolean_e 
+static tsn_boolean_e
 DLME_device_status_confirm(struct DlmeChannelConditionConfirm *cfm)
 {
 }
@@ -314,26 +289,12 @@ DLME_device_status_confirm(struct DlmeChannelConditionConfirm *cfm)
  *     |<-------------------- |                   |                         |
  *     |                      |                   |                         |
  ***********************************************************************************/
-struct DlmeInformationGetRequest{
-  uint8_t  Handle;
-  uint16_t DstAddr;
-  uint8_t  AttributeID;
-  uint8_t  MemberID;
-  uint16_t FirstStoreIndex;
-  uint16_t Count;
-};
-static tsn_boolean_e 
+
+static tsn_boolean_e
 DLME_information_get_request(struct DlmeInformationGetRequest *req)
 {
 }
-struct DlmeInformationGetIndication{
-  uint16_t SrcAddr;
-  uint8_t  AttributeID;
-  uint8_t  MemberID;
-  uint16_t FirstStoreIndex;
-  uint16_t Count;
-};
-static tsn_boolean_e 
+static tsn_boolean_e
 DLME_information_get_indication(struct DlmeInformationGetIndication *ind)
 {
 }
@@ -378,12 +339,6 @@ DLME_information_get_confirm(struct DlmeInformationGetConfirm *cfm)
  *     |<-------------------- |                   |                         |
  *     |                      |                   |                         |
  ***********************************************************************************/
-struct DlmeLeaveRequest{
-  union{
-    uint8_t  ShortAddr8;
-    uint16_t ShortAddr16;
-  };
-};
 static tsn_boolean_e DLME_leave_request(struct DlmeLeaveRequest *req)
 {
 }

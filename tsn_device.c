@@ -44,7 +44,7 @@ TSN_device_find_ByLongAddr(tsn_device_s **_dev,
   if (r != TSN_err_none)
     return r;
 
-  for (i=0;i<net->ShortAddr;i++)
+  for (i=0;i<TSN_ShorAddress_MAX;i++)
   {
     dev = net->Devices[i];
     if (dev != NULL && dev->LongAddress == PhyAddr)

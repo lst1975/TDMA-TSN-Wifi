@@ -150,9 +150,9 @@ tsn_err_e make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
   Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr);
 tsn_err_e make_TSN_information_set_request(tsn_msg_s *msg, 
   void *_req, Unsigned8 AdID, 
-  tsn_buffer *data);
+  tsn_buffer_s *data);
 tsn_err_e make_TSN_information_get_request(tsn_msg_s *msg, 
   void *_req, Unsigned8 AdID, 
-  tsn_buffer *data __TSN_UNUSED);
+  tsn_buffer_s *data __TSN_UNUSED);
 
 #endif

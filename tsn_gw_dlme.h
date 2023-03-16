@@ -143,6 +143,25 @@ struct DlmeTimeSyncConfirm{
 };
 typedef struct DlmeTimeSyncConfirm dlme_time_sync_confirm_s;
 
+struct DlmeInformationGetRequest{
+  uint8_t  Handle;
+  uint16_t DstAddr;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
+};
+typedef struct DlmeInformationGetRequest dlme_information_get_request_s;
+
+struct DlmeInformationGetIndication{
+  uint16_t SrcAddr;
+  uint8_t  AttributeID;
+  uint8_t  MemberID;
+  uint16_t FirstStoreIndex;
+  uint16_t Count;
+};
+typedef struct DlmeInformationGetIndication dlme_information_get_indication_s;
+
 enum{
   DLME_information_get_response_SUCCESS = 0,
   DLME_information_get_response_UNSUPPORTED_ATTRIBUTE,
@@ -161,6 +180,36 @@ enum{
   DLME_channel_condition_confirm_SUCCESS = 0,
   DLME_channel_condition_confirm_FAILURE,
 };
+struct DlmeChannelConditionConfirm{
+  uint8_t Status;
+};
+
+struct ChannelConditionInfomation{
+  uint8_t ChannelID;
+  uint8_t LinkQuality;
+  SingleFloat PacketLossRate;
+  uint8_t RetryNumber;
+};
+typedef struct ChannelConditionInfomation channel_condition_infomation_s;
+
+struct DlmeChannelConditionIndication{
+  uint16_t SrcAddr;
+  uint8_t Count;
+  channel_condition_infomation_s ChannelConditionInfo[0];
+};
+typedef struct DlmeChannelConditionIndication dlme_channel_condition_indication_s;
+
+struct DlmeChannelConditionRequest{
+  uint8_t Count;
+  channel_condition_infomation_s ChannelConditionInfo[0];
+};
+typedef struct DlmeChannelConditionRequest dlme_channel_condition_request_s;
+
+
+enum{
+  DLME_information_get_confirm_SUCCESS = 0,
+  DLME_information_get_confirm_UNSUPPORTED_ATTRIBUTE,
+};
 struct DlmeInformationGetConfirm{
   uint8_t  Handle;
   uint16_t SrcAddr;
@@ -174,6 +223,17 @@ struct DlmeInformationGetConfirm{
 };
 typedef struct DlmeInformationGetConfirm dlme_information_get_confirm_s;
 
+static inline const char *dlmeInformationGetConfirmStatus2String(int status)
+{
+  switch (status) {
+    case DLME_information_get_confirm_SUCCESS:
+      return "SUCCESS";
+    case DLME_information_get_confirm_UNSUPPORTED_ATTRIBUTE:
+      return "UNSUPPORTED ATTRIBUTE";
+    default:
+      return "<Unknown>";
+  }
+}
 /***********************************************************************************
  * GB/T26790.2-2015, 8.3.8, Page 73
  *                   INFORMATION set
@@ -229,7 +289,7 @@ static inline const char *dlme_info_op2string(int id)
     case DLME_information_set_option_UPDATE:
       return "UPDATE";
     default:
-      return "<Unknown>"
+      return "<Unknown>";
   }
 }
 
@@ -303,7 +363,7 @@ static const char *dlme_info_set_cfm_status2string(uint8_t Status)
 static inline tsn_boolean_e 
 DLME_information_set_request(tsn_msg_s *msg, 
   dlme_information_set_request_s *req, Unsigned8 AdID, 
-  tsn_buffer *b)
+  tsn_buffer_s *b)
 {
   if (make_TSN_information_set_request(msg, req, AdID, b) != TSN_err_none)
     return TSN_FALSE;
@@ -312,26 +372,34 @@ DLME_information_set_request(tsn_msg_s *msg,
   return TSN_TRUE;
 }
 
-static inline tsn_boolean_e 
-DLME_information_set_indication(tsn_msg_s *msg, 
-  dlme_information_set_indication_s *ind, Unsigned8 AdID, 
-  tsn_buffer *b)
+static inline tsn_boolean_e
+DLME_information_set_indication(tsn_msg_s *msg,
+  dlme_information_set_indication_s *ind, Unsigned8 AdID,
+  tsn_buffer_s *b)
 {
   return TSN_FALSE;
 }
-static inline tsn_boolean_e 
-DLME_information_set_response(tsn_msg_s *msg, 
-  dlme_information_set_response_s *rsp, Unsigned8 AdID, 
-  tsn_buffer *b)
+static inline tsn_boolean_e
+DLME_information_set_response(tsn_msg_s *msg,
+  dlme_information_set_response_s *rsp, Unsigned8 AdID,
+  tsn_buffer_s *b)
 {
   return TSN_FALSE;
 }
-static inline tsn_boolean_e 
-DLME_information_set_confirm(tsn_msg_s *msg, 
-  dlme_information_set_confirm_s *cfm, Unsigned8 AdID, 
-  tsn_buffer *b)
+static inline tsn_boolean_e
+DLME_information_set_confirm(tsn_msg_s *msg,
+  dlme_information_set_confirm_s *cfm, Unsigned8 AdID,
+  tsn_buffer_s *b)
 {
   return TSN_FALSE;
 }
+
+struct DlmeLeaveRequest{
+  union{
+    uint8_t  ShortAddr8;
+    uint16_t ShortAddr16;
+  };
+};
+typedef struct DlmeLeaveRequest dlme_leave_request_s;
 
 #endif

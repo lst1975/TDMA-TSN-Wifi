@@ -243,7 +243,7 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
 tsn_err_e 
 make_TSN_information_get_request(tsn_msg_s *msg, 
   void *_req, Unsigned8 AdID, 
-  tsn_buffer *data __TSN_UNUSED)
+  tsn_buffer_s *data __TSN_UNUSED)
 {
   int AttrLen;
   tsn_err_e r;
@@ -262,7 +262,7 @@ make_TSN_information_get_request(tsn_msg_s *msg,
   tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
   tsn_buffer_put8(b, AdID);
   tsn_buffer_put16(b, AttrLen);
-  tsn_buffer_putlen(b, req, sizeof(*req));
+  tsn_buffer_putlen(b, (uint8_t *)req, sizeof(*req));
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
@@ -282,7 +282,7 @@ make_TSN_information_get_request(tsn_msg_s *msg,
 tsn_err_e 
 make_TSN_information_set_request(tsn_msg_s *msg, 
   void *_req, Unsigned8 AdID, 
-  tsn_buffer *data)
+  tsn_buffer_s *data)
 {
   int AttrLen;
   tsn_err_e r;
@@ -301,7 +301,7 @@ make_TSN_information_set_request(tsn_msg_s *msg,
   tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
   tsn_buffer_put8(b, AdID);
   tsn_buffer_put16(b, AttrLen);
-  tsn_buffer_putlen(b, req, sizeof(*req));
+  tsn_buffer_putlen(b, (uint8_t *)req, sizeof(*req));
   tsn_buffer_putlen(b, data->data, data->len);
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
@@ -346,6 +346,36 @@ make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
     tsn_buffer_put8(b, Status);
   }
   
+  return TSN_err_none;
+}
+
+tsn_err_e
+make_TSN_DLME_LEAVE_request(tsn_msg_s *msg,
+  Unsigned8 AdID, Unsigned16 ShortAddr)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  int AttrLen = sizeof(ShortAddr);
+
+  r = ___make_TSN_Buffer(b, 4+AttrLen);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make TSN_leave_request.\n");
+
+  tsn_buffer_put8(b, TSN_DLME_JOIN_response);
+  tsn_buffer_put8(b, AdID);
+  tsn_buffer_put16(b, AttrLen);
+  tsn_buffer_put16(b, ShortAddr);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("TSN_leave_request.\n");
+    printf("\tAdID: %u\n", AdID);
+    printf("\tAttrLen: %u\n",  AttrLen);
+    printf("\tShortAddr: %u\n", ShortAddr);
+  }
+
   return TSN_err_none;
 }
 
@@ -536,7 +566,14 @@ do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
   {
     ind.SecMaterial = 0;
   }
-  
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("\tTSN_DLME_JOIN_indication.\n");
+    printf("\tPhyAddr: %"PRIu64".\n", ind.PhyAddr);
+    printf("\tSecMaterial: %"PRIu64".\n", ind.SecMaterial);
+  }
+
   return gw_dmap_T1_receive_dlme_join_indication(msg, NULL, &ind);
 }
 
@@ -569,7 +606,7 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
   NetworkID = tsn_network_id_by_Sockaddr(&msg->from);
   if (NetworkID == TSN_NetworkID_MAX)
   {
-    TSN_error("Reived packet from unknown AD.\n");
+    TSN_error("Received packet from unknown AD.\n");
     if (sysCfg.logError)
     {
       tsn_sockaddr_print(&msg->from, "AD IP Address is ", "\n");
@@ -590,7 +627,41 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
 static tsn_err_e 
 do_TSN_DLME_CHAN_COND_indication(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  tsn_device_s *dev;
+  dlme_channel_condition_indication_s ind;
+
+  if (TSN_BUFFER_LEN(b) < 2)
+    return -TSN_err_tooshort;
+
+  TSN_event("Received TSN_DLME_CHAN_COND_indication.\n");
+
+  tsn_buffer_get16(b, &ind.SrcAddr);
+  tsn_buffer_get8(b, &ind.Count);
+  for(int i = 0;i < ind.Count;i++)
+  {
+    tsn_buffer_get8(b, &ind.ChannelConditionInfo[i].ChannelID);
+    tsn_buffer_get8(b, &ind.ChannelConditionInfo[i].LinkQuality);
+    tsn_buffer_get32(b, (Unsigned32 *)&ind.ChannelConditionInfo[i].PacketLossRate);
+    tsn_buffer_get8(b, &ind.ChannelConditionInfo[i].RetryNumber);
+  }
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("\tSrcAddr = 0x%x.\n", ind.SrcAddr);
+    printf("\tCount = %u.\n", ind.Count);
+    for(int i = 0;i < ind.Count;i++)
+    {
+  	  printf("ChannelConditionInfo[%d]:\n", i);
+  	  printf("ChannelID = %u.\n", ind.ChannelConditionInfo[i].ChannelID);
+  	  printf("ChannelID = %u.\n", ind.ChannelConditionInfo[i].LinkQuality);
+  	  /* print PacketLossRate */
+  	  printf("ChannelID = %u.\n", ind.ChannelConditionInfo[i].RetryNumber);
+    }
+  }
+
+  return TSN_err_none;
 }
 
 static tsn_err_e 
@@ -633,7 +704,36 @@ do_TSN_DLME_INFO_GET_request(tsn_msg_s *msg)
 static tsn_err_e 
 do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  dlme_information_get_confirm_s cfm;
+
+  if(TSN_BUFFER_LEN(b) < 12)
+    return -TSN_err_tooshort;
+
+  TSN_event("Received TSN_DLME_INFO_GET_confirm.\n");
+
+  tsn_buffer_get8(b, &cfm.Handle);
+  tsn_buffer_get16(b, &cfm.SrcAddr);
+  tsn_buffer_get8(b, &cfm.Status);
+  tsn_buffer_get8(b, &cfm.AttributeID);
+  tsn_buffer_get8(b, &cfm.MemberID);
+  tsn_buffer_get16(b, &cfm.FirstStoreIndex);
+  tsn_buffer_get16(b, &cfm.Count);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("\tTSN_DLME_INFO_GET_confirm.\n");
+    printf("\tHandle: %u.\n", cfm.Handle);
+    printf("\tSrcAddr: 0x%x.\n", cfm.SrcAddr);
+    printf("\tStatus: %s.\n", dlmeInformationGetConfirmStatus2String(cfm.Status));
+    printf("\tAttributeID: %u.\n", cfm.AttributeID);
+    printf("\tMemberID: %d.\n", cfm.MemberID);
+    printf("\tFirstStoreIndex: %u.\n", cfm.FirstStoreIndex);
+    printf("\tCount: %u.\n", cfm.Count);
+  }
+
+  return TSN_err_none;
 }
 
 static tsn_err_e 
@@ -674,7 +774,7 @@ do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
   NetworkID = tsn_network_id_by_Sockaddr(&msg->from);
   if (NetworkID == TSN_NetworkID_MAX)
   {
-    TSN_error("Reived packet from unknown AD.\n");
+    TSN_error("Received packet from unknown AD.\n");
     if (sysCfg.logError)
     {
       tsn_sockaddr_print(&msg->from, "AD IP Address is ", "\n");

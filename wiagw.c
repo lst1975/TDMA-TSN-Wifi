@@ -84,6 +84,7 @@ static void __read_udp_msg(tsn_event_s *ev)
   if (r != TSN_err_none)
   {
     TSN_error("Failed to process message.\n");
+    tsn_free_msg(m);
   }
 }
 
@@ -110,6 +111,8 @@ int main(int argc, char **argv)
 {
   int ret = EXIT_FAILURE;
   tsn_err_e r;
+
+  TSN_HandleListInit();
 
   r = wia_epoll_init();
   if (r != TSN_err_none)
