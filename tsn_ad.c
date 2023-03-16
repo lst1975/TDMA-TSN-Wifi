@@ -65,6 +65,8 @@ tsn_network_id_by_Sockaddr(tsn_sockaddr_s *s)
     for (j=0;j<TSN_ADID_MAX;j++)
     {
       tsn_sockaddr_s *a = &n->ads[i];
+      if (!a->slen)
+        continue;
       if (tsn_sockaddr_isequal(a, (struct sockaddr *)s))
         return i;
     }
