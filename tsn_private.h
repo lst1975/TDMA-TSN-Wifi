@@ -79,5 +79,6 @@
 #include "tsn_encrypt.h"
 #include "tsn_gw_dlme.h"
 #include "tsn_state_gw.h"
+#include "tsn_auth.h"
 
 #endif

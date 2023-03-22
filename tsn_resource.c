@@ -78,13 +78,13 @@ TSN_FreeShortAddr(uint16_t *_Addr)
 
   if (Addr == TSN_ShorAddress_INVALID)
   {
-    TSN_warn("Try to free invalid ZERO short address.\n")
+    TSN_warn("Try to free invalid ZERO short address\n");
     return;
   }
   
   if (Addr >= TSN_ShorAddress_MAX - 1)
   {
-    TSN_warn("Try to free invalid OVERFLOWED short address.\n")
+    TSN_warn("Try to free invalid OVERFLOWED short address.\n");
     return;
   }
   

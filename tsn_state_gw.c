@@ -48,17 +48,6 @@ __DLME_join_response(tsn_msg_s *msg, Unsigned8 AdID,
   tsn_send_udp_msg(msg);
   return TSN_TRUE;
 }
-
-static inline tsn_boolean_e
-__DMAP_MIB_set_confirm(tsn_msg_s *msg, Unsigned8 AdID,
-  Unsigned8 Handle, Unsigned8 Status)
-{
-  if (TSN_err_none != make_TSN_DMAP_MIB_SET_confirm(msg, AdID, Handle, Status))
-    return TSN_FALSE;
-  tsn_send_udp_msg(msg);
-  return TSN_TRUE;
-}
-
 /***********************************************************************************
  * GB/T26790.2-2015, 6.2.5.1, Page 18, Table 12, Graph 13 
  *                   GW Device DMAP State Machine 
@@ -103,7 +92,7 @@ gw_dmap_T1_receive_dlme_join_indication(tsn_msg_s *msg,
   r = TSN_device_find_ByLongAddr(&dev, NetworkID, ind->PhyAddr);
   if (r != TSN_err_none)
     return r;
-  return __gw_dmap_state_machine(msg, dev, DMAP_TRIGGER_T1_join, ind);
+  return __gw_dmap_state_machine(msg, dev, DMAP_TRIGGER_T1_join, ind) == TSN_TRUE ? TSN_err_none : -TSN_err_system;
 }
 
 tsn_boolean_e 
@@ -167,6 +156,19 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
 {
   switch (dmap->MachineState)
   {
+    case DMAP_STATE_leave:
+      if (trigger != DMAP_TRIGGER_T16)
+      {
+        goto ret_free_msg_false;
+      }
+      else
+      {
+        dlme_leave_request_s *req;
+        req = (dlme_leave_request_s *)dlpdu;
+        __ReleaseResources(req->ShortAddr16);
+      }
+      break;
+      
     case DMAP_STATE_end:
       goto ret_free_msg_false;
 
@@ -270,7 +272,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
         }
       }
       __DLME_join_response(msg, dmap->AccessDeviceID, 
-        TSN_AD_JOIN_ACK_SUCCESS, dmap->DeviceShortAddress));
+        TSN_AD_JOIN_ACK_SUCCESS, dmap->DeviceShortAddress);
       dmap->MachineState = DMAP_STATE_resource_allocation;
       
       trigger = DMAP_TRIGGER_T4_ResAlloc;
@@ -316,7 +318,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           s.NumberSlots  = TSN_htons(c->NumberSlots);
           s.ActiveFlag   = c->ActiveFlag;
           tsn_memcpy(&s.ActiveSlot, &c->ActiveSlot, sizeof(c->ActiveSlot));
-          tsn_buffer_set(&b, &s, sizeof(s));
+          tsn_buffer_set(&b, (Unsigned8 *)&s, sizeof(s));
           DLME_information_set_request(msg, &req, dmap->AccessDeviceID, &b);
 
           TSN_event("Try to send SuperframeList.\n");
@@ -359,7 +361,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
         if (cfm->Status != DLME_information_set_response_SUCCESS)
         {
           dmap->MachineState = DMAP_STATE_end;
-          return TSN_FALSE;
+          goto ret_free_msg_false;
         }
 
         switch (cfm->Handle & DLME_STATE_information_set_handle_mask) 
@@ -375,7 +377,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
             break;
           default:
             dmap->MachineState = DMAP_STATE_end;
-            return TSN_FALSE;
+            goto ret_free_msg_false;
         }
         if (!dmap->Flags)
           dmap->MachineState = DMAP_STATE_operation;
@@ -389,6 +391,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       break;
       
     case DMAP_STATE_operation:
+#if 0
       if (trigger == DMAP_TRIGGER_T7)
       {
         TsnDmapMibSetRequestS *req;
@@ -468,19 +471,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       {
         goto ret_free_msg_false;
       }
-      break;
-      
-    case DMAP_STATE_leave:
-      if (trigger != DMAP_TRIGGER_T16)
-      {
-        goto ret_free_msg_false;
-      }
-      else
-      {
-        dlme_leave_request_s *req;
-        req = (dlme_leave_request_s *)dlpdu;
-        __ReleaseResources(req->ShortAddr16);
-      }
+#endif
       break;
       
     default:
@@ -530,6 +521,7 @@ __gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
     case DMAP_STATE_init:
       if (trigger != DMAP_TRIGGER_T0)
         return TSN_FALSE;
+      TSN_SetDmapInitializationDone();
       sysCfg.State = DMAP_STATE_active;
       /* FALLTHROUGH */
       

@@ -112,6 +112,7 @@ int main(int argc, char **argv)
   int ret = EXIT_FAILURE;
   tsn_err_e r;
 
+  tsn_system_init();
   TSN_HandleListInit();
 
   r = wia_epoll_init();

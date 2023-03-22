@@ -294,7 +294,7 @@ static inline const char *dlme_info_op2string(int id)
 }
 
 struct DlmeInformationSetRequest{
-  uint8_t  Handle;
+  uint16_t Handle;
   uint16_t DstAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;
@@ -306,7 +306,7 @@ struct DlmeInformationSetRequest{
 typedef struct DlmeInformationSetRequest dlme_information_set_request_s;
 
 struct DlmeInformationSetIndication{
-  uint8_t  Handle;
+  uint16_t Handle;
   uint16_t SrcAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;
@@ -323,7 +323,7 @@ enum{
   DLME_information_set_response_INVALID_PARAMETER,
 };
 struct DlmeInformationSetResponse{
-  uint8_t  Handle;
+  uint16_t Handle;
   uint16_t SrcAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;
@@ -340,7 +340,7 @@ enum{
   DLME_information_set_confirm_INVALID_PARAMETER,
 };
 struct DlmeInformationSetConfirm{
-  uint8_t Handle;
+  uint16_t Handle;
   uint8_t Status;
 };
 typedef struct DlmeInformationSetConfirm dlme_information_set_confirm_s;

@@ -33,7 +33,7 @@
 #define _GW_MIB_H_
 
 struct DsnDmapMibGetRequest{
-  Unsigned8  Handle;
+  Unsigned16 Handle;
   Unsigned16 ShortAddr;
   Unsigned8  AttributeID;
   Unsigned8  MemberID;
@@ -45,7 +45,7 @@ typedef struct DsnDmapMibGetRequest TsnDmapMibGetRequestS;
 #define INVALID_STORE_INDEX Unsigned16Max
 
 struct TsnDmapMibGetConfirm{
-  Unsigned8  Handle;
+  Unsigned16 Handle;
   Unsigned8  Status;
   Unsigned16 Count;
   Unsigned8  AttributeValue[0];
@@ -60,7 +60,7 @@ enum{
 };
 
 struct DmapMibSetRequest{
-  Unsigned8  Handle;
+  Unsigned16 Handle;
   Unsigned16 ShortAddr;
   Unsigned8  AttributeID;
   Unsigned8  MemberID;
@@ -117,6 +117,11 @@ static inline int DMAP_mib_get_confirm(void *cfm)
 #define DMAP_mib_permission_read  0x02
 
 typedef struct TSN_DMAP_mib_attribute TSN_DMAP_mib_attribute_s;
+typedef void * (*tsn_mib_get_f)(int *len);
+typedef tsn_boolean_e (*tsn_mib_set_f)(void *data, int len);
+
+void * tsn_mib_get(int *len __TSN_UNUSED);
+tsn_boolean_e tsn_mib_set(void *data __TSN_UNUSED, int len __TSN_UNUSED);
 
 struct TSN_DMAP_mib_attribute{
   const char *Name;
@@ -131,7 +136,8 @@ struct TSN_DMAP_mib_attribute{
   uint64_t DefaultValueStatic;
   uint64_t ValueMin;
   uint64_t ValueMax;
-  
+  tsn_mib_get_f MibGet;
+  tsn_mib_set_f MibSet;
   TSN_DMAP_mib_attribute_s *DefaultEntryAddr;
   union{
     TSN_DMAP_mib_attribute_s **value_List;
@@ -211,6 +217,8 @@ TSN_DMAP_mib_entry_get_data(TSN_DMAP_mib_attribute_s *mib)
   .DefaultEntryAddr   = NULL, \
   .DefaultEntryCount  = 0, \
   .Offset             = offset, \
+  .MibGet             = tsn_mib_get, \
+  .MibSet             = tsn_mib_set, \
 }
     
 #define __DECL_MIB_ATTR_OFFSET_LIST(defaultEntry,prefix,id,dataType,mi,mx,permission,mibType,dftValue,devices,description,offset) { \
@@ -228,6 +236,8 @@ TSN_DMAP_mib_entry_get_data(TSN_DMAP_mib_attribute_s *mib)
   .DefaultEntryAddr   = defaultEntry, \
   .DefaultEntryCount  = sizeof(defaultEntry)/sizeof(TSN_DMAP_mib_attribute_s), \
   .Offset             = offset, \
+  .MibGet             = tsn_mib_get, \
+  .MibSet             = tsn_mib_set, \
 }
         
 static inline tsn_boolean_e

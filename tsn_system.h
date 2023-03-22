@@ -66,6 +66,7 @@ struct tsn_gw_dlpdu_normal{
 };
 typedef struct tsn_gw_dlpdu_normal tsn_gw_dlpdu_normal_s;
 
+typedef struct tsn_msg tsn_msg_s;
 typedef void (*tsn_msg_f)(tsn_msg_s *m);
 
 struct tsn_msg {
@@ -81,7 +82,6 @@ struct tsn_msg {
   uint16_t handle;
   uint8_t isInQ;
 };
-typedef struct tsn_msg tsn_msg_s;
 
 static inline tsn_msg_s *
 tsn_create_msg(void *priv, int len)
@@ -94,7 +94,6 @@ tsn_create_msg(void *priv, int len)
   m->isInQ  = TSN_FALSE;
   m->stamp  = 0;
   m->cb     = NULL;
-  m->freed  = TSN_FALSE;
   m->dlpdu  = &m->_dlpdu;
   tsn_buffer_init(&m->b, (Unsigned8 *)(m+1), len);
   return m;
@@ -124,6 +123,7 @@ __TSN_INTERFACE TimeData tsn_system_time(void);
 tsn_err_e tsn_system_get_network(tsn_network_s **net, unsigned int network);
 void tsn_sockaddr_print(tsn_sockaddr_s *s, const char *head, const char *tail);
 int tsn_sockaddr_salen(tsn_sockaddr_s *s);
+tsn_boolean_e tsn_system_init(void);
 
 #endif
 

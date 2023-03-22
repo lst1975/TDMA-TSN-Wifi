@@ -93,6 +93,8 @@ make_TSN_AD_JOIN_response(tsn_msg_s *msg,
   r = ___make_TSN_Buffer(b, 15);
   if (TSN_err_none != r)
     return r;
+
+  TSN_event("Make TSN_AD_JOIN_response.\n");
   
   tsn_buffer_put8(b, TSN_AD_JOIN_ack);
   tsn_buffer_put64(b, ADAddr);
@@ -107,6 +109,20 @@ make_TSN_AD_JOIN_response(tsn_msg_s *msg,
   {
     tsn_buffer_put16(b, 1);
     tsn_buffer_put8(b, Status);
+  }
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("TSN_AD_JOIN_response.\n");
+    printf("\tAdID: %u\n", AdID);
+    printf("\tADAddr: %u\n", ADAddr);
+    printf("\tStatus: %u\n", Status);
+
+    if (Status == AD_JOIN_SUCCESS)
+    {
+      printf("\tAdID: %u\n", AdID);
+      printf("\tADAddr: %u\n", ADAddr);
+    }
   }
   
   return TSN_err_none;
@@ -267,8 +283,8 @@ make_TSN_information_get_request(tsn_msg_s *msg,
     printf("\tAttrLen: %u\n",  AttrLen);
     printf("\tDstAddr: %u\n", req->DstAddr);
     printf("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
-    printf("\tAttributeID: %s\n", dmap_mib_AttributeID2string(req->AttributeID));
-    printf("\tMemberID: %s\n", dmap_mib_MemberID2string(req->AttributeID, req->MemberID));
+    printf("\tAttributeID: %u\n", req->AttributeID);
+    printf("\tMemberID: %u\n", req->MemberID);
     printf("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
     printf("\tCount: %u\n", req->Count);
   }
@@ -307,8 +323,8 @@ make_TSN_information_set_request(tsn_msg_s *msg,
     printf("\tAttrLen: %u\n",  AttrLen);
     printf("\tDstAddr: %u\n", req->DstAddr);
     printf("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
-    printf("\tAttributeID: %s\n", dmap_mib_AttributeID2string(req->AttributeID));
-    printf("\tMemberID: %s\n", dmap_mib_MemberID2string(req->AttributeID, req->MemberID));
+    printf("\tAttributeID: %u\n", req->AttributeID);
+    printf("\tMemberID: %u\n", req->MemberID);
     printf("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
     printf("\tCount: %u\n", req->Count);
   }
@@ -326,6 +342,8 @@ make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
   if (TSN_err_none != r)
     return r;
   
+  TSN_event("Make TSN_DLME_JOIN_response.\n");
+
   tsn_buffer_put8(b, TSN_DLME_JOIN_response);
   tsn_buffer_put8(b, AdID);
   if (Status == DLME_JOIN_SUCCESS)
@@ -339,7 +357,16 @@ make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
     tsn_buffer_put16(b, 1);
     tsn_buffer_put8(b, Status);
   }
-  
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    printf("TSN_leave_request.\n");
+    printf("\tAdID: %u\n", AdID);
+    printf("\tStatus: %u\n", Status);
+    printf("\tShortAddr: %u\n", ShortAddr);
+  }
+
+
   return TSN_err_none;
 }
 
@@ -549,6 +576,8 @@ do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
   
   if (TSN_BUFFER_LEN(b) < 8)
     return -TSN_err_tooshort;
+
+  TSN_event("Received TSN_DLME_JOIN_indication.\n");
 
   tsn_buffer_get64(b, &ind.PhyAddr);
   if (sysCfg.config.SecurityLevel != DMAP_mib_id_static_SecurityLevel_None)

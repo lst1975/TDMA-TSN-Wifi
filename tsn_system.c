@@ -104,7 +104,22 @@ tsn_boolean_e tsn_system_init(void)
       memset(a, 0, sizeof(*a));
       a->sa = (struct sockaddr *)a;
     }
+    {
+      tsn_sockaddr_s *a;
+      struct sockaddr_in *a4;
+
+      a = &s->ads[0];
+      a->sa   = (struct sockaddr *)a;
+      a->slen = sizeof(a->u.addr4);
+
+      a4 = &a->u.addr4;
+      a4->sin_family      = AF_INET;
+      a4->sin_port        = TSN_htons(8848);
+      a4->sin_addr.s_addr = inet_addr("10.0.2.15");
+    }
+
   }
+  sysCfg.network[0].Active = TSN_TRUE;
   return TSN_TRUE;
 
 error:
