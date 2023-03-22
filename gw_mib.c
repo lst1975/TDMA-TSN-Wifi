@@ -34,15 +34,6 @@
 static TSN_DMAP_mib_attribute_s *
 __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
 
-void * tsn_mib_get(int *len __TSN_UNUSED)
-{
-  return NULL;
-}
-tsn_boolean_e tsn_mib_set(void *data __TSN_UNUSED, int len __TSN_UNUSED)
-{
-  return TSN_FALSE;
-}
-
 /***********************************************************************************
  * GB/T26790.2-2015, 6.7.1.2.2, Page 35 
  *           Superframe Struct Attributes

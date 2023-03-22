@@ -97,7 +97,7 @@ TSN_AllocateHandle(tsn_msg_s *msg)
     return TSN_FALSE;
 
   tsn_handle_msg_array[msg->handle] = msg;
-  list_add_tail(&msg->link, &tsn_handle_msg_list);
+  list_add_tail(&msg->wait, &tsn_handle_msg_list);
   msg->stamp = tsn_system_time();
   return TSN_TRUE;
 }
@@ -110,7 +110,7 @@ TSN_FreeHandle(tsn_msg_s *msg)
   if (msg->isInQ == TSN_FALSE)
     return;
   tsn_handle_msg_array[msg->handle] = NULL;
-  list_del(&msg->link);
+  list_del(&msg->wait);
   __TSN_FreeHandle(&msg->handle);
 }
 

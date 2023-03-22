@@ -294,7 +294,7 @@ static inline const char *dlme_info_op2string(int id)
 }
 
 struct DlmeInformationSetRequest{
-  uint16_t Handle;
+  uint8_t  Handle;
   uint16_t DstAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;
@@ -306,7 +306,7 @@ struct DlmeInformationSetRequest{
 typedef struct DlmeInformationSetRequest dlme_information_set_request_s;
 
 struct DlmeInformationSetIndication{
-  uint16_t Handle;
+  uint8_t  Handle;
   uint16_t SrcAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;
@@ -323,7 +323,7 @@ enum{
   DLME_information_set_response_INVALID_PARAMETER,
 };
 struct DlmeInformationSetResponse{
-  uint16_t Handle;
+  uint8_t  Handle;
   uint16_t SrcAddr;
   uint8_t  AttributeOption;
   uint8_t  AttributeID;
@@ -340,7 +340,7 @@ enum{
   DLME_information_set_confirm_INVALID_PARAMETER,
 };
 struct DlmeInformationSetConfirm{
-  uint16_t Handle;
+  uint8_t Handle;
   uint8_t Status;
 };
 typedef struct DlmeInformationSetConfirm dlme_information_set_confirm_s;
@@ -361,13 +361,24 @@ static const char *dlme_info_set_cfm_status2string(uint8_t Status)
 }
 
 static inline tsn_boolean_e 
-DLME_information_set_request(tsn_msg_s *msg, 
+DLME_information_set_request(tsn_msg_s *_msg, 
   dlme_information_set_request_s *req, Unsigned8 AdID, 
   tsn_buffer_s *b)
 {
-  if (make_TSN_information_set_request(msg, req, AdID, b) != TSN_err_none)
-    return TSN_FALSE;
+  int AttrLen;
+  tsn_msg_s *msg;
 
+  AttrLen = sizeof(dlme_information_set_request_s)+TSN_BUFFER_LEN(b);
+  msg = tsn_duplicate_msg(_msg, 4+AttrLen);
+  if (msg == NULL)
+    return TSN_FALSE;
+  
+  if (make_TSN_information_set_request(msg, req, AdID, b) != TSN_err_none)
+  {
+    tsn_free_msg(msg);
+    return TSN_FALSE;
+  }
+  
   tsn_send_udp_msg(msg);
   return TSN_TRUE;
 }

@@ -88,16 +88,14 @@ make_TSN_AD_JOIN_response(tsn_msg_s *msg,
   Unsigned8 Status, Unsigned16 ADAddr, Unsigned8 AdID)
 {
   tsn_err_e r;
-  tsn_gw_dlpdu_normal_s *n;
   tsn_buffer_s *b = &msg->b;
 
   r = ___make_TSN_Buffer(b, 15);
   if (TSN_err_none != r)
     return r;
   
-  n = (tsn_gw_dlpdu_normal_s *)msg->priv;
   tsn_buffer_put8(b, TSN_AD_JOIN_ack);
-  tsn_buffer_put64(b, n->ADAddr);
+  tsn_buffer_put64(b, ADAddr);
   if (Status == AD_JOIN_SUCCESS)
   {
     tsn_buffer_put16(b, 4);
@@ -116,11 +114,11 @@ make_TSN_AD_JOIN_response(tsn_msg_s *msg,
 
 static tsn_err_e 
 make_TSN_GACK_indication(tsn_msg_s *msg, 
-  Unsigned8 count, Unsigned8 addType, gack_info_s *gack)
+  Unsigned8 count, Unsigned8 AdID, Unsigned8 addType, 
+  gack_info_s *gack)
 {
   int len;
   tsn_err_e r;
-  tsn_gw_dlpdu_normal_s *n;
   tsn_buffer_s *b = &msg->b;
 
   len = tsn_get_addr_length(addType);
@@ -133,9 +131,8 @@ make_TSN_GACK_indication(tsn_msg_s *msg,
   if (TSN_err_none != r)
     return r;
   
-  n = (tsn_gw_dlpdu_normal_s *)msg->priv;
   tsn_buffer_put8(b, TSN_GACK_indication);
-  tsn_buffer_put8(b, n->AdID);
+  tsn_buffer_put8(b, AdID);
   tsn_buffer_put16(b, len+1);
   tsn_buffer_put8(b, count);
   
@@ -163,11 +160,11 @@ make_TSN_GACK_indication(tsn_msg_s *msg,
 
 static tsn_err_e 
 make_TSN_NACK_indication(tsn_msg_s *msg, 
-  Unsigned8 count, Unsigned8 addType, tsn_addr_u *nack)
+  Unsigned8 count, Unsigned8 AdID, Unsigned8 addType, 
+  tsn_addr_u *nack)
 {
   int len;
   tsn_err_e r;
-  tsn_gw_dlpdu_normal_s *n;
   tsn_buffer_s *b = &msg->b;
 
   len = tsn_get_addr_length(addType);
@@ -179,9 +176,8 @@ make_TSN_NACK_indication(tsn_msg_s *msg,
   if (TSN_err_none != r)
     return r;
   
-  n = (tsn_gw_dlpdu_normal_s *)msg->priv;
   tsn_buffer_put8(b, TSN_GACK_indication);
-  tsn_buffer_put8(b, n->AdID);
+  tsn_buffer_put8(b, AdID);
   tsn_buffer_put16(b, len+1);
   tsn_buffer_put8(b, count);
   for (int i = 0; i < count; i++)
@@ -324,14 +320,12 @@ make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
   Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr)
 {
   tsn_err_e r;
-  tsn_gw_dlpdu_normal_s *n;
   tsn_buffer_s *b = &msg->b;
 
   r = ___make_TSN_Buffer(b, 7);
   if (TSN_err_none != r)
     return r;
   
-  n = (tsn_gw_dlpdu_normal_s *)msg->priv;
   tsn_buffer_put8(b, TSN_DLME_JOIN_response);
   tsn_buffer_put8(b, AdID);
   if (Status == DLME_JOIN_SUCCESS)
@@ -393,9 +387,10 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
   Unsigned16 ShortAddr;
 
   b = &msg->b;
-  n = (tsn_gw_dlpdu_normal_s *)msg->priv;
   if (TSN_BUFFER_LEN(b) != 9)
     return -TSN_err_malformed;
+
+  n = (tsn_gw_dlpdu_normal_s *)msg->dlpdu;
   if (n->AttrLen != 9)
     return -TSN_err_malformed;
   
@@ -655,9 +650,9 @@ do_TSN_DLME_CHAN_COND_indication(tsn_msg_s *msg)
     {
   	  printf("ChannelConditionInfo[%d]:\n", i);
   	  printf("ChannelID = %u.\n", ind.ChannelConditionInfo[i].ChannelID);
-  	  printf("ChannelID = %u.\n", ind.ChannelConditionInfo[i].LinkQuality);
+  	  printf("LinkQuality = %u.\n", ind.ChannelConditionInfo[i].LinkQuality);
   	  /* print PacketLossRate */
-  	  printf("ChannelID = %u.\n", ind.ChannelConditionInfo[i].RetryNumber);
+  	  printf("RetryNumber = %u.\n", ind.ChannelConditionInfo[i].RetryNumber);
     }
   }
 
@@ -713,7 +708,7 @@ do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
 
   TSN_event("Received TSN_DLME_INFO_GET_confirm.\n");
 
-  tsn_buffer_get16(b, &cfm.Handle);
+  tsn_buffer_get8(b, &cfm.Handle);
   tsn_buffer_get16(b, &cfm.SrcAddr);
   tsn_buffer_get8(b, &cfm.Status);
   tsn_buffer_get8(b, &cfm.AttributeID);
@@ -926,23 +921,22 @@ tsn_dlpdu_process_adgw(tsn_msg_s *msg)
 {
   tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
-  tsn_gw_dlpdu_normal_s n;
+  tsn_gw_dlpdu_normal_s *n = &msg->_dlpdu;
 
   TSN_event("Received dlpdu packet from AD.\n");
 
-  r = tsn_adgw_dll_dlpdu2normal(b, &n);
+  r = tsn_adgw_dll_dlpdu2normal(b, n);
   if (TSN_err_none != r)
     return r;
 
-  tsn_dlpdu_adgw_print(&n);
+  tsn_dlpdu_adgw_print(n);
   
-  if (n.ServID >= TSN_dlpdu_type_max)
+  if (n->ServID >= TSN_dlpdu_type_max)
     return -TSN_err_unsupport;
 
   TSN_debug("Processing packet: %s.\n", 
-    __dlpduType2String(n.ServID));
+    __dlpduType2String(n->ServID));
 
-  msg->priv = &n;
-  return (*frameTableGateway[n.ServID].func)(msg);
+  return (*frameTableGateway[n->ServID].func)(msg);
 }
 

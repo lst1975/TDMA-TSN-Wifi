@@ -163,7 +163,6 @@ static tsn_boolean_e DLME_join_indication(struct DlmeJoinIndication *ind)
 static tsn_boolean_e DLME_join_response(struct DlmeJoinResponse *rsp)
 {
 }
-
 static tsn_boolean_e DLME_join_confirm(struct DlmeJoinConfirm *cfm)
 {
 }
@@ -240,7 +239,6 @@ static tsn_boolean_e
 DLME_channel_condition_request(struct DlmeChannelConditionRequest *req)
 {
 }
-
 static tsn_boolean_e 
 DLME_channel_condition_indication(struct DlmeChannelConditionIndication *ind)
 {

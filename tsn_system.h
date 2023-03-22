@@ -57,13 +57,25 @@ typedef struct tsn_sys_config tsn_sys_config_s;
 #define TSN_HANDLE_MAX 256
 #define TSN_HANDLE_INVALID ((uint16_t)(-1))
 
+struct tsn_gw_dlpdu_normal{
+  Unsigned8   ServID;
+  Unsigned8   AdID;
+  Unsigned64  ADAddr;
+  Unsigned16  AttrLen;
+  Unsigned8  *Attrs;
+};
+typedef struct tsn_gw_dlpdu_normal tsn_gw_dlpdu_normal_s;
+
 typedef void (*tsn_msg_f)(tsn_msg_s *m);
 
 struct tsn_msg {
   list_head_s link;
+  list_head_s wait;
   tsn_buffer_s b;
   tsn_sockaddr_s from;
   void *priv;
+  tsn_gw_dlpdu_normal_s _dlpdu;
+  void *dlpdu;
   tsn_msg_f cb;
   TimeData stamp;
   uint16_t handle;
@@ -77,11 +89,13 @@ tsn_create_msg(void *priv, int len)
   tsn_msg_s *m = (tsn_msg_s *)malloc(sizeof(*m)+len);
   if (m == NULL)
     return NULL;
-  m->priv = priv;
+  m->priv   = priv;
   m->handle = TSN_HANDLE_INVALID;
-  m->isInQ = TSN_FALSE;
-  m->stamp = 0;
-  m->cb = NULL;
+  m->isInQ  = TSN_FALSE;
+  m->stamp  = 0;
+  m->cb     = NULL;
+  m->freed  = TSN_FALSE;
+  m->dlpdu  = &m->_dlpdu;
   tsn_buffer_init(&m->b, (Unsigned8 *)(m+1), len);
   return m;
 }
@@ -90,6 +104,18 @@ static inline void
 tsn_free_msg(tsn_msg_s *m)
 {
   free(m);
+}
+
+static inline tsn_msg_s *
+tsn_duplicate_msg(tsn_msg_s *_msg, int len)
+{
+  tsn_msg_s *msg;
+
+  msg = tsn_create_msg(_msg->priv, len);
+  if (msg == NULL)
+    return NULL;
+  msg->from = _msg->from;
+  return msg;
 }
 
 extern tsn_sys_config_s sysCfg;

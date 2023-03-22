@@ -41,7 +41,10 @@ __DLME_join_response(tsn_msg_s *msg, Unsigned8 AdID,
   Unsigned8 Status, Unsigned16 ShortAddr)
 {
   if (TSN_err_none != make_TSN_DLME_JOIN_response(msg, AdID, Status, ShortAddr))
+  {
+    tsn_free_msg(msg);
     return TSN_FALSE;
+  }
   tsn_send_udp_msg(msg);
   return TSN_TRUE;
 }
@@ -165,23 +168,30 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
   switch (dmap->MachineState)
   {
     case DMAP_STATE_end:
-      return TSN_FALSE;
+      goto ret_free_msg_false;
 
     case DMAP_STATE_init:
       if (trigger != DMAP_TRIGGER_T1_join)
-        return TSN_FALSE;
+      {
+        goto ret_free_msg_false;
+      }
       dmap->MachineState = DMAP_STATE_active;
       /* FALLTHROUGH */
 
     case DMAP_STATE_active:
       if (trigger != DMAP_TRIGGER_T1_join)
-        return TSN_FALSE;
+      {
+        goto ret_free_msg_false;
+      }
       dmap->MachineState = DMAP_STATE_join;
       /* FALLTHROUGH */
 
     case DMAP_STATE_join:
       if (trigger != DMAP_TRIGGER_T1_join)
-        return TSN_FALSE;
+      {
+        goto ret_free_msg_false;
+      }
+      else
       {
         tsn_boolean_e AuthenResult;
         dlme_join_indication_s *ind = (dlme_join_indication_s *)dlpdu;
@@ -194,7 +204,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
             TSN_AD_JOIN_ACK_SYSTEM_ERROR,
             dmap->DeviceShortAddress);
           dmap->MachineState = DMAP_STATE_end;
-          return TSN_FALSE;
+          return TSN_TRUE;
         }
         dmap->MachineState = DMAP_STATE_join_authenticating;
         return gw_dmap_T1_receive_authentication_response(msg, dmap, ind);
@@ -203,7 +213,10 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       
     case DMAP_STATE_join_authenticating:
       if (trigger != DMAP_TRIGGER_T1_auth)
-        return TSN_FALSE;
+      {
+        goto ret_free_msg_false;
+      }
+      else
       {
         dlme_join_indication_s *ind = (dlme_join_indication_s *)dlpdu;
         if (ind->AuthenResult != TSN_SUCCESS)
@@ -214,7 +227,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
             TSN_AD_JOIN_ACK_AUTHENTICATION_Failed, 
             dmap->DeviceShortAddress);
           dmap->MachineState = DMAP_STATE_end;
-          return TSN_FALSE;
+          return TSN_TRUE;
         }
         else
         {
@@ -227,7 +240,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
               TSN_AD_JOIN_ACK_SYSTEM_ERROR, 
               dmap->DeviceShortAddress);
             dmap->MachineState = DMAP_STATE_end;
-            return TSN_FALSE;
+            return TSN_TRUE;
           }
           dmap->DeviceShortAddress = Addr;
           dmap->MachineState = DMAP_STATE_join_allocatingShortAddress;
@@ -239,7 +252,10 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       
     case DMAP_STATE_join_allocatingShortAddress:
       if (trigger != DMAP_TRIGGER_T2_addr)
-        return TSN_FALSE;
+      {
+        goto ret_free_msg_false;
+      }
+      else
       {
         dlme_join_indication_s *ind = (dlme_join_indication_s *)dlpdu;
         if (ind->AddrResult != TSN_SUCCESS)
@@ -250,11 +266,13 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
             TSN_AD_JOIN_ACK_EXCEEDED, 
             dmap->DeviceShortAddress);
           dmap->MachineState = DMAP_STATE_end;
-          return TSN_FALSE;
+          return TSN_TRUE;
         }
       }
-      __DLME_join_response(msg, dmap->AccessDeviceID, TSN_AD_JOIN_ACK_SUCCESS, dmap->DeviceShortAddress);
+      __DLME_join_response(msg, dmap->AccessDeviceID, 
+        TSN_AD_JOIN_ACK_SUCCESS, dmap->DeviceShortAddress));
       dmap->MachineState = DMAP_STATE_resource_allocation;
+      
       trigger = DMAP_TRIGGER_T4_ResAlloc;
       /* FALLTHROUGH */
       
@@ -319,12 +337,12 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
 
           s.LinkID               = TSN_htons(c->LinkID);
           s.LinkType             = c->LinkType;
-          s.PacketLossRate       = TSN_htonl(c->PacketLossRate);
+          *(uint32_t*)&s.PacketLossRate = TSN_htonl(*(uint32_t*)&c->PacketLossRate);
           s.PeerAddr             = TSN_htons(c->PeerAddr);
           s.RelativeSlotNumber   = TSN_htons(c->RelativeSlotNumber);
           s.ChannelIndex         = c->ChannelIndex;
           s.SuperframeID         = c->SuperframeID;
-          tsn_buffer_set(&b, &s, sizeof(s));
+          tsn_buffer_set(&b, (Unsigned8 *)&s, sizeof(s));
           DLME_information_set_request(msg, &req, dmap->AccessDeviceID, &b);
 
           TSN_event("Try to send DllLinkList.\n");
@@ -332,8 +350,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
         
         return TSN_TRUE;
       }
-
-      if (trigger == DMAP_TRIGGER_T5_infoSetConfirm)
+      else if (trigger == DMAP_TRIGGER_T5_infoSetConfirm)
       {
         /* DLME-INFO-SET.confirm() */
         dlme_information_set_confirm_s *cfm;
@@ -364,6 +381,10 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           dmap->MachineState = DMAP_STATE_operation;
 
         return TSN_TRUE;
+      }
+      else
+      {
+        goto ret_free_msg_false;
       }
       break;
       
@@ -445,14 +466,16 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       }
       else
       {
-        return TSN_FALSE;
+        goto ret_free_msg_false;
       }
-      tsn_free_msg(m);
       break;
       
     case DMAP_STATE_leave:
       if (trigger != DMAP_TRIGGER_T16)
-        return TSN_FALSE;
+      {
+        goto ret_free_msg_false;
+      }
+      else
       {
         dlme_leave_request_s *req;
         req = (dlme_leave_request_s *)dlpdu;
@@ -460,14 +483,15 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       }
       break;
       
-    case DMAP_STATE_end:
-      return TSN_FALSE;
-      
     default:
-      return TSN_FALSE;
+      goto ret_free_msg_false;
   }
 
   return TSN_TRUE;
+
+ret_free_msg_false:
+  tsn_free_msg(msg);
+  return TSN_FALSE;
 }
 
 /***********************************************************************************
@@ -504,12 +528,13 @@ __gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
   switch (sysCfg.State)
   {
     case DMAP_STATE_init:
-      if (trigger == DMAP_TRIGGER_T0)
-        sysCfg.State = DMAP_STATE_active;
-      return TSN_TRUE;
+      if (trigger != DMAP_TRIGGER_T0)
+        return TSN_FALSE;
+      sysCfg.State = DMAP_STATE_active;
+      /* FALLTHROUGH */
       
     case DMAP_STATE_active:
-      if (trigger > DMAP_TRIGGER_T0 || trigger < DMAP_TRIGGER_MAX)
+      if (trigger > DMAP_TRIGGER_T0 && trigger < DMAP_TRIGGER_MAX)
         return gw_dmap_state_machine(msg, dmap, trigger, dlpdu);
       return TSN_FALSE;
       

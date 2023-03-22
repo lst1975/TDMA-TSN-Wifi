@@ -84,7 +84,6 @@ static void __read_udp_msg(tsn_event_s *ev)
   if (r != TSN_err_none)
   {
     TSN_error("Failed to process message.\n");
-    tsn_free_msg(m);
   }
 }
 
@@ -98,12 +97,13 @@ static void __send_udp_msg(tsn_event_s *ev)
     tsn_msg_s *m;
     m = list_first_entry(&ev->msgs,tsn_msg_s,link);
     tsn_assert(m != NULL);
+    list_del(&m->link);
     if (tsn_unix_sendto(c, m) < 0)
     {
       TSN_debug("Failed to send udp message.\n");
+      tsn_free_msg(m);
       return;  
     }
-    list_del(&m->link);
   }
 }
 
@@ -128,6 +128,8 @@ int main(int argc, char **argv)
     goto clean1;
   }
 
+  __gw_dmap_state_machine(NULL, NULL, DMAP_TRIGGER_T0, NULL);
+  
   while (sysCfg.run)
   {
     r = wia_epoll_process_events(TSN_TIMER_INFINITE, 0);

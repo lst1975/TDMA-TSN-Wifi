@@ -69,15 +69,6 @@ enum {
   TSN_dlpdu_type_max,             
 };
 
-struct tsn_gw_dlpdu_normal{
-  Unsigned8   ServID;
-  Unsigned8   AdID;
-  Unsigned64  ADAddr;
-  Unsigned16  AttrLen;
-  Unsigned8  *Attrs;
-};
-typedef struct tsn_gw_dlpdu_normal tsn_gw_dlpdu_normal_s;
-
 struct AdJoinRequest {
   Unsigned8  NetworkID;
   Unsigned64 PhyAddr;
