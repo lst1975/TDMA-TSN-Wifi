@@ -113,15 +113,15 @@ make_TSN_AD_JOIN_response(tsn_msg_s *msg,
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("TSN_AD_JOIN_response.\n");
-    printf("\tAdID: %u\n", AdID);
-    printf("\tADAddr: %u\n", ADAddr);
-    printf("\tStatus: %u\n", Status);
+    tsn_print("TSN_AD_JOIN_response.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tADAddr: %u\n", ADAddr);
+    tsn_print("\tStatus: %u\n", Status);
 
     if (Status == AD_JOIN_SUCCESS)
     {
-      printf("\tAdID: %u\n", AdID);
-      printf("\tADAddr: %u\n", ADAddr);
+      tsn_print("\tAdID: %u\n", AdID);
+      tsn_print("\tADAddr: %u\n", ADAddr);
     }
   }
   
@@ -241,12 +241,12 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
   
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("TSN_DLDE_DATA_request.\n");
-    printf("\tDstAddr: %u\n", DstAddr);
-    printf("\tVCR ID: %u\n",  VCR_ID);
-    printf("\tDataType: %s\n", get_DLDE_DataType(DataType));
-    printf("\tPriority: %s\n", get_DLDE_DataPriority(Priority));
-    printf("\tPayload Length: %u\n", PayloadLength);
+    tsn_print("TSN_DLDE_DATA_request.\n");
+    tsn_print("\tDstAddr: %u\n", DstAddr);
+    tsn_print("\tVCR ID: %u\n",  VCR_ID);
+    tsn_print("\tDataType: %s\n", get_DLDE_DataType(DataType));
+    tsn_print("\tPriority: %s\n", get_DLDE_DataPriority(Priority));
+    tsn_print("\tPayload Length: %u\n", PayloadLength);
   }
 
   return TSN_err_none;
@@ -278,15 +278,15 @@ make_TSN_information_get_request(tsn_msg_s *msg,
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("TSN_information_get_request.\n");
-    printf("\tAdID: %u\n", AdID);
-    printf("\tAttrLen: %u\n",  AttrLen);
-    printf("\tDstAddr: %u\n", req->DstAddr);
-    printf("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
-    printf("\tAttributeID: %u\n", req->AttributeID);
-    printf("\tMemberID: %u\n", req->MemberID);
-    printf("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
-    printf("\tCount: %u\n", req->Count);
+    tsn_print("TSN_information_get_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n",  AttrLen);
+    tsn_print("\tDstAddr: %u\n", req->DstAddr);
+    tsn_print("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
+    tsn_print("\tAttributeID: %u\n", req->AttributeID);
+    tsn_print("\tMemberID: %u\n", req->MemberID);
+    tsn_print("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
+    tsn_print("\tCount: %u\n", req->Count);
   }
   return TSN_err_none;
 }
@@ -318,15 +318,15 @@ make_TSN_information_set_request(tsn_msg_s *msg,
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("TSN_information_set_request.\n");
-    printf("\tAdID: %u\n", AdID);
-    printf("\tAttrLen: %u\n",  AttrLen);
-    printf("\tDstAddr: %u\n", req->DstAddr);
-    printf("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
-    printf("\tAttributeID: %u\n", req->AttributeID);
-    printf("\tMemberID: %u\n", req->MemberID);
-    printf("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
-    printf("\tCount: %u\n", req->Count);
+    tsn_print("TSN_information_set_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n",  AttrLen);
+    tsn_print("\tDstAddr: %u\n", req->DstAddr);
+    tsn_print("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
+    tsn_print("\tAttributeID: %u\n", req->AttributeID);
+    tsn_print("\tMemberID: %u\n", req->MemberID);
+    tsn_print("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
+    tsn_print("\tCount: %u\n", req->Count);
   }
   return TSN_err_none;
 }
@@ -360,10 +360,10 @@ make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("TSN_leave_request.\n");
-    printf("\tAdID: %u\n", AdID);
-    printf("\tStatus: %u\n", Status);
-    printf("\tShortAddr: %u\n", ShortAddr);
+    tsn_print("TSN_leave_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tStatus: %u\n", Status);
+    tsn_print("\tShortAddr: %u\n", ShortAddr);
   }
 
 
@@ -391,10 +391,10 @@ make_TSN_DLME_LEAVE_request(tsn_msg_s *msg,
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("TSN_leave_request.\n");
-    printf("\tAdID: %u\n", AdID);
-    printf("\tAttrLen: %u\n",  AttrLen);
-    printf("\tShortAddr: %u\n", ShortAddr);
+    tsn_print("TSN_leave_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n",  AttrLen);
+    tsn_print("\tShortAddr: %u\n", ShortAddr);
   }
 
   return TSN_err_none;
@@ -428,7 +428,7 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("\tNetworkID: %u.\n", req.NetworkID);
+    tsn_print("\tNetworkID: %u.\n", req.NetworkID);
     tsn_print_longaddr(req.PhyAddr);
   }
 
@@ -556,10 +556,10 @@ do_TSN_DLDE_DATA_indication(tsn_msg_s *msg)
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("\tTSN_DLDE_DATA_indication.\n");
-    printf("\tDataType: %s.\n", get_DLDE_DataType(s.DataType));
-    printf("\tSrcAddr: %u.\n", s.srcAddr);
-    printf("\tPayloadLength: %u.\n", s.PayloadLength);
+    tsn_print("\tTSN_DLDE_DATA_indication.\n");
+    tsn_print("\tDataType: %s.\n", get_DLDE_DataType(s.DataType));
+    tsn_print("\tSrcAddr: %u.\n", s.srcAddr);
+    tsn_print("\tPayloadLength: %u.\n", s.PayloadLength);
   }
   
   if (s.DataType != TSN_DLDE_DATA_TRANSMIT_INDICATION_DataType_DATA)
@@ -593,9 +593,9 @@ do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("\tTSN_DLME_JOIN_indication.\n");
-    printf("\tPhyAddr: %"PRIu64".\n", ind.PhyAddr);
-    printf("\tSecMaterial: %"PRIu64".\n", ind.SecMaterial);
+    tsn_print("\tTSN_DLME_JOIN_indication.\n");
+    tsn_print("\tPhyAddr: %"PRIu64".\n", ind.PhyAddr);
+    tsn_print("\tSecMaterial: %"PRIu64".\n", ind.SecMaterial);
   }
 
   return gw_dmap_T1_receive_dlme_join_indication(msg, NULL, &ind);
@@ -673,15 +673,15 @@ do_TSN_DLME_CHAN_COND_indication(tsn_msg_s *msg)
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("\tSrcAddr = 0x%x.\n", ind.SrcAddr);
-    printf("\tCount = %u.\n", ind.Count);
+    tsn_print("\tSrcAddr = 0x%x.\n", ind.SrcAddr);
+    tsn_print("\tCount = %u.\n", ind.Count);
     for(int i = 0;i < ind.Count;i++)
     {
-  	  printf("ChannelConditionInfo[%d]:\n", i);
-  	  printf("ChannelID = %u.\n", ind.ChannelConditionInfo[i].ChannelID);
-  	  printf("LinkQuality = %u.\n", ind.ChannelConditionInfo[i].LinkQuality);
+  	  tsn_print("ChannelConditionInfo[%d]:\n", i);
+  	  tsn_print("ChannelID = %u.\n", ind.ChannelConditionInfo[i].ChannelID);
+  	  tsn_print("LinkQuality = %u.\n", ind.ChannelConditionInfo[i].LinkQuality);
   	  /* print PacketLossRate */
-  	  printf("RetryNumber = %u.\n", ind.ChannelConditionInfo[i].RetryNumber);
+  	  tsn_print("RetryNumber = %u.\n", ind.ChannelConditionInfo[i].RetryNumber);
     }
   }
 
@@ -704,9 +704,9 @@ do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("\tTSN_DLME_Time_Sync_indication.\n");
-    printf("\tSrcAddr: %u.\n", ind.SrcAddr);
-    printf("\tFieldDeviceTimeValue: %"PRIu64".\n", 
+    tsn_print("\tTSN_DLME_Time_Sync_indication.\n");
+    tsn_print("\tSrcAddr: %u.\n", ind.SrcAddr);
+    tsn_print("\tFieldDeviceTimeValue: %"PRIu64".\n", 
       ind.FieldDeviceTimeValue);
   }
   
@@ -747,14 +747,14 @@ do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("\tTSN_DLME_INFO_GET_confirm.\n");
-    printf("\tHandle: %u.\n", cfm.Handle);
-    printf("\tSrcAddr: 0x%x.\n", cfm.SrcAddr);
-    printf("\tStatus: %s.\n", dlmeInformationGetConfirmStatus2String(cfm.Status));
-    printf("\tAttributeID: %u.\n", cfm.AttributeID);
-    printf("\tMemberID: %d.\n", cfm.MemberID);
-    printf("\tFirstStoreIndex: %u.\n", cfm.FirstStoreIndex);
-    printf("\tCount: %u.\n", cfm.Count);
+    tsn_print("\tTSN_DLME_INFO_GET_confirm.\n");
+    tsn_print("\tHandle: %u.\n", cfm.Handle);
+    tsn_print("\tSrcAddr: 0x%x.\n", cfm.SrcAddr);
+    tsn_print("\tStatus: %s.\n", dlmeInformationGetConfirmStatus2String(cfm.Status));
+    tsn_print("\tAttributeID: %u.\n", cfm.AttributeID);
+    tsn_print("\tMemberID: %d.\n", cfm.MemberID);
+    tsn_print("\tFirstStoreIndex: %u.\n", cfm.FirstStoreIndex);
+    tsn_print("\tCount: %u.\n", cfm.Count);
   }
 
   return TSN_err_none;
@@ -788,8 +788,8 @@ do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
     
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("\tHandle: %u.\n", cfm.Handle);
-    printf("\tStatus: %s.\n", dlme_info_set_cfm_status2string(cfm.Status));
+    tsn_print("\tHandle: %u.\n", cfm.Handle);
+    tsn_print("\tStatus: %s.\n", dlme_info_set_cfm_status2string(cfm.Status));
   }
 
   if (cfm.Status != DLME_information_set_confirm_SUCCESS)
@@ -932,16 +932,16 @@ tsn_dlpdu_adgw_print(tsn_gw_dlpdu_normal_s *n)
 {
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    printf("Packet Type: %s\n", __dlpduType2String(n->ServID));
+    tsn_print("Packet Type: %s\n", __dlpduType2String(n->ServID));
     if (n->ServID > TSN_AD_JOIN_ack)
     {
-      printf("\tAccess Device ID: %u\n", n->AdID);
+      tsn_print("\tAccess Device ID: %u\n", n->AdID);
     }
     else
     {
       tsn_print_longaddr(n->ADAddr);
     }
-    printf("\tAttibutes Length: %u\n", n->AttrLen);
+    tsn_print("\tAttibutes Length: %u\n", n->AttrLen);
   }
 }
 

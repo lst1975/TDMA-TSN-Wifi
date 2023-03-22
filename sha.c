@@ -37,6 +37,7 @@
  */
 #include <string.h>
 #include "sha.h"
+#include "gw_base.h"
 
 /* ----------------------------------------------------------------------
  * Core SHA algorithm: processes 16-word blocks into a message digest.
@@ -69,12 +70,12 @@ void SHATransform(word32 * digest, word32 * block)
     extern int random_diagnostics;
     if (random_diagnostics) {
       int i;
-      printf("SHATransform:");
+      tsn_print("SHATransform:");
       for (i = 0; i < 5; i++)
-        printf(" %08x", digest[i]);
-      printf(" +");
+        tsn_print(" %08x", digest[i]);
+      tsn_print(" +");
       for (i = 0; i < 16; i++)
-        printf(" %08x", block[i]);
+        tsn_print(" %08x", block[i]);
     }
   }
 #endif
@@ -140,10 +141,10 @@ void SHATransform(word32 * digest, word32 * block)
     extern int random_diagnostics;
     if (random_diagnostics) {
       int i;
-      printf(" =");
+      tsn_print(" =");
       for (i = 0; i < 5; i++)
-        printf(" %08x", digest[i]);
-      printf("\n");
+        tsn_print(" %08x", digest[i]);
+      tsn_print("\n");
     }
   }
 #endif

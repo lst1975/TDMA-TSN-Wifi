@@ -271,26 +271,26 @@ static void
 tsn_dlpdu_dllhdr_print_flags(tsn_dlpdu_dllhdr_s *n)
 {
   int pre = 0;
-  printf("\tFlags: ");
+  tsn_print("\tFlags: ");
   if (n.is_segment)
   {
     if (pre)
-      printf("|");
-    printf("SEGMENT");
+      tsn_print("|");
+    tsn_print("SEGMENT");
   }
   if (n.is_preemption)
   {
     if (pre)
-      printf("|");
-    printf("PREEMPTION");
+      tsn_print("|");
+    tsn_print("PREEMPTION");
   }
   if (n.is_shortaddr)
   {
     if (pre)
-      printf("|");
-    printf("SHORTADDR");
+      tsn_print("|");
+    tsn_print("SHORTADDR");
   }
-  printf("\n");
+  tsn_print("\n");
 }
 
 static const char *__frameType2String(unsigned int type)
@@ -305,17 +305,17 @@ tsn_dlpdu_dllhdr_print(tsn_dlpdu_dllhdr_s *n)
 {
   if (sysCfg.dumpPacket)
   {
-    printf("Packet Type: %s\n", __frameType2String(n->type));
+    tsn_print("Packet Type: %s\n", __frameType2String(n->type));
     tsn_dlpdu_dllhdr_print_flags(n);
     tsn_print_addr(&n->addr);
-    printf("\tNetworkID: %u\n", n->networkID);
-    printf("\tSequence: %u\n", TSN_ntohs(n->seq));
-    if (hdr->is_segment)
+    tsn_print("\tNetworkID: %u\n", n->networkID);
+    tsn_print("\tSequence: %u\n", TSN_ntohs(n->seq));
+    if (n->is_segment)
     {
-      printf("\tSegment Count: %u\n", n->segment_count);
-      printf("\tSegment Sequence: %u\n", n->segment_seq);
+      tsn_print("\tSegment Count: %u\n", n->segment_count);
+      tsn_print("\tSegment Sequence: %u\n", n->segment_seq);
     }
-    printf("\tLength: %u\n", TSN_ntohs(n->length));
+    tsn_print("\tLength: %u\n", TSN_ntohs(n->length));
   }
 }
 

@@ -224,6 +224,8 @@ void SHA256_Simple(const void *p, int len, unsigned char *output) {
   SHA256_Final(&s, output);
 }
 
+#include "gw_base.h"
+
 #if TSN_TEST
 
 #include <stdio.h>
@@ -267,7 +269,7 @@ int main(void) {
     }
   }
 
-  printf("%d errors\n", errors);
+  tsn_print("%d errors\n", errors);
 
   return 0;
 }

@@ -281,7 +281,9 @@ void SHA1Calc(const unsigned char *input, unsigned int inlen, unsigned char *out
 /* ================ end of sha1.cpp ================ */
 
 #include "gw_base.h"
+
 #if TSN_TEST
+
 #define BUFSIZE 4096
 
 int
@@ -299,10 +301,10 @@ main(int argc, char **argv)
     SHA1Update(&ctx, buf, BUFSIZE);
   SHA1Final(hash, &ctx);
 
-  printf("SHA1=");
+  tsn_print("SHA1=");
   for(i=0;i<20;i++)
-    printf("%02x", hash[i]);
-  printf("\n");
+    tsn_print("%02x", hash[i]);
+  tsn_print("\n");
   return 0;
 }
 

@@ -63,6 +63,18 @@ void ___TSN_string(const char *type, const char *fmt, ...)
   printf("%s: %s", type, buffer);
 }
 
+void ___TSN_print(const char *fmt, ...)
+{
+  char buffer[1024];
+
+  va_list args;
+  va_start (args, fmt);
+  vsnprintf(buffer,sizeof(buffer),fmt, args);
+  va_end (args);
+
+  printf("%s", buffer);
+}
+
 void
 tsn_print_sockaddr(struct sockaddr *sa)
 {
@@ -71,17 +83,17 @@ tsn_print_sockaddr(struct sockaddr *sa)
   {
     char buf[INET_ADDRSTRLEN];
     struct sockaddr_in *sin = (struct sockaddr_in *)sa;
-    printf("socket family: IPv4\n");
-    printf("socket address: %s\n", inet_ntop(AF_INET, &sin->sin_addr, buf, sizeof(buf)));
-    printf("socket port: %u\n", TSN_ntohs(sin->sin_port));
+    tsn_print("socket family: IPv4\n");
+    tsn_print("socket address: %s\n", inet_ntop(AF_INET, &sin->sin_addr, buf, sizeof(buf)));
+    tsn_print("socket port: %u\n", TSN_ntohs(sin->sin_port));
   }
   else
   {
     char buf[INET6_ADDRSTRLEN];
     struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sa;
-    printf("Family: IPv6\n");
-    printf("IPv6 Address: %s\n", inet_ntop(AF_INET6, &sin6->sin6_addr, buf, sizeof(buf)));
-    printf("Socket Port: %u\n", TSN_ntohs(sin6->sin6_port));
+    tsn_print("Family: IPv6\n");
+    tsn_print("IPv6 Address: %s\n", inet_ntop(AF_INET6, &sin6->sin6_addr, buf, sizeof(buf)));
+    tsn_print("Socket Port: %u\n", TSN_ntohs(sin6->sin6_port));
   }
 }
 

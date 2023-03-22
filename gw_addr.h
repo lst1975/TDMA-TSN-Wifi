@@ -32,6 +32,8 @@
 #ifndef __GW_ADDR_H_
 #define __GW_ADDR_H_
 
+#include "gw_base.h"
+
 #define ___TSN_htonll(x) x
 #define TSN_LongAddr_VendorID_Mask         ___TSN_htonll(0xffffff0000000000)
 #define TSN_LongAddr_DeviceType_Mask       ___TSN_htonll(0x000000ffff000000)
@@ -107,18 +109,18 @@ tsn_print_longaddr(Unsigned64 __longAddr)
 {
   Unsigned64 longAddr = TSN_htonll(__longAddr);
   Unsigned8 *a = (Unsigned8 *)&longAddr;
-  printf("\t64 bits long addr: 0x%X%X%X%X%X%X%X%X\n", 
+  tsn_print("\t64 bits long addr: 0x%X%X%X%X%X%X%X%X\n", 
     (tsn_uint_t)a[0],(tsn_uint_t)a[1],(tsn_uint_t)a[2],
     (tsn_uint_t)a[3],(tsn_uint_t)a[4],(tsn_uint_t)a[5],
     (tsn_uint_t)a[6],(tsn_uint_t)a[7]);
-  printf("\t\tVendorID: %X%X%X\n", 
+  tsn_print("\t\tVendorID: %X%X%X\n", 
     (tsn_uint_t)a[0],(tsn_uint_t)a[1],(tsn_uint_t)a[2]);
-  printf("\t\tDeviceType: %s\n", 
+  tsn_print("\t\tDeviceType: %s\n", 
     tsn_is_gateway(__longAddr) ? "Gateway" : 
     tsn_is_Access(__longAddr) ? "Access" :
     tsn_is_Field(__longAddr) ? "Field" :
     tsn_is_HandHeld(__longAddr) ? "Held" : "Unknown");
-  printf("\t\tDeviceID: %X%X%X\n", 
+  tsn_print("\t\tDeviceID: %X%X%X\n", 
     (tsn_uint_t)a[5],(tsn_uint_t)a[6],(tsn_uint_t)a[7]);
 }
 
@@ -147,10 +149,10 @@ tsn_print_addr(tsn_addr_u *Addr)
   switch (Addr->AddrType)
   {
     case DMAP_mib_id_static_AddressTypeFlag_u8:
-      printf("8 bits short addr: %u\n", Addr->AddrU8);
+      tsn_print("8 bits short addr: %u\n", Addr->AddrU8);
       break;
     case DMAP_mib_id_static_AddressTypeFlag_u16:
-      printf("16 bits short addr: %u\n", Addr->AddrU16);
+      tsn_print("16 bits short addr: %u\n", Addr->AddrU16);
       break;
     case DMAP_mib_id_static_AddressTypeFlag_u64:
       tsn_print_longaddr(Addr->AddrU64);

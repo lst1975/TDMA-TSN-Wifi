@@ -64,7 +64,6 @@
 #include "gw_buffer.h"
 #include "gw_mib.h"
 #include "gw_addr.h"
-#include "gw_log.h"
 #include "gw_state.h"
 #include "tsn_resource.h"
 #include "tsn_device.h"
