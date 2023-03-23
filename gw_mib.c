@@ -1714,73 +1714,22 @@ TSN_DMAP_mib_struct_get_check(const TSN_DMAP_mib_attribute_s *srcMib,
   return DMAP_mib_get_confirm_SUCCESS;
 }
 
-static TSN_DMAP_mib_attribute_s *
-__TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size)
-{
-  TSN_DMAP_mib_attribute_s *mib = tsn_malloc(size);
-  if (mib == NULL)
-  {
-    tsn_log(ERROR, "Failed to copy MIBs with size=%d.", size);
-    return NULL;
-  }
-  tsn_memcpy(mib, srcMib, size);
-  return mib;
-}
-
-static struct {
-  int count;
-  TSN_DMAP_mib_attribute_s *mibs;
-} tsn_dstMib = { .count=__NENTS(dmap_mibs_table), .mibs = NULL };
-
-static tsn_err_e
-__TSN_DMAP_mib_init(TSN_DMAP_mib_attribute_s *dstMib, 
-  TSN_DMAP_mib_attribute_s *srcMib, int size)
-{
-  for (int i=0; i<size/sizeof(TSN_DMAP_mib_attribute_s); i++)
-  {
-    TSN_DMAP_mib_attribute_s *mib = &dstMib[i];
-
-    mib->DefaultEntryAddr = &srcMib[i];
-    INIT_LIST_HEAD(&mib->List);
-
-    switch (mib->dataType)
-    {
-      case DATA_TYPE_List:
-        break;
-      case DATA_TYPE_Struct:
-        break;
-      case DATA_TYPE_OctetString:
-        break;
-      default:
-        break;
-    }
-  }
-
-  return TSN_TRUE;
-}
-
 tsn_err_e
 TSN_DMAP_mib_init(void)
 {
-  TSN_DMAP_mib_attribute_s * dstMib = __TSN_DMAP_mib_create(sizeof(dmap_mibs_table));
-  if (dstMib == NULL)
-    return TSN_FALSE;
-  TSN_DMAP_mib_get.data = dstMib;
-  TSN_DMAP_mib_set.data = dstMib;
-  tsn_dstMib.mibs = dstMib;
-  return __TSN_DMAP_mib_init(dstMib, dmap_mibs_table, tsn_dstMib.count);
+  return TSN_err_none;
 }
 
 /***********************************************************************************
  * GB/T26790.2-2015, 6.7.2.2, Page 42 
  *           Parameters of DMAP-MIB-GET.request 
  *
-   Unsigned8  Handle          The handle for DMAP-MIB-GET.request.
-   Unsigned16 ShortAddr       The 8/16-bits shord address of field device or the 
-                    ID of access device.
+   Unsigned8  Handle           The handle for DMAP-MIB-GET.request.
+   Unsigned16 ShortAddr        The 8/16-bits shord address of field device or the 
+                                 ID of access device.
    Unsigned8  AttributeID      The ID of this attribute in MIB.
    Unsigned8  MemberID         The ID of one member of a STRUCT attribute. 
-                    255 is for all attributes.
+                                 255 is for all attributes.
    Unsigned16 FirstStoreIndex  The index of first member of a STRUCT attribute to read.
    Unsigned16 Count            The number of members of a STRUCT attribute to read.
  *
@@ -1788,10 +1737,29 @@ TSN_DMAP_mib_init(void)
 static tsn_err_e
 TSN_DMAP_mib_get_confirm(void *s)
 {
+  tsn_primative_s *prv = &TSN_DMAP_mib_get;
+  TsnDmapMibGetRequestS *req = (TsnDmapMibGetRequestS *)s;
+  TSN_DMAP_mib_attribute_s *srcMib, *entry;
+  tsn_mibid_t mibID = TSN_DMAP_mib_id2index(req.AttributeID);
+  
+  srcMib = (TSN_DMAP_mib_attribute_s*)prv->data;
+  entry = &srcMib[mibID];
+
+  if (entry->DataType == DATA_TYPE_List
+    || entry->DataType == DATA_TYPE_Struct)
+  {
+  }
+  else
+  {
+    
+  }
+  
+  return TSN_err_none;
 }
 static tsn_err_e
 TSN_DMAP_mib_get_request(void *s)
 {
+  tsn_err_e r = TSN_err_none, rc;
   TSN_DMAP_mib_attribute_s *srcMib, *entry;
 
   tsn_primative_s *prv = &TSN_DMAP_mib_get;
@@ -1803,8 +1771,21 @@ TSN_DMAP_mib_get_request(void *s)
       .Count  = 0,
     };
   tsn_mibid_t mibID = TSN_DMAP_mib_id2index(req.AttributeID);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tTSN_DMAP_mib_get_request.\n");
+    tsn_print("\tHandle: %u.\n", req.Handle);
+    tsn_print("\tShortAddr: %u.\n", req.ShortAddr);
+    tsn_print("\tAttributeID: %u.\n", req.AttributeID);
+    tsn_print("\tMemberID: %d.\n", req.MemberID);
+    tsn_print("\tFirstStoreIndex: %u.\n", req.FirstStoreIndex);
+    tsn_print("\tCount: %u.\n", req.Count);
+  }
+
   if (mibID == DMAP_mib_id_INVALID)
   {
+    r = TSN_err_invalid;
     status = DMAP_mib_get_confirm_INVALID_ATTRIBUTE;
     goto confirm;
   }
@@ -1813,42 +1794,54 @@ TSN_DMAP_mib_get_request(void *s)
   if (!TSN_DMAP_mib_entry_isreadable(entry))
   {
     status = DMAP_mib_get_confirm_PERMISSION;
+    r = TSN_err_permission;
     goto confirm;
   }
-  if (entry->DataType == DATA_TYPE_List)
+
+  if (entry->DataType == DATA_TYPE_List
+    || entry->DataType == DATA_TYPE_Struct)
   {
-    status = TSN_DMAP_mib_list_get_check(srcMib, 
-      req->FirstStoreIndex, 
-      req->Count, 
-      req->MemberID, 
-      req->IndexValue);
-    if (status != DMAP_mib_get_confirm_SUCCESS)
+    if (entry->DataType == DATA_TYPE_List)
     {
+      status = TSN_DMAP_mib_list_get_check(srcMib, 
+        req->FirstStoreIndex, 
+        req->Count, 
+        req->MemberID, 
+        req->IndexValue);
+      if (status != DMAP_mib_get_confirm_SUCCESS)
+      {
+        r = TSN_err_permission;
+        goto confirm;
+      }
+    }
+    if (entry->DataType == DATA_TYPE_Struct)
+    {
+      status = TSN_DMAP_mib_struct_get_check(srcMib, 
+        req->Count, 
+        req->MemberID);
+      if (status != DMAP_mib_get_confirm_SUCCESS)
+      {
+        r = TSN_err_permission;
+        goto confirm;
+      }
+    }
+  }
+  else
+  {
+    if (req->FirstStoreIndex || req->MemberID)
+    {
+      status = DMAP_mib_get_confirm_PERMISSION;
+      r = TSN_err_malformed;
       goto confirm;
     }
   }
-  if (entry->DataType == DATA_TYPE_Struct)
-  {
-    status = TSN_DMAP_mib_struct_get_check(srcMib, 
-      req->Count, 
-      req->MemberID);
-    if (status != DMAP_mib_get_confirm_SUCCESS)
-    {
-      goto confirm;
-    }
-  }
+
 confirm:
   cfm.Status = status;
-  prv->confirm(&cfm);
-}
-
-int
-TSN_DMAP_mib_shortAddr_type(void)
-{
-  return tsn_dstMib.mibs[DMAP_mib_id_static_AddressTypeFlag]
-    .Value.value_Unsigned8 ? 
-        DMAP_mib_id_static_AddressTypeFlag_u16 : 
-          DMAP_mib_id_static_AddressTypeFlag_u8;
+  rc = prv->confirm(&cfm);
+  if (rc != TSN_err_none)
+    r = rc;
+  return r;
 }
 
 #define SERVER_PORT_MIB 8766
@@ -1857,6 +1850,6 @@ static tsn_connection_s tsn_udp_mib_server = {
   .type       = SOCK_DGRAM,
   .family     = AF_INET,
   .protocol   = IPPROTO_UDP,
-  .port       = SERVER_PORT,
+  .port       = SERVER_PORT_MIB,
   .sent       = 0,
 };

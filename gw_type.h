@@ -325,6 +325,7 @@ enum tsn_err{
   TSN_err_invalid,
   TSN_err_exceeded,
   TSN_err_system,
+  TSN_err_permission,
   TSN_err_eagain,
   TSN_err_eintr,
   TSN_err_max,
