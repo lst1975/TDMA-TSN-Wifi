@@ -76,10 +76,10 @@ static tsn_err_e __wia_epoll_init(tsn_sys_config_s *sys)
   {
     if (wia_event_list) 
     {
-      free(wia_event_list);
+      tsn_free(wia_event_list);
     }
 
-    wia_event_list = malloc(sizeof(struct epoll_event) * sys->Events);
+    wia_event_list = tsn_malloc(sizeof(struct epoll_event) * sys->Events);
     if (wia_event_list == NULL) 
     {
       return -TSN_err_nomem;
@@ -111,7 +111,7 @@ wia_epoll_done(tsn_sys_config_s *sys __TSN_UNUSED)
   wia_ep_handle = -1;
   if (wia_event_list != NULL)
   {
-    free(wia_event_list);
+    tsn_free(wia_event_list);
     wia_event_list = NULL;
   }
   wia_nevents = 0;

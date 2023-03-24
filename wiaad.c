@@ -31,6 +31,35 @@
  */
 #include "tsn_private.h"
 
+#define SERVER_PORT 8766
+#define CLIENT_PORT 8767
+
+#if 0
+static tsn_connection_s tsn_udp_fd = {
+  .fd         = -1,
+  .type       = SOCK_DGRAM,
+  .family     = AF_INET,
+  .protocol   = IPPROTO_UDP,
+  .port       = SERVER_PORT,
+  .sent       = 0,
+  .proces     = fd_tsn_dlpdu_process_adgw,
+  .tsn_read   = __fd_read_udp_msg,
+  .tsn_write  = __fd_send_udp_msg,
+};
+#endif
+
+static tsn_connection_s tsn_udp_gw = {
+  .fd         = -1,
+  .type       = SOCK_DGRAM,
+  .family     = AF_INET,
+  .protocol   = IPPROTO_UDP,
+  .port       = CLIENT_PORT,
+  .sent       = 0,
+  .proces     = tsn_dlpdu_process_adgw,
+  .tsn_read   = __read_udp_msg,
+  .tsn_write  = __send_udp_msg,
+};
+
 int main(int argc, char **argv)
 {
   int ret = EXIT_FAILURE;
@@ -40,14 +69,21 @@ int main(int argc, char **argv)
   if (r != TSN_err_none)
   {
     TSN_error("wia_epoll_init failed.\n");
-    goto clean1;
+    goto clean0;
   }
 
-  r = tsn_server_init();
+  r = tsn_server_init(&tsn_udp_gw);
   if (r != TSN_err_none)
   {
     TSN_error("tsn_server_init failed.\n");
-    goto clean0;
+    goto clean1;
+  }
+
+  r = tsn_server_init(&tsn_udp_fd);
+  if (r != TSN_err_none)
+  {
+    TSN_error("tsn_server_init failed.\n");
+    goto clean2;
   }
 
   while (sysCfg.run)
@@ -62,7 +98,7 @@ int main(int argc, char **argv)
   ret = EXIT_SUCCESS;
 
 clean2:
-  tsn_server_free();
+  tsn_server_free(&tsn_udp_gw);
 clean1:
   wia_epoll_free();
 clean0:

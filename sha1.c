@@ -156,7 +156,7 @@ void SHA1Transform(unsigned int state[5], const unsigned char buffer[64])
   } CHAR64LONG16;
 #ifdef SHA1HANDSOFF
   CHAR64LONG16 block[1];  /* use array to appear as a pointer */
-  memcpy(block, buffer, 64);
+  tsn_memcpy(block, buffer, 64);
 #else
   /* The following had better never be used because it causes the
    * pointer-to-const buffer to be cast into a pointer to non-const.
@@ -201,7 +201,7 @@ void SHA1Transform(unsigned int state[5], const unsigned char buffer[64])
   /* Wipe variables */
   a = b = c = d = e = 0;
 #ifdef SHA1HANDSOFF
-  memset(block, '\0', sizeof(block));
+  tsn_memset(block, '\0', sizeof(block));
 #endif
 }
 
@@ -232,7 +232,7 @@ void SHA1Update(SHA1_CTX* context, const unsigned char* data, unsigned int len)
   context->count[1] += (len>>29);
   j = (j >> 3) & 63;
   if ((j + len) > 63) {
-    memcpy(&context->buffer[j], data, (i = 64-j));
+    tsn_memcpy(&context->buffer[j], data, (i = 64-j));
     SHA1Transform(context->state, context->buffer);
     for (; i + 63 < len; i += 64) {
       SHA1Transform(context->state, &data[i]);
@@ -240,7 +240,7 @@ void SHA1Update(SHA1_CTX* context, const unsigned char* data, unsigned int len)
     j = 0;
   }
   else i = 0;
-  memcpy(&context->buffer[j], &data[i], len - i);
+  tsn_memcpy(&context->buffer[j], &data[i], len - i);
 }
 
 
@@ -268,8 +268,8 @@ void SHA1Final(unsigned char digest[20], SHA1_CTX* context)
      ((context->state[i>>2] >> ((3-(i & 3)) * 8)) & 255);
   }
   /* Wipe variables */
-  memset(context, '\0', sizeof(*context));
-  memset(&finalcount, '\0', sizeof(finalcount));
+  tsn_memset(context, '\0', sizeof(*context));
+  tsn_memset(&finalcount, '\0', sizeof(finalcount));
 }
 
 void SHA1Calc(const unsigned char *input, unsigned int inlen, unsigned char *output) {

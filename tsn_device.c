@@ -127,7 +127,7 @@ TSN_device_create(tsn_device_s **_dev,
   if (net->Devices[DeviceShortAddress])
     return -TSN_err_existed;
     
-  dev = (tsn_device_s *)malloc(sizeof(*dev));
+  dev = (tsn_device_s *)tsn_malloc(sizeof(*dev));
   if (dev == NULL)
   {
     TSN_error("Failed to malloc tsn_device_s.\n");    
@@ -169,7 +169,7 @@ TSN_device_destroy(tsn_device_s *dev)
   list_del(&dev->link);
   net->Devices[dev->DeviceShortAddress] = NULL;
   TSN_FreeShortAddr(&dev->DeviceShortAddress);
-  free(dev);
+  tsn_free(dev);
   
   return TSN_err_none;
 }

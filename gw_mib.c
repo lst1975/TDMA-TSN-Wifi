@@ -1844,7 +1844,7 @@ confirm:
   return r;
 }
 
-#define SERVER_PORT_MIB 8766
+#define SERVER_PORT_MIB 8768
 static tsn_connection_s tsn_udp_mib_server = {
   .fd         = -1,
   .type       = SOCK_DGRAM,

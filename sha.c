@@ -180,14 +180,14 @@ void SHA_Bytes(SHA_State * s, const void *p, int len)
     /*
      * Trivial case: just add to the block.
      */
-    memcpy(s->block + s->blkused, q, len);
+    tsn_memcpy(s->block + s->blkused, q, len);
     s->blkused += len;
   } else {
     /*
      * We must complete and process at least one block.
      */
     while (s->blkused + len >= 64) {
-      memcpy(s->block + s->blkused, q, 64 - s->blkused);
+      tsn_memcpy(s->block + s->blkused, q, 64 - s->blkused);
       q += 64 - s->blkused;
       len -= 64 - s->blkused;
       /* Now process the block. Gather bytes big-endian into words */
@@ -201,7 +201,7 @@ void SHA_Bytes(SHA_State * s, const void *p, int len)
       SHATransform(s->h, wordblock);
       s->blkused = 0;
     }
-    memcpy(s->block, q, len);
+    tsn_memcpy(s->block, q, len);
     s->blkused = len;
   }
 }
@@ -221,7 +221,7 @@ void SHA_Final(SHA_State * s, unsigned char *output)
   lenhi = (s->lenhi << 3) | (s->lenlo >> (32 - 3));
   lenlo = (s->lenlo << 3);
 
-  memset(c, 0, pad);
+  tsn_memset(c, 0, pad);
   c[0] = 0x80;
   SHA_Bytes(s, &c, pad);
 

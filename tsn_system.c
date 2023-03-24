@@ -95,13 +95,13 @@ tsn_boolean_e tsn_system_init(void)
     s->AdID = 0;
     s->Active = TSN_FALSE;
     s->FDNumber = 0;
-    memset(s->Devices, 0, sizeof(s->Devices));
+    tsn_memset(s->Devices, 0, sizeof(s->Devices));
     INIT_LIST_HEAD(&s->Ads);
 
     for (j=0;j<TSN_ADID_MAX;j++)
     {
       tsn_sockaddr_s *a = &s->ads[i];
-      memset(a, 0, sizeof(*a));
+      tsn_memset(a, 0, sizeof(*a));
       a->sa = (struct sockaddr *)a;
     }
     {

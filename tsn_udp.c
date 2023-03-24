@@ -31,13 +31,6 @@
  */
 #include "tsn_private.h"
 
-void tsn_send_udp_msg(tsn_msg_s *m)
-{
-  tsn_connection_s *c;
-  c = (tsn_connection_s *)m->priv;
-  list_add_tail(&m->link, &c->write.msgs);
-}
-
 static inline void 
 tsn_event_init(tsn_event_s *ev, tsn_connection_s *c, 
   void (*handler)(tsn_event_s *ev))
@@ -55,10 +48,66 @@ tsn_event_init(tsn_event_s *ev, tsn_connection_s *c,
   INIT_LIST_HEAD(&ev->msgs);
 }
 
-tsn_err_e __tsn_server_init(
-  tsn_connection_s *c,
-  void (*tsn_read)(tsn_event_s *ev), 
-  void (*tsn_send)(tsn_event_s *ev))
+void tsn_send_udp_msg(tsn_msg_s *m)
+{
+  tsn_connection_s *c;
+  c = (tsn_connection_s *)m->priv;
+  list_add_tail(&m->link, &c->write.msgs);
+}
+
+static void __read_udp_msg(tsn_event_s *ev)
+{
+  ssize_t n;
+  tsn_err_e r;
+  tsn_msg_s *m;
+  tsn_connection_s *c;
+
+  c = (tsn_connection_s *)ev->data;
+  m = tsn_create_msg(c, TSN_BUFF_LEN_MAX);
+  if (m == NULL)
+  {
+    TSN_error("Failed to tsn_create_msg.\n");
+    return;
+  }
+
+  n = tsn_unix_recv(c, m);
+  if (n < 0)
+  {
+    tsn_free_msg(m);
+    return;
+  }
+
+  tsn_memcpy(&m->from, &c->client, sizeof(m->from));
+  m->b.len = n;
+
+  r = c->process(m);
+  if (r != TSN_err_none)
+  {
+    TSN_error("Failed to process message.\n");
+  }
+}
+
+static void __send_udp_msg(tsn_event_s *ev)
+{
+  tsn_connection_s *c;
+
+  c = (tsn_connection_s *)ev->data;
+  while (!list_empty(&ev->msgs))
+  {
+    tsn_msg_s *m;
+    m = list_first_entry(&ev->msgs,tsn_msg_s,link);
+    tsn_assert(m != NULL);
+    list_del(&m->link);
+    if (tsn_unix_sendto(c, m) < 0)
+    {
+      TSN_debug("Failed to send udp message.\n");
+      tsn_free_msg(m);
+      return;  
+    }
+  }
+}
+
+static tsn_err_e __tsn_server_init(tsn_connection_s *c)
 {
   int ret;
   tsn_err_e err;
@@ -69,14 +118,14 @@ tsn_err_e __tsn_server_init(
 
   TSN_event("try to init udp server!\n");
   
-  memset(server_addr, 0, sizeof(*server_addr));
+  tsn_memset(server_addr, 0, sizeof(*server_addr));
   c->addr.sa   = (struct sockaddr *)server_addr;
   c->addr.slen = sizeof(*server_addr);
   server_addr->sin_family = c->family;
   server_addr->sin_addr.s_addr = TSN_htonl(INADDR_ANY); 
   server_addr->sin_port = TSN_htons(c->port);  
 
-  memset(client_addr, 0, sizeof(*client_addr));
+  tsn_memset(client_addr, 0, sizeof(*client_addr));
   c->client.sa   = (struct sockaddr *)client_addr;
   c->client.slen = sizeof(*client_addr);
 
@@ -107,8 +156,8 @@ tsn_err_e __tsn_server_init(
 
   tsn_print_sockaddr(c->addr.sa);
 
-  tsn_event_init(&c->read, c, tsn_read);
-  tsn_event_init(&c->write, c, tsn_send);
+  tsn_event_init(&c->read, c, c->tsn_read);
+  tsn_event_init(&c->write, c, c->tsn_send);
 
   err = wia_epoll_add_connection(c);
   if (err != TSN_err_none)
@@ -127,9 +176,20 @@ clean0:
   return err;
 }
 
-void __tsn_server_free(tsn_connection_s *c)
+static void __tsn_server_free(tsn_connection_s *c)
 {
+  tsn_event_s *ev = &c->write;
+  while (!list_empty(&ev->msgs))
+  {
+    tsn_msg_s *m;
+    m = list_first_entry(&ev->msgs,tsn_msg_s,link);
+    tsn_assert(m != NULL);
+    list_del(&m->link);
+    tsn_free_msg(m);
+  }
+  
   wia_epoll_del_connection(c, 0);
+  
   if (c->fd != -1)
   {
     if (close(c->fd) == -1)
@@ -137,4 +197,18 @@ void __tsn_server_free(tsn_connection_s *c)
     else
       c->fd = -1;
   }
+}
+
+tsn_err_e tsn_server_init(tsn_connection_s *c)
+{
+  if (c->tsn_read == NULL)
+    c->tsn_read = __read_udp_msg;
+  if (c->tsn_send == NULL)
+    c->tsn_send = __send_udp_msg;
+  return __tsn_server_init(c);
+}
+
+void tsn_server_free(tsn_connection_s *c)
+{
+  return __tsn_server_free(c);
 }

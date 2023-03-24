@@ -128,6 +128,6 @@ tsn_system_cfg_ad_del(unsigned int NetworkID, tsn_sockaddr_s *s)
   if (a == NULL)
     return TSN_FALSE;
   
-  memset(a, 0, sizeof(*a));
+  tsn_memset(a, 0, sizeof(*a));
   return TSN_TRUE;
 }

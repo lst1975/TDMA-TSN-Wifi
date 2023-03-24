@@ -230,14 +230,14 @@ void SHA512_Bytes(SHA512_State *s, const void *p, int len) {
     /*
      * Trivial case: just add to the block.
      */
-    memcpy(s->block + s->blkused, q, len);
+    tsn_memcpy(s->block + s->blkused, q, len);
     s->blkused += len;
   } else {
     /*
      * We must complete and process at least one block.
      */
     while (s->blkused + len >= BLKSIZE) {
-      memcpy(s->block + s->blkused, q, BLKSIZE - s->blkused);
+      tsn_memcpy(s->block + s->blkused, q, BLKSIZE - s->blkused);
       q += BLKSIZE - s->blkused;
       len -= BLKSIZE - s->blkused;
       /* Now process the block. Gather bytes big-endian into words */
@@ -256,7 +256,7 @@ void SHA512_Bytes(SHA512_State *s, const void *p, int len) {
       SHA512_Block(s, wordblock);
       s->blkused = 0;
     }
-    memcpy(s->block, q, len);
+    tsn_memcpy(s->block, q, len);
     s->blkused = len;
   }
 }
@@ -278,7 +278,7 @@ void SHA512_Final(SHA512_State *s, unsigned char *digest) {
     len[i] = (lenhi << 3) | (lenlo >> (32-3));
   }
 
-  memset(c, 0, pad);
+  tsn_memset(c, 0, pad);
   c[0] = 0x80;
   SHA512_Bytes(s, &c, pad);
 

@@ -32,7 +32,17 @@
 #ifndef __GW_BASE_H_
 #define __GW_BASE_H_
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #define TSN_TEST 0
 #include "gw_log.h"
+
+#define tsn_malloc(size) malloc(size)
+#define tsn_free(mptr)   free(mptr)
+#define tsn_memcpy(dst,src,size) memcpy(dst,src,size)
+#define tsn_memcmp(dst,src,size) memcmp(dst,src,size)
+#define tsn_memset(dst,data,size) memset(dst,data,size)
 
 #endif

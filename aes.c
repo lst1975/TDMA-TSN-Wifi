@@ -144,7 +144,7 @@ static void transport(uint8_t state[BLOCK_SIZE])
   for (r = 0; r < 4; ++r)
     for (c = 0; c < 4; ++c)
       new_state[r][c] = state[(c << 2) + r];
-  memcpy(state, new_state, sizeof(new_state));
+  tsn_memcpy(state, new_state, sizeof(new_state));
 }
 
 static void add_round_key(uint8_t state[BLOCK_SIZE], const uint8_t key[BLOCK_SIZE])
@@ -205,7 +205,7 @@ static void _mix_columns(uint8_t state[BLOCK_SIZE], const uint8_t matrix[][4])
       for (i = 0; i < 4; ++i)
         new_state[(c << 2) + r] ^=
           GF_256_multiply(matrix[r][i], state[(c << 2) + i]);
-  memcpy(state, new_state, sizeof(new_state));
+  tsn_memcpy(state, new_state, sizeof(new_state));
 }
 
 #define mix_columns(state) _mix_columns(state, MIX)
@@ -288,7 +288,7 @@ int aes_encrypt_block(aes_context *ctx,
   uint32_t Nr = ctx->nr;
   uint32_t *RK = ctx->rk;
   uint8_t *state = cipher_text;
-  memcpy(state, text, BLOCK_SIZE);
+  tsn_memcpy(state, text, BLOCK_SIZE);
 
   add_round_key(state, (const uint8_t *)RK);
   uint32_t i;
@@ -309,7 +309,7 @@ int aes_decrypt_block(aes_context *ctx,
   uint32_t Nr = ctx->nr;
   uint32_t *INV_RK = ctx->rk;
   uint8_t *state = text;
-  memcpy(state, cipher_text, BLOCK_SIZE);
+  tsn_memcpy(state, cipher_text, BLOCK_SIZE);
 
   add_round_key(state, (const uint8_t *)(INV_RK + (Nr << 2)));
   uint32_t i;

@@ -68,17 +68,17 @@ void hmac_md5(unsigned char *key, int key_len,
   */
 
   /* start out by storing key in pads */
-  memset( k_ipad, 0, sizeof(k_ipad));
-  memset( k_opad, 0, sizeof(k_opad));
+  tsn_memset( k_ipad, 0, sizeof(k_ipad));
+  tsn_memset( k_opad, 0, sizeof(k_opad));
   if(key_len <= KEY_IOPAD_SIZE)
   {
-    memcpy( k_ipad, key, key_len);
-    memcpy( k_opad, key, key_len);
+    tsn_memcpy( k_ipad, key, key_len);
+    tsn_memcpy( k_opad, key, key_len);
   }
   else
   {
     MD5Calc(key, key_len, k_ipad);
-    memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
+    tsn_memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
   }
   
   /* XOR key with ipad and opad values */
@@ -108,17 +108,17 @@ void hmac_sha1(unsigned char *key, int key_len,
   int i;
 
   /* start out by storing key in pads */
-  memset(k_ipad, 0, sizeof(k_ipad));
-  memset(k_opad, 0, sizeof(k_opad));
+  tsn_memset(k_ipad, 0, sizeof(k_ipad));
+  tsn_memset(k_opad, 0, sizeof(k_opad));
   if(key_len <= KEY_IOPAD_SIZE)
   {
-    memcpy( k_ipad, key, key_len);
-    memcpy( k_opad, key, key_len);
+    tsn_memcpy( k_ipad, key, key_len);
+    tsn_memcpy( k_opad, key, key_len);
   }
   else
   {
     SHA1Calc(key, key_len, k_ipad);
-    memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
+    tsn_memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
   }
 
   /* XOR key with ipad and opad values */
@@ -148,17 +148,17 @@ void hmac_sha224(unsigned char *key, int key_len,
   int i;
 
   /* start out by storing key in pads */
-  memset(k_ipad, 0, sizeof(k_ipad));
-  memset(k_opad, 0, sizeof(k_opad));
+  tsn_memset(k_ipad, 0, sizeof(k_ipad));
+  tsn_memset(k_opad, 0, sizeof(k_opad));
   if(key_len <= KEY_IOPAD_SIZE)
   {
-    memcpy( k_ipad, key, key_len);
-    memcpy( k_opad, key, key_len);
+    tsn_memcpy( k_ipad, key, key_len);
+    tsn_memcpy( k_opad, key, key_len);
   }
   else
   {
     SHA224_Simple(key, key_len, k_ipad);
-    memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
+    tsn_memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
   }
 
   /* XOR key with ipad and opad values */
@@ -188,17 +188,17 @@ void hmac_sha256(unsigned char *key, int key_len,
   int i;
 
   /* start out by storing key in pads */
-  memset(k_ipad, 0, sizeof(k_ipad));
-  memset(k_opad, 0, sizeof(k_opad));
+  tsn_memset(k_ipad, 0, sizeof(k_ipad));
+  tsn_memset(k_opad, 0, sizeof(k_opad));
   if(key_len <= KEY_IOPAD_SIZE)
   {
-    memcpy( k_ipad, key, key_len);
-    memcpy( k_opad, key, key_len);
+    tsn_memcpy( k_ipad, key, key_len);
+    tsn_memcpy( k_opad, key, key_len);
   }
   else
   {
     SHA256_Simple(key, key_len, k_ipad);
-    memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
+    tsn_memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
   }
 
   /* XOR key with ipad and opad values */
@@ -230,17 +230,17 @@ void hmac_sha384(unsigned char *key, int key_len,
   int i;
 
   /* start out by storing key in pads */
-  memset(k_ipad, 0, sizeof(k_ipad));
-  memset(k_opad, 0, sizeof(k_opad));
+  tsn_memset(k_ipad, 0, sizeof(k_ipad));
+  tsn_memset(k_opad, 0, sizeof(k_opad));
   if(key_len <= KEY_IOPAD_SIZE)
   {
-    memcpy( k_ipad, key, key_len);
-    memcpy( k_opad, key, key_len);
+    tsn_memcpy( k_ipad, key, key_len);
+    tsn_memcpy( k_opad, key, key_len);
   }
   else
   {
     SHA384_Simple(key, key_len, k_ipad);
-    memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
+    tsn_memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
   }
 
   /* XOR key with ipad and opad values */
@@ -270,17 +270,17 @@ void hmac_sha512(unsigned char *key, int key_len,
   int i;
 
   /* start out by storing key in pads */
-  memset(k_ipad, 0, sizeof(k_ipad));
-  memset(k_opad, 0, sizeof(k_opad));
+  tsn_memset(k_ipad, 0, sizeof(k_ipad));
+  tsn_memset(k_opad, 0, sizeof(k_opad));
   if(key_len <= KEY_IOPAD_SIZE)
   {
-    memcpy( k_ipad, key, key_len);
-    memcpy( k_opad, key, key_len);
+    tsn_memcpy( k_ipad, key, key_len);
+    tsn_memcpy( k_opad, key, key_len);
   }
   else
   {
     SHA512_Simple(key, key_len, k_ipad);
-    memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
+    tsn_memcpy(k_opad, k_ipad, KEY_IOPAD_SIZE);
   }
 
   /* XOR key with ipad and opad values */

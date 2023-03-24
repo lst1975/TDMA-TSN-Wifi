@@ -150,5 +150,5 @@ TSN_CheckHandle(void)
 void
 TSN_HandleListInit(void)
 {
-  memset(&tsn_handle_msg_array[0], 0, sizeof(tsn_handle_msg_array));
+  tsn_memset(&tsn_handle_msg_array[0], 0, sizeof(tsn_handle_msg_array));
 }

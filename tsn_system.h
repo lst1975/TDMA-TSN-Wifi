@@ -86,7 +86,7 @@ struct tsn_msg {
 static inline tsn_msg_s *
 tsn_create_msg(void *priv, int len)
 {
-  tsn_msg_s *m = (tsn_msg_s *)malloc(sizeof(*m)+len);
+  tsn_msg_s *m = (tsn_msg_s *)tsn_malloc(sizeof(*m)+len);
   if (m == NULL)
     return NULL;
   m->priv   = priv;
@@ -102,7 +102,7 @@ tsn_create_msg(void *priv, int len)
 static inline void
 tsn_free_msg(tsn_msg_s *m)
 {
-  free(m);
+  tsn_free(m);
 }
 
 static inline tsn_msg_s *

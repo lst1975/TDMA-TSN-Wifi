@@ -172,7 +172,7 @@ MD5Update(//context, input, inputLen)
   * Transform as many times as possible.
   */
   if (inputLen >= partLen) {
-    memcpy
+    tsn_memcpy
       ((POINTER) & context->buffer[index], (POINTER) input, partLen);
     MD5Transform(context->state, context->buffer);
 
@@ -184,7 +184,7 @@ MD5Update(//context, input, inputLen)
     i = 0;
 
   /* Buffer remaining input */
-  memcpy
+  tsn_memcpy
     ((POINTER) & context->buffer[index], (POINTER) & input[i],
     inputLen - i);
 }
@@ -219,7 +219,7 @@ MD5Final(//digest, context)
   /*
   * Zeroize sensitive information.
   */
-  memset((POINTER) context, 0, sizeof(*context));
+  tsn_memset((POINTER) context, 0, sizeof(*context));
 }
 
 /*
@@ -315,7 +315,7 @@ MD5Transform(//state, block)
   /*
   * Zeroize sensitive information.
   */
-  memset((POINTER) x, 0, sizeof(x));
+  tsn_memset((POINTER) x, 0, sizeof(x));
 }
 
 /*

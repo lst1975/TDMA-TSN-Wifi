@@ -118,6 +118,9 @@ struct tsn_connection{
   tsn_socket_t fd;
   uint16_t port;
   uint16_t family;
+  tsn_err_e (*process)(tsn_msg_s *m);
+  void (*tsn_read)(tsn_event_s *ev); 
+  void (*tsn_send)(tsn_event_s *ev);
 };
 
 #define TSN_TIMER_INFINITE (time_t)(-1)
