@@ -124,16 +124,18 @@ tsn_print_longaddr(Unsigned64 __longAddr)
     (tsn_uint_t)a[5],(tsn_uint_t)a[6],(tsn_uint_t)a[7]);
 }
 
-union _tsnAddr{
+struct _tsnAddr{
   Unsigned8 AddrType;
-  Unsigned8 AddrU8;
-  Unsigned16 AddrU16;
-  Unsigned64 AddrU64;
+  union{
+    Unsigned8  AddrU8;
+    Unsigned16 AddrU16;
+    Unsigned64 AddrU64;
+  };
 };
-typedef union _tsnAddr tsn_addr_u;
+typedef struct _tsnAddr tsn_addr_s;
 
 static inline Unsigned16
-tsn_get_short_addr(tsn_addr_u *Addr)
+tsn_get_short_addr(tsn_addr_s *Addr)
 {
   if (Addr->AddrType == DMAP_mib_id_static_AddressTypeFlag_u16) 
     return Addr->AddrU16;
@@ -144,7 +146,7 @@ tsn_get_short_addr(tsn_addr_u *Addr)
 }
 
 static inline void
-tsn_print_addr(tsn_addr_u *Addr)
+tsn_print_addr(tsn_addr_s *Addr)
 {
   switch (Addr->AddrType)
   {
@@ -175,5 +177,7 @@ tsn_get_addr_length(int addType)
       return 0;
   }
 }
+
+void tsn_print_sockaddr(struct sockaddr *sa);
 
 #endif

@@ -34,7 +34,7 @@
  *
  *   http://csrc.nist.gov/cryptval/shs.html
  */
-#include <string.h>
+#include "gw_base.h"
 #include "sha512.h"
 
 #define BLKSIZE 128
@@ -313,12 +313,8 @@ void SHA512_Simple(const void *p, int len, unsigned char *output) {
   SHA512_Final(&s, output);
 }
 
-#include "gw_base.h"
-
 #if TSN_TEST
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 
 int main(void) {

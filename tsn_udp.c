@@ -83,6 +83,7 @@ static void __read_udp_msg(tsn_event_s *ev)
   r = c->process(m);
   if (r != TSN_err_none)
   {
+    tsn_free_msg(m);
     TSN_error("Failed to process message.\n");
   }
 }
@@ -212,3 +213,4 @@ void tsn_server_free(tsn_connection_s *c)
 {
   return __tsn_server_free(c);
 }
+

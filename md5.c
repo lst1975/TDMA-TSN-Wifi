@@ -57,7 +57,7 @@
 * documentation and/or software.
 */
 
-#include <string.h>
+#include "gw_base.h"
 #include "md5.h"
 
 /*

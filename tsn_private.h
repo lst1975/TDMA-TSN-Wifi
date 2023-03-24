@@ -73,6 +73,7 @@
 #include "tsn_epoll.h"
 #include "tsn_udp.h"
 #include "tsn_frame_gateway.h"
+#include "tsn_frame_dll.h"
 #include "tsn_gw_dlde.h"
 #include "tsn_ad.h"
 #include "tsn_encrypt.h"

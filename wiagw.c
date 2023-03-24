@@ -33,16 +33,16 @@
 
 #define SERVER_PORT 8765
 
-static tsn_connection_s tsn_udp_server = {
+static tsn_connection_s tsn_udp_gw = {
   .fd         = -1,
   .type       = SOCK_DGRAM,
   .family     = AF_INET,
   .protocol   = IPPROTO_UDP,
   .port       = SERVER_PORT,
   .sent       = 0,
-  .proces     = tsn_dlpdu_process_adgw,
+  .process    = tsn_dlpdu_process_adgw,
   .tsn_read   = NULL,
-  .tsn_write  = NULL,
+  .tsn_send   = NULL,
 };
 
 int main(int argc, char **argv)
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     goto clean0;
   }
 
-  r = tsn_server_init(&tsn_udp_server);
+  r = tsn_server_init(&tsn_udp_gw);
   if (r != TSN_err_none)
   {
     TSN_error("tsn_server_init failed.\n");
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
   }
   
   ret = EXIT_SUCCESS;
-  tsn_server_free();
+  tsn_server_free(&tsn_udp_gw);
 
 clean1:
   wia_epoll_free();

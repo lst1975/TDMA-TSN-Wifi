@@ -29,7 +29,7 @@
  *                              
  **************************************************************************************
  */
-#include <string.h>
+#include "gw_base.h"
 #include "hmac.h"
 #include "md5.h"
 #include "sha.h"

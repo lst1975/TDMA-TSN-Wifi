@@ -98,7 +98,7 @@ struct tsn_dlpdu_dllhdr{
   Unsigned8 is_preemption:1;
   Unsigned8 is_shortaddr:1;
   Unsigned8 networkID;
-  tsn_addr_u addr;
+  tsn_addr_s addr;
   Unsigned16 seq;
   Unsigned8  segment_count;
   Unsigned8  segment_seq;
@@ -109,5 +109,6 @@ typedef struct tsn_dlpdu_dllhdr tsn_dlpdu_dllhdr_s;
 #define tsn_dlpdu_dllhdr_min_len 7
 
 void tsn_dlpdu_dllhdr_print(tsn_dlpdu_dllhdr_s *n);
+tsn_err_e tsn_dlpdu_process_dll(tsn_msg_s *msg);
   
 #endif

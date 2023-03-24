@@ -54,23 +54,23 @@ tsn_dlpdu_dllhdr_convert(tsn_buffer_s *b,
   {
     if (sysCfg.useShortAddr)
     { 
-      n->addr->AddrType = DMAP_mib_id_static_AddressTypeFlag_u8;
-      tsn_buffer_get8(b, &n->addr->AddrU8);
+      n->addr.AddrType = DMAP_mib_id_static_AddressTypeFlag_u8;
+      tsn_buffer_get8(b, &n->addr.AddrU8);
     }
     else
     {
       if (b->len < 2)
         return -TSN_err_tooshort;
-      n->addr->AddrType = DMAP_mib_id_static_AddressTypeFlag_u16;
-      tsn_buffer_get16(b, &n->addr->AddrU16);
+      n->addr.AddrType = DMAP_mib_id_static_AddressTypeFlag_u16;
+      tsn_buffer_get16(b, &n->addr.AddrU16);
     }
   }
   else
   {
     if (b->len < 4)
       return -TSN_err_tooshort;
-    n->addr->AddrType = DMAP_mib_id_static_AddressTypeFlag_u64;
-    tsn_buffer_get64(b, &n->addr->AddrU64);
+    n->addr.AddrType = DMAP_mib_id_static_AddressTypeFlag_u64;
+    tsn_buffer_get64(b, &n->addr.AddrU64);
   }
 
   if (b->len < 2)
@@ -103,135 +103,135 @@ tsn_dlpdu_dllhdr_build(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
   {
     if (sysCfg.useShortAddr)
     { 
-      tsn_buffer_put8(b, n->addr->AddrU8);
+      tsn_buffer_put8(b, n->addr.AddrU8);
     }
     else
     {
-      tsn_buffer_put16(b, n->addr->AddrU16);
+      tsn_buffer_put16(b, n->addr.AddrU16);
     }
   }
   else
   {
-    tsn_buffer_put64(b, n->addr->AddrU64);
+    tsn_buffer_put64(b, n->addr.AddrU64);
   }
-  tsn_buffer_put16(b, n.seq);
+  tsn_buffer_put16(b, n->seq);
   if (n->is_segment)
   {
-    tsn_buffer_put8(b, n.segment_count);
-    tsn_buffer_put8(b, n.segment_seq);
+    tsn_buffer_put8(b, n->segment_count);
+    tsn_buffer_put8(b, n->segment_seq);
   }
-  tsn_buffer_put16(b, n.length);
+  tsn_buffer_put16(b, n->length);
 }
 
 static tsn_err_e 
-do_FRAME_TYPE_Beacon(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_Beacon(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_Data(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_Data(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_Aggregation(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_Aggregation(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_GACK(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_GACK(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_NACK(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_NACK(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_JoinRequest(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_JoinRequest(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_JoinResponse(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_JoinResponse(tsn_msg_s *msg)
 {
   if (sysCfg.devType == DMAP_mib_device_gw)
     return -TSN_err_unsupport;
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_LeaveRequest(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
-{
-  return -TSN_err_unsupport;
-}
-static int 
-do_FRAME_TYPE_LeaveResponse(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_LeaveRequest(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_DeviceStatusReport(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_LeaveResponse(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_ChannelConditionReport(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
-{
-  return -TSN_err_unsupport;
-}
-static int 
-do_FRAME_TYPE_TwoWayTimeSynchronizationRequest(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_DeviceStatusReport(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_TwoWayTimeSynchronizationResponse(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_ChannelConditionReport(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_RemoteAttributeGetRequest(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_TwoWayTimeSynchronizationRequest(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_RemoteAttributeGetResponse(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_TwoWayTimeSynchronizationResponse(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_RemoteAttributeSetRequest(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_RemoteAttributeGetRequest(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_RemoteAttributeSetResponse(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_RemoteAttributeGetResponse(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_KeyEstablishRequest(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_RemoteAttributeSetRequest(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_KeyEstablishResponse(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_RemoteAttributeSetResponse(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_KeyUpdateRequest(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_KeyEstablishRequest(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_KeyUpdateResponse(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_KeyEstablishResponse(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 static tsn_err_e 
-do_FRAME_TYPE_SecurityAlarm(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
+do_FRAME_TYPE_KeyUpdateRequest(tsn_msg_s *msg)
+{
+  return -TSN_err_unsupport;
+}
+static tsn_err_e 
+do_FRAME_TYPE_KeyUpdateResponse(tsn_msg_s *msg)
+{
+  return -TSN_err_unsupport;
+}
+static tsn_err_e 
+do_FRAME_TYPE_SecurityAlarm(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
@@ -272,19 +272,19 @@ tsn_dlpdu_dllhdr_print_flags(tsn_dlpdu_dllhdr_s *n)
 {
   int pre = 0;
   tsn_print("\tFlags: ");
-  if (n.is_segment)
+  if (n->is_segment)
   {
     if (pre)
       tsn_print("|");
     tsn_print("SEGMENT");
   }
-  if (n.is_preemption)
+  if (n->is_preemption)
   {
     if (pre)
       tsn_print("|");
     tsn_print("PREEMPTION");
   }
-  if (n.is_shortaddr)
+  if (n->is_shortaddr)
   {
     if (pre)
       tsn_print("|");
@@ -320,11 +320,12 @@ tsn_dlpdu_dllhdr_print(tsn_dlpdu_dllhdr_s *n)
 }
 
 tsn_err_e
-tsn_dlpdu_process_dll(tsn_buffer_s *b)
+tsn_dlpdu_process_dll(tsn_msg_s *msg)
 {
   tsn_err_e r;
   tsn_dlpdu_dllhdr_s n;
-  char *base = b.ptr;
+  tsn_buffer_s *b = &msg->b;
+  Unsigned8 *base = b->ptr;
 
   TSN_event("Received dlpdu packet.\n");
 
@@ -348,5 +349,5 @@ tsn_dlpdu_process_dll(tsn_buffer_s *b)
     return -TSN_err_malformed;
   }
   
-  return (*frameTableDll[n.type].func)(&n, b);
+  return (*frameTableDll[n.type].func)(msg);
 }

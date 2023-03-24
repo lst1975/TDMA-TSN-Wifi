@@ -7,7 +7,7 @@ OBJS_GW = wiagw.o gw_log.o tsn_epoll.o tsn_device.o tsn_system.o \
 			sha.o sha1.o sha224.o sha256.o sha384.o sha512.o \
 			md5.o hmac.o tsn_frame_gateway.o tsn_encrypt.o \
 			tsn_ad.o tsn_resource.o tsn_handle.o tsn_state_gw.o \
-			tsn_auth.o
+			tsn_auth.o tsn_frame_dll.o
 			
 OBJS_AD = wiaad.o gw_log.o tsn_epoll.o tsn_device.o tsn_system.o \
 			crc16.o crc32.o crc64.o crc.o fcs16.o tsn_udp.o

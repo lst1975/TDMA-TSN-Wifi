@@ -39,7 +39,7 @@ enum{
 };
 
 struct GACKInfo{
-  tsn_addr_u Addr;
+  tsn_addr_s Addr;
   uint16_t Seq;
 };
 typedef struct GACKInfo gack_info_s;
@@ -177,7 +177,7 @@ make_TSN_GACK_indication(tsn_msg_s *msg,
 static tsn_err_e 
 make_TSN_NACK_indication(tsn_msg_s *msg, 
   Unsigned8 count, Unsigned8 AdID, Unsigned8 addType, 
-  tsn_addr_u *nack)
+  tsn_addr_s *nack)
 {
   int len;
   tsn_err_e r;

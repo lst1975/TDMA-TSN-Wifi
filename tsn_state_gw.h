@@ -57,4 +57,7 @@ __gw_dmap_state_machine(
   tsn_dmap_trigger_e trigger, 
   void *dlpdu);
 
+tsn_boolean_e TSN_IsDmapInitializationDone(void);
+void TSN_SetDmapInitializationDone(void);
+
 #endif

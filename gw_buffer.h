@@ -40,7 +40,7 @@ struct tsn_buffer{
 };
 typedef struct tsn_buffer tsn_buffer_s;
 
-#define TSN_BUFFER_GO(b,len) { (b)->ptr += len; (b)->len += len; }
+#define TSN_BUFFER_GO(b,_len) { (b)->ptr += _len; (b)->len += _len; }
 #define TSN_BUFFER_PTR(b) (b)->ptr
 #define TSN_BUFFER_LEN(b) (b)->len
 

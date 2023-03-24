@@ -92,7 +92,8 @@ gw_dmap_T1_receive_dlme_join_indication(tsn_msg_s *msg,
   r = TSN_device_find_ByLongAddr(&dev, NetworkID, ind->PhyAddr);
   if (r != TSN_err_none)
     return r;
-  return __gw_dmap_state_machine(msg, dev, DMAP_TRIGGER_T1_join, ind) == TSN_TRUE ? TSN_err_none : -TSN_err_system;
+  return __gw_dmap_state_machine(msg, dev, DMAP_TRIGGER_T1_join, ind) 
+            == TSN_TRUE ? TSN_err_none : -TSN_err_system;
 }
 
 tsn_boolean_e 
@@ -165,7 +166,9 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       {
         dlme_leave_request_s *req;
         req = (dlme_leave_request_s *)dlpdu;
-        __ReleaseResources(req->ShortAddr16);
+        __ReleaseResources(&req->ShortAddr16);
+        dmap->MachineState = DMAP_STATE_end;
+        tsn_free_msg(msg);
       }
       break;
       

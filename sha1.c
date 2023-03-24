@@ -52,8 +52,8 @@ A million repetitions of "a"
 
 #define SHA1HANDSOFF
 
-#include <stdio.h>
-#include <string.h>
+#include "gw_base.h"
+
 #include <sys/types.h>  /* for u_int*_t */
 #if defined(__sun)
 #include "solarisfixes.h"
@@ -279,8 +279,6 @@ void SHA1Calc(const unsigned char *input, unsigned int inlen, unsigned char *out
   SHA1Final(output, &ctx);
 }
 /* ================ end of sha1.cpp ================ */
-
-#include "gw_base.h"
 
 #if TSN_TEST
 
