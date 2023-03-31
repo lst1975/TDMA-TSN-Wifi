@@ -29,6 +29,7 @@
  *                              
  **************************************************************************************
  */
+ 
 #include "tsn_private.h"
 
 enum{
@@ -37,12 +38,6 @@ enum{
   AD_JOIN_AUTHENTICATION_Failed,
   AD_JOIN_EXCEEDED,
 };
-
-struct GACKInfo{
-  tsn_addr_s Addr;
-  uint16_t Seq;
-};
-typedef struct GACKInfo gack_info_s;
 
 static tsn_err_e 
 send_TSN_gw_response(tsn_msg_s *msg)
@@ -58,34 +53,10 @@ send_TSN_gw_data(tsn_msg_s *msg)
   return TSN_err_none;
 }
 
-static tsn_err_e 
-___make_TSN_Buffer(tsn_buffer_s *b, int len)
-{
-  if (b->size < len)
-  {
-    Unsigned8 *uptr;
-    
-    if (b->data != NULL)
-    {
-      tsn_free(b->data);
-      b->data = NULL;
-    }
-
-    uptr = (Unsigned8 *)tsn_malloc(len);
-    if (uptr == NULL)
-      return -TSN_err_nomem;
-    tsn_buffer_init(b, uptr, len);
-  }
-  else
-  {
-    tsn_buffer_reinit(b);
-  }
-  return TSN_err_none;
-}
-
-static tsn_err_e 
+tsn_err_e
 make_TSN_AD_JOIN_response(tsn_msg_s *msg, 
-  Unsigned8 Status, Unsigned16 ADAddr, Unsigned8 AdID)
+  Unsigned8 Status, Unsigned64 ADLongAddr,
+  Unsigned8 AdID, Unsigned16 ADAddr)
 {
   tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
@@ -97,7 +68,7 @@ make_TSN_AD_JOIN_response(tsn_msg_s *msg,
   TSN_event("Make TSN_AD_JOIN_response.\n");
   
   tsn_buffer_put8(b, TSN_AD_JOIN_ack);
-  tsn_buffer_put64(b, ADAddr);
+  tsn_buffer_put64(b, ADLongAddr);
   if (Status == AD_JOIN_SUCCESS)
   {
     tsn_buffer_put16(b, 4);
@@ -113,22 +84,21 @@ make_TSN_AD_JOIN_response(tsn_msg_s *msg,
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    tsn_print("TSN_AD_JOIN_response.\n");
-    tsn_print("\tAdID: %u\n", AdID);
-    tsn_print("\tADAddr: %u\n", ADAddr);
-    tsn_print("\tStatus: %u\n", Status);
+    tsn_print("\tTSN_AD_JOIN_response.\n");
+    tsn_print_longaddr(ADLongAddr);
+    tsn_print("\tStatus: %s\n", AdJoinResponseStatus2String(Status));
 
     if (Status == AD_JOIN_SUCCESS)
     {
       tsn_print("\tAdID: %u\n", AdID);
-      tsn_print("\tADAddr: %u\n", ADAddr);
+      tsn_print("\tADAddr: %#x\n", ADAddr);
     }
   }
   
   return TSN_err_none;
 }
 
-static tsn_err_e 
+tsn_err_e
 make_TSN_GACK_indication(tsn_msg_s *msg, 
   Unsigned8 count, Unsigned8 AdID, Unsigned8 addType, 
   gack_info_s *gack)
@@ -147,6 +117,8 @@ make_TSN_GACK_indication(tsn_msg_s *msg,
   if (TSN_err_none != r)
     return r;
   
+  TSN_event("Make TSN_GACK_indication.\n");
+
   tsn_buffer_put8(b, TSN_GACK_indication);
   tsn_buffer_put8(b, AdID);
   tsn_buffer_put16(b, len+1);
@@ -171,10 +143,23 @@ make_TSN_GACK_indication(tsn_msg_s *msg,
     
     tsn_buffer_put16(b, gack[i].Seq);
   }
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tTSN_GACK_indication.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n", len+1);
+    tsn_print("\tcount: %u\n", count);
+    for (int i = 0; i < count; i++)
+    {
+      tsn_print_addr(&gack[i].Addr);
+      tsn_print("\tSeq: %u\n", gack[i].Seq);
+    }
+  }
   return TSN_err_none;
 }
 
-static tsn_err_e 
+tsn_err_e
 make_TSN_NACK_indication(tsn_msg_s *msg, 
   Unsigned8 count, Unsigned8 AdID, Unsigned8 addType, 
   tsn_addr_s *nack)
@@ -192,7 +177,9 @@ make_TSN_NACK_indication(tsn_msg_s *msg,
   if (TSN_err_none != r)
     return r;
   
-  tsn_buffer_put8(b, TSN_GACK_indication);
+  TSN_event("Make TSN_NACK_indication.\n");
+
+  tsn_buffer_put8(b, TSN_NACK_indication);
   tsn_buffer_put8(b, AdID);
   tsn_buffer_put16(b, len+1);
   tsn_buffer_put8(b, count);
@@ -207,15 +194,30 @@ make_TSN_NACK_indication(tsn_msg_s *msg,
         tsn_buffer_put16(b, nack[i].AddrU16);
         break;
       case DMAP_mib_id_static_AddressTypeFlag_u64:
+        tsn_buffer_put16(b, nack[i].AddrU64);
+        break;
       default:
         return -TSN_err_invalid;
+    }
+  }
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tTSN_NACK_indication.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n", len+1);
+    tsn_print("\tcount: %u\n", count);
+    for (int i = 0; i < count; i++)
+    {
+      tsn_print_addr(&nack[i]);
     }
   }
   return TSN_err_none;
 }
 
-static tsn_err_e 
+tsn_err_e
 make_TSN_DLDE_DATA_request(tsn_msg_s *msg, 
+    Unsigned8   AdID,
     Unsigned16  DstAddr,
     Unsigned16  VCR_ID,
     Unsigned8   DataType,
@@ -225,13 +227,17 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
 {
   tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
+  int AttrLen = PayloadLength+8;
   
-  r = ___make_TSN_Buffer(b, PayloadLength+8);
+  r = ___make_TSN_Buffer(b, AttrLen);
   if (TSN_err_none != r)
     return r;
 
   TSN_event("Make TSN_DLDE_DATA_request.\n");
 
+  tsn_buffer_put8(b, TSN_DLDE_DATA_request);
+  tsn_buffer_put8(b, AdID);
+  tsn_buffer_put16(b, AttrLen);
   tsn_buffer_put16(b, DstAddr);
   tsn_buffer_put16(b, VCR_ID);
   tsn_buffer_put8(b, DataType);
@@ -241,8 +247,10 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
   
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    tsn_print("TSN_DLDE_DATA_request.\n");
-    tsn_print("\tDstAddr: %u\n", DstAddr);
+    tsn_print("\tTSN_DLDE_DATA_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n", AttrLen);
+    tsn_print("\tDstAddr: %#x\n", DstAddr);
     tsn_print("\tVCR ID: %u\n",  VCR_ID);
     tsn_print("\tDataType: %s\n", get_DLDE_DataType(DataType));
     tsn_print("\tPriority: %s\n", get_DLDE_DataPriority(Priority));
@@ -252,156 +260,8 @@ make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
   return TSN_err_none;
 }
 
-tsn_err_e 
-make_TSN_information_get_request(tsn_msg_s *msg, 
-  void *_req, Unsigned8 AdID, 
-  tsn_buffer_s *data __TSN_UNUSED)
-{
-  int AttrLen;
-  tsn_err_e r;
-  tsn_buffer_s *b = &msg->b;
-  dlme_information_set_request_s *req;
-
-  req = (dlme_information_set_request_s *)_req;
-  AttrLen = sizeof(*req);
-  
-  r = ___make_TSN_Buffer(b, 4+AttrLen);
-  if (TSN_err_none != r)
-    return r;
-
-  TSN_event("Make TSN_information_set_request.\n");
-
-  tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
-  tsn_buffer_put8(b, AdID);
-  tsn_buffer_put16(b, AttrLen);
-  tsn_buffer_putlen(b, (uint8_t *)req, sizeof(*req));
-
-  if (sysCfg.dumpPacket || sysCfg.logDebug)
-  {
-    tsn_print("TSN_information_get_request.\n");
-    tsn_print("\tAdID: %u\n", AdID);
-    tsn_print("\tAttrLen: %u\n",  AttrLen);
-    tsn_print("\tDstAddr: %u\n", req->DstAddr);
-    tsn_print("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
-    tsn_print("\tAttributeID: %u\n", req->AttributeID);
-    tsn_print("\tMemberID: %u\n", req->MemberID);
-    tsn_print("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
-    tsn_print("\tCount: %u\n", req->Count);
-  }
-  return TSN_err_none;
-}
-
-tsn_err_e 
-make_TSN_information_set_request(tsn_msg_s *msg, 
-  void *_req, Unsigned8 AdID, 
-  tsn_buffer_s *data)
-{
-  int AttrLen;
-  tsn_err_e r;
-  tsn_buffer_s *b = &msg->b;
-  dlme_information_set_request_s *req;
-
-  req = (dlme_information_set_request_s *)_req;
-  AttrLen = sizeof(*req)+TSN_BUFFER_LEN(data);
-  
-  r = ___make_TSN_Buffer(b, 4+AttrLen);
-  if (TSN_err_none != r)
-    return r;
-
-  TSN_event("Make TSN_information_set_request.\n");
-
-  tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
-  tsn_buffer_put8(b, AdID);
-  tsn_buffer_put16(b, AttrLen);
-  tsn_buffer_putlen(b, (uint8_t *)req, sizeof(*req));
-  tsn_buffer_putlen(b, data->data, data->len);
-
-  if (sysCfg.dumpPacket || sysCfg.logDebug)
-  {
-    tsn_print("TSN_information_set_request.\n");
-    tsn_print("\tAdID: %u\n", AdID);
-    tsn_print("\tAttrLen: %u\n",  AttrLen);
-    tsn_print("\tDstAddr: %u\n", req->DstAddr);
-    tsn_print("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
-    tsn_print("\tAttributeID: %u\n", req->AttributeID);
-    tsn_print("\tMemberID: %u\n", req->MemberID);
-    tsn_print("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
-    tsn_print("\tCount: %u\n", req->Count);
-  }
-  return TSN_err_none;
-}
-
-tsn_err_e 
-make_TSN_DLME_JOIN_response(tsn_msg_s *msg, 
-  Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr)
-{
-  tsn_err_e r;
-  tsn_buffer_s *b = &msg->b;
-
-  r = ___make_TSN_Buffer(b, 7);
-  if (TSN_err_none != r)
-    return r;
-  
-  TSN_event("Make TSN_DLME_JOIN_response.\n");
-
-  tsn_buffer_put8(b, TSN_DLME_JOIN_response);
-  tsn_buffer_put8(b, AdID);
-  if (Status == DLME_JOIN_SUCCESS)
-  {
-    tsn_buffer_put16(b, 3);
-    tsn_buffer_put8(b, Status);
-    tsn_buffer_put16(b, ShortAddr);
-  }
-  else
-  {
-    tsn_buffer_put16(b, 1);
-    tsn_buffer_put8(b, Status);
-  }
-
-  if (sysCfg.dumpPacket || sysCfg.logDebug)
-  {
-    tsn_print("TSN_leave_request.\n");
-    tsn_print("\tAdID: %u\n", AdID);
-    tsn_print("\tStatus: %u\n", Status);
-    tsn_print("\tShortAddr: %u\n", ShortAddr);
-  }
-
-
-  return TSN_err_none;
-}
-
-tsn_err_e
-make_TSN_DLME_LEAVE_request(tsn_msg_s *msg,
-  Unsigned8 AdID, Unsigned16 ShortAddr)
-{
-  tsn_err_e r;
-  tsn_buffer_s *b = &msg->b;
-  int AttrLen = sizeof(ShortAddr);
-
-  r = ___make_TSN_Buffer(b, 4+AttrLen);
-  if (TSN_err_none != r)
-    return r;
-
-  TSN_event("Make TSN_leave_request.\n");
-
-  tsn_buffer_put8(b, TSN_DLME_JOIN_response);
-  tsn_buffer_put8(b, AdID);
-  tsn_buffer_put16(b, AttrLen);
-  tsn_buffer_put16(b, ShortAddr);
-
-  if (sysCfg.dumpPacket || sysCfg.logDebug)
-  {
-    tsn_print("TSN_leave_request.\n");
-    tsn_print("\tAdID: %u\n", AdID);
-    tsn_print("\tAttrLen: %u\n",  AttrLen);
-    tsn_print("\tShortAddr: %u\n", ShortAddr);
-  }
-
-  return TSN_err_none;
-}
-
 static tsn_err_e 
-do_TSN_AD_JOIN_request(tsn_msg_s *msg)
+__do_TSN_AD_JOIN_request(tsn_msg_s *msg)
 {
   int status;
   tsn_err_e r;
@@ -494,16 +354,19 @@ do_TSN_AD_JOIN_request(tsn_msg_s *msg)
 good:  
   r = make_TSN_AD_JOIN_response(msg, 
     AD_JOIN_SUCCESS, 
+    req.PhyAddr,
     dev->AccessDeviceID, 
     dev->DeviceShortAddress);
   if (r != TSN_err_none)
     return r;
+  tsn_send_udp_msg(msg);
   return send_TSN_gw_response(msg);
   
 failed:
-  r = make_TSN_AD_JOIN_response(msg, status, 0, 0);
+  r = make_TSN_AD_JOIN_response(msg, status, req.PhyAddr, 0, 0);
   if (r != TSN_err_none)
     return r;
+  tsn_send_udp_msg(msg);
   return send_TSN_gw_response(msg);
 }
 
@@ -513,31 +376,31 @@ failed:
  * GB/T26790.2-2015, 8.1.7.2, Page 56
  ***********************************************************************************/
 static tsn_err_e 
-do_TSN_AD_JOIN_ack(tsn_msg_s *msg)
+__do_TSN_AD_JOIN_ack(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_GACK_indication(tsn_msg_s *msg)
+__do_TSN_GACK_indication(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_NACK_indication(tsn_msg_s *msg)
+__do_TSN_NACK_indication(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_DLDE_DATA_request(tsn_msg_s *msg)
+__do_TSN_DLDE_DATA_request(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_DLDE_DATA_indication(tsn_msg_s *msg)
+__do_TSN_DLDE_DATA_indication(tsn_msg_s *msg)
 {
   tsn_buffer_s *b = &msg->b;
   tsn_dlde_data_transmit_indication_s s;
@@ -558,7 +421,7 @@ do_TSN_DLDE_DATA_indication(tsn_msg_s *msg)
   {
     tsn_print("\tTSN_DLDE_DATA_indication.\n");
     tsn_print("\tDataType: %s.\n", get_DLDE_DataType(s.DataType));
-    tsn_print("\tSrcAddr: %u.\n", s.srcAddr);
+    tsn_print("\tSrcAddr: %#x.\n", s.srcAddr);
     tsn_print("\tPayloadLength: %u.\n", s.PayloadLength);
   }
   
@@ -568,8 +431,78 @@ do_TSN_DLDE_DATA_indication(tsn_msg_s *msg)
   return send_TSN_gw_data(msg);
 }
 
+/***********************************************************************************
+ * GB/T26790.2-2015, 8.3.4, Page 63
+ *                   DEVICE join
+ *
+ * used by field equipments to send WIA-FA join request
+ *
+ ************************************************************************************
+ *
+ *  FD-DMAP                 FD-DLL              AD-DLL                    GW-DMAP
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |   DLME-JOIN.request  |                   |                         |
+ *     |   -----------------> |                   |                         |
+ *     |                      | join request frame|                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |        GACK       |                         |
+ *     |                      | <-----------------|  DLME-JOIN.indication   |
+ *     |                      |                   |------------------------>|
+ *     |                      |                   |                         |
+ *     |                      |                   |   DLME-JOIN.response    |
+ *     |                      |  dual-direction   |<------------------------|
+ *     |                      |  time-sync ack    |                         |
+ *     |                      | <-----------------|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |   DLME-JOIN.confirm  |                   |                         |
+ *     |<-------------------- |                   |                         |
+ *     |                      |                   |                         |
+ ***********************************************************************************/
+  
+tsn_err_e 
+make_TSN_DLME_JOIN_response(tsn_msg_s *msg, 
+  Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+
+  r = ___make_TSN_Buffer(b, 7);
+  if (TSN_err_none != r)
+    return r;
+  
+  TSN_event("Make TSN_DLME_JOIN_response.\n");
+
+  tsn_buffer_put8(b, TSN_DLME_JOIN_response);
+  tsn_buffer_put8(b, AdID);
+  if (Status == DLME_JOIN_SUCCESS)
+  {
+    tsn_buffer_put16(b, 3);
+    tsn_buffer_put8(b, Status);
+    tsn_buffer_put16(b, ShortAddr);
+  }
+  else
+  {
+    tsn_buffer_put16(b, 1);
+    tsn_buffer_put8(b, Status);
+  }
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("TSN_leave_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tStatus: %u\n", Status);
+    tsn_print("\tShortAddr: %u\n", ShortAddr);
+  }
+
+
+  return TSN_err_none;
+}
+
 static tsn_err_e 
-do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
+__do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
 {
   tsn_buffer_s *b = &msg->b;
   dlme_join_indication_s ind;
@@ -594,7 +527,7 @@ do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
     tsn_print("\tTSN_DLME_JOIN_indication.\n");
-    tsn_print("\tPhyAddr: %"PRIu64".\n", ind.PhyAddr);
+    tsn_print_longaddr(ind.PhyAddr);
     tsn_print("\tSecMaterial: %"PRIu64".\n", ind.SecMaterial);
   }
 
@@ -602,13 +535,38 @@ do_TSN_DLME_JOIN_indication(tsn_msg_s *msg)
 }
 
 static tsn_err_e 
-do_TSN_DLME_JOIN_response(tsn_msg_s *msg)
+__do_TSN_DLME_JOIN_response(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
+/***********************************************************************************
+ * GB/T26790.2-2015, 8.3.5, Page 63
+ *                   DEVICE status
+ *
+ * used by field equipments to report device status periodically
+ *
+ ************************************************************************************
+ *
+ *  FD-DMAP                 FD-DLL              AD-DLL                    GW-DMAP
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-FD-STATUS.request|                   |                         |
+ *     |   -----------------> |                   |                         |
+ *     |                      |device status frame|                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |        NACK       |                         |
+ *     |                      | <-----------------|DLME-FD-STATUS.indication|
+ *     |                      |                   |------------------------>|
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-FD-STATUS.confirm|                   |                         |
+ *     |<-------------------- |                   |                         |
+ *     |                      |                   |                         |
+ ***********************************************************************************/
 static tsn_err_e 
-do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
+__do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
 {
   int NetworkID;
   tsn_err_e r;
@@ -623,6 +581,13 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
 
   tsn_buffer_get16(b, &ind.ShortAddr);
   tsn_buffer_get8(b, &ind.PowerSupplyStatus);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tTSN_DLME_DEV_STATUS_indication.\n");
+    tsn_print("\tShortAddr: %#x.\n", ind.ShortAddr);
+    tsn_print("\tPowerSupplyStatus: %s.\n", dlmeDevPowerSupplyStatus2String(ind.PowerSupplyStatus));
+  }
 
   if (ind.PowerSupplyStatus > DMAP_mib_id_device_PowerSupplyStatus_MAX)
     return -TSN_err_invalid;
@@ -648,53 +613,119 @@ do_TSN_DLME_DEV_STATUS_indication(tsn_msg_s *msg)
   return TSN_err_none;
 }
 
+/***********************************************************************************
+ * GB/T26790.2-2015, 8.3.6, Page 68
+ *                   CHANNEL condition
+ *
+ * used by field equipments to report WIA-FA channel condition
+ *
+ ************************************************************************************
+ *
+ *  FD-DMAP                 FD-DLL              AD-DLL                    GW-DMAP
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-CHANNEL-CONDITION|                   |                         |
+ *     |       .request       |                   |                         |
+ *     |   -----------------> |                   |                         |
+ *     |                      | channel condition |                         |
+ *     |                      |       frame       |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |        NACK       |                         |
+ *     |                      | <-----------------|  DLME-CHANNEL-CONDITION |
+ *     |                      |                   |       .indication       |
+ *     |                      |                   |------------------------>|
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-CHANNEL-CONDITION|                   |                         |
+ *     |       .confirm       |                   |                         |
+ *     |<-------------------- |                   |                         |
+ *     |                      |                   |                         |
+ ***********************************************************************************/
 static tsn_err_e 
-do_TSN_DLME_CHAN_COND_indication(tsn_msg_s *msg)
+__do_TSN_DLME_CHAN_COND_indication(tsn_msg_s *msg)
 {
   tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
   tsn_device_s *dev;
   dlme_channel_condition_indication_s ind;
 
-  if (TSN_BUFFER_LEN(b) < 2)
+  if (TSN_BUFFER_LEN(b) < 3)
     return -TSN_err_tooshort;
 
   TSN_event("Received TSN_DLME_CHAN_COND_indication.\n");
 
   tsn_buffer_get16(b, &ind.SrcAddr);
   tsn_buffer_get8(b, &ind.Count);
+
+  if (ind.Count <= 0)
+    return -TSN_err_invalid;
+
+  channel_condition_infomation_s ChannelConditionInfo[ind.Count];
   for(int i = 0;i < ind.Count;i++)
   {
-    tsn_buffer_get8(b, &ind.ChannelConditionInfo[i].ChannelID);
-    tsn_buffer_get8(b, &ind.ChannelConditionInfo[i].LinkQuality);
-    tsn_buffer_get32(b, (Unsigned32 *)&ind.ChannelConditionInfo[i].PacketLossRate);
-    tsn_buffer_get8(b, &ind.ChannelConditionInfo[i].RetryNumber);
+    tsn_buffer_get8(b, &ChannelConditionInfo[i].ChannelID);
+    tsn_buffer_get8(b, &ChannelConditionInfo[i].LinkQuality);
+    tsn_buffer_get32(b, (Unsigned32 *)&ChannelConditionInfo[i].PacketLossRate);
+    tsn_buffer_get8(b, &ChannelConditionInfo[i].RetryNumber);
   }
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
-    tsn_print("\tSrcAddr = 0x%x.\n", ind.SrcAddr);
+    tsn_print("\tTSN_DLME_CHAN_COND_indication.\n");
+    tsn_print("\tSrcAddr = %#x.\n", ind.SrcAddr);
     tsn_print("\tCount = %u.\n", ind.Count);
     for(int i = 0;i < ind.Count;i++)
     {
-  	  tsn_print("ChannelConditionInfo[%d]:\n", i);
-  	  tsn_print("ChannelID = %u.\n", ind.ChannelConditionInfo[i].ChannelID);
-  	  tsn_print("LinkQuality = %u.\n", ind.ChannelConditionInfo[i].LinkQuality);
-  	  /* print PacketLossRate */
-  	  tsn_print("RetryNumber = %u.\n", ind.ChannelConditionInfo[i].RetryNumber);
+      tsn_print("\tChannelConditionInfo[%d]:\n", i);
+      tsn_print("\tChannelID = %u.\n", ChannelConditionInfo[i].ChannelID);
+      tsn_print("\tLinkQuality = %u.\n", ChannelConditionInfo[i].LinkQuality);
+      tsn_print("\tPacketLossRate: %f\n", *(float *)&ChannelConditionInfo[i].PacketLossRate);
+      tsn_print("\tRetryNumber = %u.\n", ChannelConditionInfo[i].RetryNumber);
     }
   }
 
   return TSN_err_none;
 }
 
+/***********************************************************************************
+ * GB/T26790.2-2015, 8.3.3, Page 61
+ *                   TIME synchronization 
+ *
+ * used by field equipments to send dual-direction time synchronization request to AD
+ *
+ ************************************************************************************
+ *
+ *  FD-DMAP                 FD-DLL              AD-DLL                    AD-DMAP
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-TIME-SYNC.request|                   |                         |
+ *     |   -----------------> |                   |                         |
+ *     |                      |   dual-direction  |                         |
+ *     |                      |    time-sync req  |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |        GACK       |                         |
+ *     |                      | <-----------------|DLME-TIME-SYNC.indication|
+ *     |                      |                   |------------------------>|
+ *     |                      |                   |                         |
+ *     |                      |                   | DLME-TIME-SYNC.response |
+ *     |                      |   dual-direction  |<------------------------|
+ *     |                      |   time-sync ack   |                         |
+ *     |                      | <-----------------|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-TIME-SYNC.confirm|                   |                         |
+ *     |<-------------------- |                   |                         |
+ *     |                      |                   |                         |
+ ***********************************************************************************/
 static tsn_err_e 
-do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
+__do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
 {
   tsn_buffer_s *b = &msg->b;
   dlme_time_sync_indication_s ind;
   
-  if (TSN_BUFFER_LEN(b) < sizeof(ind))
+  if (TSN_BUFFER_LEN(b) < 10)
     return -TSN_err_tooshort;
 
   TSN_event("Received TSN_DLME_Time_Sync_indication.\n");
@@ -705,34 +736,112 @@ do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
     tsn_print("\tTSN_DLME_Time_Sync_indication.\n");
-    tsn_print("\tSrcAddr: %u.\n", ind.SrcAddr);
+    tsn_print("\tSrcAddr: %#x.\n", ind.SrcAddr);
     tsn_print("\tFieldDeviceTimeValue: %"PRIu64".\n", 
       ind.FieldDeviceTimeValue);
   }
   
-  return -TSN_err_unsupport;
+  return TSN_err_none;
 }
 
 static tsn_err_e 
-do_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg)
+__do_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg)
+{
+  return -TSN_err_unsupport;
+}
+
+/***********************************************************************************
+ * GB/T26790.2-2015, 8.3.7, Page 69
+ *                   INFORMATION get
+ *
+ * used by Gateway device to get attributes from field devices
+ *
+ ************************************************************************************
+ *
+ *  GW-DMAP                 AD-DLL              FD-DLL                    FD-DMAP
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-INFO-GET.request |                   |                         |
+ *     |   -----------------> |                   |                         |
+ *     |                      | information get   |                         |
+ *     |                      |  request frame    |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   | DLME-INFO-GET.indication|
+ *     |                      |                   |------------------------>|
+ *     |                      |                   |                         |
+ *     |                      |                   |  DLME-INFO-GET.response |
+ *     |                      |                   |<------------------------|
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |  information get  |                         |
+ *     |                      |   response frame  |                         |
+ *     |                      | <-----------------|                         |
+ *     |                      |                   |                         |
+ *     |                      |        GACK       |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-INFO-GET.confirm |                   |                         |
+ *     |<-------------------- |                   |                         |
+ *     |                      |                   |                         |
+ ***********************************************************************************/
+tsn_err_e 
+make_TSN_information_get_request(tsn_msg_s *msg, 
+  void *_req, Unsigned8 AdID, 
+  tsn_buffer_s *data __TSN_UNUSED)
+{
+  int AttrLen;
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  dlme_information_set_request_s *req;
+
+  req = (dlme_information_set_request_s *)_req;
+  AttrLen = sizeof(*req);
+  
+  r = ___make_TSN_Buffer(b, 4+AttrLen);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make TSN_information_set_request.\n");
+
+  tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
+  tsn_buffer_put8(b, AdID);
+  tsn_buffer_put16(b, AttrLen);
+  tsn_buffer_putlen(b, (uint8_t *)req, sizeof(*req));
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("TSN_information_get_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n",  AttrLen);
+    tsn_print("\tDstAddr: %u\n", req->DstAddr);
+    tsn_print("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
+    tsn_print("\tAttributeID: %u\n", req->AttributeID);
+    tsn_print("\tMemberID: %u\n", req->MemberID);
+    tsn_print("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
+    tsn_print("\tCount: %u\n", req->Count);
+  }
+  return TSN_err_none;
+}
+
+static tsn_err_e 
+__do_TSN_DLME_INFO_GET_request(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_DLME_INFO_GET_request(tsn_msg_s *msg)
-{
-  return -TSN_err_unsupport;
-}
-
-static tsn_err_e 
-do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
+__do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
 {
   tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
   dlme_information_get_confirm_s cfm;
 
-  if(TSN_BUFFER_LEN(b) < 12)
+  if(TSN_BUFFER_LEN(b) < 10)
     return -TSN_err_tooshort;
 
   TSN_event("Received TSN_DLME_INFO_GET_confirm.\n");
@@ -749,7 +858,7 @@ do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
   {
     tsn_print("\tTSN_DLME_INFO_GET_confirm.\n");
     tsn_print("\tHandle: %u.\n", cfm.Handle);
-    tsn_print("\tSrcAddr: 0x%x.\n", cfm.SrcAddr);
+    tsn_print("\tSrcAddr: %#x.\n", cfm.SrcAddr);
     tsn_print("\tStatus: %s.\n", dlmeInformationGetConfirmStatus2String(cfm.Status));
     tsn_print("\tAttributeID: %u.\n", cfm.AttributeID);
     tsn_print("\tMemberID: %d.\n", cfm.MemberID);
@@ -760,14 +869,94 @@ do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
   return TSN_err_none;
 }
 
+/***********************************************************************************
+ * GB/T26790.2-2015, 8.3.8, Page 73
+ *                   INFORMATION set
+ *
+ * used by Gateway device to set attributes for field devices
+ *
+ ************************************************************************************
+ *
+ *  GW-DMAP                 AD-DLL              FD-DLL                    FD-DMAP
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-INFO-SET.request |                   |                         |
+ *     |   -----------------> |                   |                         |
+ *     |                      | information set   |                         |
+ *     |                      |  request frame    |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   | DLME-INFO-SET.indication|
+ *     |                      |                   |------------------------>|
+ *     |                      |                   |                         |
+ *     |                      |                   |  DLME-INFO-SET.response |
+ *     |                      |                   |<------------------------|
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |  information set  |                         |
+ *     |                      |   response frame  |                         |
+ *     |                      | <-----------------|                         |
+ *     |                      |                   |                         |
+ *     |                      |        GACK       |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |DLME-INFO-SET.confirm |                   |                         |
+ *     |<-------------------- |                   |                         |
+ *     |                      |                   |                         |
+ ***********************************************************************************/
+
+tsn_err_e 
+make_TSN_information_set_request(tsn_msg_s *msg, 
+  void *_req, Unsigned8 AdID, 
+  tsn_buffer_s *data)
+{
+  int AttrLen;
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  dlme_information_set_request_s *req;
+
+  req = (dlme_information_set_request_s *)_req;
+  AttrLen = sizeof(*req)+TSN_BUFFER_LEN(data);
+  
+  r = ___make_TSN_Buffer(b, 4+AttrLen);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make TSN_information_set_request.\n");
+
+  tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
+  tsn_buffer_put8(b, AdID);
+  tsn_buffer_put16(b, AttrLen);
+  tsn_buffer_putlen(b, (uint8_t *)req, sizeof(*req));
+  tsn_buffer_putlen(b, data->data, data->len);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("TSN_information_set_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n",  AttrLen);
+    tsn_print("\tDstAddr: %u\n", req->DstAddr);
+    tsn_print("\tAttribute Option: %s\n", dlme_info_op2string(req->AttributeOption));
+    tsn_print("\tAttributeID: %u\n", req->AttributeID);
+    tsn_print("\tMemberID: %u\n", req->MemberID);
+    tsn_print("\tFirstStoreIndex: %u\n", req->FirstStoreIndex);
+    tsn_print("\tCount: %u\n", req->Count);
+  }
+  return TSN_err_none;
+}
+
 static tsn_err_e 
-do_TSN_DLME_INFO_SET_request(tsn_msg_s *msg)
+__do_TSN_DLME_INFO_SET_request(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
+__do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
 {
   int NetworkID;
   tsn_err_e r;
@@ -777,17 +966,18 @@ do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
 
   TSN_event("Received TSN_DLME_INFO_SET_confirm.\n");
 
-  if (TSN_BUFFER_LEN(b) < sizeof(cfm))
+  if (TSN_BUFFER_LEN(b) < 3)
     return -TSN_err_tooshort;
   
   tsn_buffer_get16(b, &cfm.Handle);
   tsn_buffer_get8(b, &cfm.Status);
 
-  if (cfm.Handle >= TSN_ShorAddress_INVALID)
+  if (cfm.Handle == TSN_ShorAddress_INVALID)
     return -TSN_err_invalid;
     
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
+    tsn_print("\tDLME_INFO_SET_confirm.\n");
     tsn_print("\tHandle: %u.\n", cfm.Handle);
     tsn_print("\tStatus: %s.\n", dlme_info_set_cfm_status2string(cfm.Status));
   }
@@ -818,46 +1008,117 @@ do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
     return TSN_err_none;
 }
 
+/***********************************************************************************
+ * GB/T26790.2-2015, 8.3.9, Page 75
+ *                   LEAVE
+ *
+ * used by Gateway device to send LEAVE request to field devices
+ *
+ ************************************************************************************
+ *
+ *  GW-DMAP                 AD-DLL              FD-DLL                    FD-DMAP
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |  DLME-LEAVE.request  |                   |                         |
+ *     |   -----------------> |                   |                         |
+ *     |                      |   device leave    |                         |
+ *     |                      |   request frame   |                         |
+ *     |                      | ----------------->|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |  DLME-LEAVE.indication  |
+ *     |                      |                   |------------------------>|
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |DLME-LEAVE.response|                         |
+ *     |                      |<------------------|                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |                      |                   |                         |
+ *     |  DLME-LEAVE.confirm  |                   |                         |
+ *     |<-------------------- |                   |                         |
+ *     |                      |                   |                         |
+ ***********************************************************************************/
+  
+tsn_err_e
+make_TSN_DLME_LEAVE_request(tsn_msg_s *msg,
+  Unsigned8 AdID, Unsigned16 ShortAddr)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  int AttrLen = sizeof(ShortAddr);
+
+  r = ___make_TSN_Buffer(b, 4+AttrLen);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make TSN_leave_request.\n");
+
+  tsn_buffer_put8(b, TSN_DLME_JOIN_response);
+  tsn_buffer_put8(b, AdID);
+  tsn_buffer_put16(b, AttrLen);
+  tsn_buffer_put16(b, ShortAddr);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("TSN_leave_request.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n",  AttrLen);
+    tsn_print("\tShortAddr: %u\n", ShortAddr);
+  }
+
+  return TSN_err_none;
+}
+
 static tsn_err_e 
-do_TSN_DLME_LEAVE_request(tsn_msg_s *msg)
+__do_TSN_DLME_LEAVE_request(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_KEY_ESTABLISH_request(tsn_msg_s *msg)
+__do_TSN_KEY_ESTABLISH_request(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_KEY_ESTABLISH_confirm(tsn_msg_s *msg)
+__do_TSN_KEY_ESTABLISH_confirm(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_KEY_UPDATE_request(tsn_msg_s *msg)
+__do_TSN_KEY_UPDATE_request(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_KEY_UPDATE_confirm(tsn_msg_s *msg)
+__do_TSN_KEY_UPDATE_confirm(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
 static tsn_err_e 
-do_TSN_SECURITY_ALARM_indication(tsn_msg_s *msg)
+__do_TSN_SECURITY_ALARM_indication(tsn_msg_s *msg)
 {
   return -TSN_err_unsupport;
 }
 
+/***********************************************************************************
+ *
+ * VECTOR Array
+ *                   
+ *    Process received data link packet
+ *
+ ***********************************************************************************/
+  
 #define __DECL_F(n) [TSN_ ## n] = { \
   .number=TSN_ ## n, \
   .name=#n, \
-  .func=do_TSN_ ## n, \
+  .func=__do_TSN_ ## n, \
 }
   
 static name_number_s frameTableGateway[TSN_dlpdu_type_max]={

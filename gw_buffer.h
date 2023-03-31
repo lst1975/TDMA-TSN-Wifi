@@ -140,4 +140,30 @@ static inline void tsn_buffer_getlen(tsn_buffer_s *b, Unsigned8 *data, int len)
   b->len -= len;
 }
 
+static tsn_err_e
+___make_TSN_Buffer(tsn_buffer_s *b, int len)
+{
+  if (b->size < len)
+  {
+    Unsigned8 *uptr;
+
+    if (b->data != NULL)
+    {
+      tsn_free(b->data);
+      b->data = NULL;
+    }
+
+    uptr = (Unsigned8 *)tsn_malloc(len);
+    if (uptr == NULL)
+      return -TSN_err_nomem;
+    tsn_buffer_init(b, uptr, len);
+  }
+  else
+  {
+    tsn_buffer_reinit(b);
+  }
+  return TSN_err_none;
+}
+
+
 #endif

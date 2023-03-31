@@ -46,6 +46,7 @@ tsn_dlpdu_dllhdr_convert(tsn_buffer_s *b,
   n->is_segment = hdr->is_segment;
   n->is_preemption = hdr->is_preemption;
   n->is_shortaddr = hdr->is_shortaddr;
+  n->networkID = hdr->networkID;
   n->segment_count = 0;
   n->segment_seq = 0;
   n->length = 0;
@@ -123,20 +124,219 @@ tsn_dlpdu_dllhdr_build(tsn_dlpdu_dllhdr_s *n, tsn_buffer_s *b)
   tsn_buffer_put16(b, n->length);
 }
 
-static tsn_err_e 
+tsn_err_e
+make_FRAME_TYPE_JoinResponse(tsn_msg_s *msg,
+  Unsigned8 Status, Unsigned16 ShortAddr)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  tsn_dlpdu_dllhdr_s *n = (tsn_dlpdu_dllhdr_s *)msg->dlpdu;
+
+  r = ___make_TSN_Buffer(b, 14+3);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make FRAME_TYPE_JoinResponse.\n");
+
+  tsn_dlpdu_dllhdr_build(n, b);
+
+  tsn_buffer_put8(b, Status);
+  tsn_buffer_put16(b, ShortAddr);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_JoinResponse.\n");
+    tsn_print("\tStatus: %s.\n", dlmeJoinStatus2String(Status));
+    tsn_print("\tShortAddr: %#x.\n", ShortAddr);
+  }
+
+  return TSN_err_none;
+}
+
+tsn_err_e
+make_FRAME_TYPE_LeaveRequest(tsn_msg_s *msg)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  tsn_dlpdu_dllhdr_s *n = (tsn_dlpdu_dllhdr_s *)msg->dlpdu;
+
+  r = ___make_TSN_Buffer(b, 14);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make FRAME_TYPE_LeaveRequest.\n");
+
+  tsn_dlpdu_dllhdr_build(n, b);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_LeaveRequest.\n");
+  }
+
+  return TSN_err_none;
+}
+
+tsn_err_e
+make_FRAME_TYPE_TwoWayTimeSynchronizationResponse(tsn_msg_s *msg,
+  TimeData FieldDeviceTimeValue, TimeData ReceiveTimeValue)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  tsn_dlpdu_dllhdr_s *n = (tsn_dlpdu_dllhdr_s *)msg->dlpdu;
+
+  r = ___make_TSN_Buffer(b, 14+16);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make FRAME_TYPE_TwoWayTimeSynchronizationResponse.\n");
+
+  tsn_dlpdu_dllhdr_build(n, b);
+
+  tsn_buffer_put64(b, FieldDeviceTimeValue);
+  tsn_buffer_put64(b, ReceiveTimeValue);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_TwoWayTimeSynchronizationResponse.\n");
+    tsn_print("\tFieldDeviceTimeValue: %"PRIu64".\n", FieldDeviceTimeValue);
+    tsn_print("\tReceiveTimeValue: %"PRIu64".\n", ReceiveTimeValue);
+  }
+
+  return TSN_err_none;
+}
+
+tsn_err_e
+make_FRAME_TYPE_RemoteAttributeGetRequest(tsn_msg_s *msg,
+  Unsigned8 AttributeID, Unsigned8 MemberID,
+  Unsigned16 FirstStoreIndex, Unsigned16 Count)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  tsn_dlpdu_dllhdr_s *n = (tsn_dlpdu_dllhdr_s *)msg->dlpdu;
+
+  r = ___make_TSN_Buffer(b, 14+6);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make FRAME_TYPE_RemoteAttributeGetRequest.\n");
+
+  tsn_dlpdu_dllhdr_build(n, b);
+
+  tsn_buffer_put8(b, AttributeID);
+  tsn_buffer_put8(b, MemberID);
+  tsn_buffer_put16(b, FirstStoreIndex);
+  tsn_buffer_put16(b, Count);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_RemoteAttributeGetRequest.\n");
+    tsn_print("\tAttributeID: %u.\n", AttributeID);
+    tsn_print("\tMemberID: %u.\n", MemberID);
+    tsn_print("\tFirstStoreIndex: %u.\n", FirstStoreIndex);
+    tsn_print("\tCount: %u.\n", Count);
+  }
+
+  return TSN_err_none;
+}
+
+tsn_err_e
+make_FRAME_TYPE_RemoteAttributeSetRequest(tsn_msg_s *msg,
+  Unsigned8 AttributeOption, Unsigned8 AttributeID,
+  Unsigned8 MemberID, Unsigned16 FirstStoreIndex,
+  Unsigned16 Count)
+{
+  tsn_err_e r;
+  tsn_buffer_s *b = &msg->b;
+  tsn_dlpdu_dllhdr_s *n = (tsn_dlpdu_dllhdr_s *)msg->dlpdu;
+
+  r = ___make_TSN_Buffer(b, 14+7);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make FRAME_TYPE_RemoteAttributeSetRequest.\n");
+
+  tsn_dlpdu_dllhdr_build(n, b);
+
+  tsn_buffer_put8(b, AttributeOption);
+  tsn_buffer_put8(b, AttributeID);
+  tsn_buffer_put8(b, MemberID);
+  tsn_buffer_put16(b, FirstStoreIndex);
+  tsn_buffer_put16(b, Count);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_RemoteAttributeSetRequest.\n");
+    tsn_print("\tAttributeOption: %s.\n", dlme_info_op2string(AttributeOption));
+    tsn_print("\tAttributeID: %u.\n", AttributeID);
+    tsn_print("\tMemberID: %u.\n", MemberID);
+    tsn_print("\tFirstStoreIndex: %u.\n", FirstStoreIndex);
+    tsn_print("\tCount: %u.\n", Count);
+  }
+
+  return TSN_err_none;
+}
+
+
+static tsn_err_e
 do_FRAME_TYPE_Beacon(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+  tsn_beacon_information_s info;
+
+  if(TSN_BUFFER_LEN(b) < 17)
+    return -TSN_err_tooshort;
+
+  TSN_event("Received FRAME_TYPE_Beacon.\n");
+
+  tsn_buffer_get16(b, &info.SuperframeLength);
+  tsn_buffer_get16(b, &info.TimeslotDuration);
+  tsn_buffer_get16(b, &info.BeaconRelativeTimeslotNum);
+  tsn_buffer_get16(b, &info.FirstSharedTimeslotNumber);
+  tsn_buffer_get8(b, &info.SharedTimeslotNumber);
+  tsn_buffer_get64(b, &info.AbsoluteTimeValue);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_Beacon.\n");
+    tsn_print("\tSuperframeLength: %u.\n", info.SuperframeLength);
+    tsn_print("\tTimeslotDuration: %u.\n", info.TimeslotDuration);
+    tsn_print("\tBeaconRelativeTimeslotNum: %u.\n", info.BeaconRelativeTimeslotNum);
+    tsn_print("\tFirstSharedTimeslotNumber: %u.\n", info.FirstSharedTimeslotNumber);
+    tsn_print("\tSharedTimeslotNumber: %u.\n", info.SharedTimeslotNumber);
+    tsn_print("\tAbsoluteTimeValue: %"PRIu64".\n", info.AbsoluteTimeValue);
+  }
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_Data(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+
+  TSN_event("Received FRAME_TYPE_Data.\n");
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_Data.\n");
+  }
+
+  // TODO
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_Aggregation(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+
+  TSN_event("Received FRAME_TYPE_Aggregation.\n");
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_Aggregation.\n");
+  }
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_GACK(tsn_msg_s *msg)
@@ -151,7 +351,28 @@ do_FRAME_TYPE_NACK(tsn_msg_s *msg)
 static tsn_err_e 
 do_FRAME_TYPE_JoinRequest(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+  dlme_join_request_s req;
+
+  TSN_event("Received FRAME_TYPE_JoinRequest.\n");
+
+  if (sysCfg.config.SecurityLevel != DMAP_mib_id_static_SecurityLevel_None)
+  {
+    if (TSN_BUFFER_LEN(b) < 8)
+      return -TSN_err_tooshort;
+    tsn_buffer_get64(b, &req.SecMaterial);
+  }
+  else
+  {
+    req.SecMaterial = 0;
+  }
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_JoinRequest.\n");
+    tsn_print("\tSecMaterial: %"PRIu64".\n", req.SecMaterial);
+  }
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_JoinResponse(tsn_msg_s *msg)
@@ -168,22 +389,82 @@ do_FRAME_TYPE_LeaveRequest(tsn_msg_s *msg)
 static tsn_err_e 
 do_FRAME_TYPE_LeaveResponse(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+
+  TSN_event("Received FRAME_TYPE_LeaveResponse.\n");
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_LeaveResponse.\n");
+  }
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_DeviceStatusReport(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+  dlme_device_status_request_s req;
+
+  if(TSN_BUFFER_LEN(b) < 1)
+    return -TSN_err_tooshort;
+
+  TSN_event("Received FRAME_TYPE_DeviceStatusReport.\n");
+
+  tsn_buffer_get8(b, &req.PowerSupplyStatus);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_DeviceStatusReport.\n");
+    tsn_print("\tPowerSupplyStatus: %s.\n", dlmeDevPowerSupplyStatus2String(req.PowerSupplyStatus));
+  }
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_ChannelConditionReport(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+  dlme_channel_condition_request_s req;
+
+  if(TSN_BUFFER_LEN(b) < 1)
+    return -TSN_err_tooshort;
+
+  TSN_event("Received FRAME_TYPE_ChannelConditionReport.\n");
+
+  tsn_buffer_get8(b, &req.Count);
+
+  if (req.Count <= 0)
+    return -TSN_err_invalid;
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_ChannelConditionReport.\n");
+    tsn_print("\tCount: %u.\n", req.Count);
+  }
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_TwoWayTimeSynchronizationRequest(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+  dlme_time_sync_request_s req;
+
+  if (TSN_BUFFER_LEN(b) < 8)
+    return -TSN_err_tooshort;
+
+  TSN_event("Received FRAME_TYPE_TwoWayTimeSynchronizationRequest.\n");
+
+  tsn_buffer_get64(b, &req.FieldDeviceTimeValue);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_TwoWayTimeSynchronizationRequest.\n");
+    tsn_print("\tFieldDeviceTimeValue: %"PRIu64".\n", req.FieldDeviceTimeValue);
+  }
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_TwoWayTimeSynchronizationResponse(tsn_msg_s *msg)
@@ -198,7 +479,31 @@ do_FRAME_TYPE_RemoteAttributeGetRequest(tsn_msg_s *msg)
 static tsn_err_e 
 do_FRAME_TYPE_RemoteAttributeGetResponse(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+  dlme_information_get_response_s res;
+
+  if (TSN_BUFFER_LEN(b) < 7)
+    return -TSN_err_tooshort;
+
+  TSN_event("Received FRAME_TYPE_RemoteAttributeGetResponse.\n");
+
+  tsn_buffer_get8(b, &res.Status);
+  tsn_buffer_get8(b, &res.AttributeID);
+  tsn_buffer_get8(b, &res.MemberID);
+  tsn_buffer_get16(b, &res.FirstStoreIndex);
+  tsn_buffer_get16(b, &res.Count);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_RemoteAttributeSetResponse.\n");
+    tsn_print("\tStatus: %s.\n", dlmeInformationGetResponseStatus2String(res.Status));
+    tsn_print("\tAttributeID: %u.\n", res.AttributeID);
+    tsn_print("\tMemberID: %u.\n", res.MemberID);
+    tsn_print("\tFirstStoreIndex: %u.\n", res.FirstStoreIndex);
+    tsn_print("\tCount: %u.\n", res.Count);
+  }
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_RemoteAttributeSetRequest(tsn_msg_s *msg)
@@ -208,7 +513,33 @@ do_FRAME_TYPE_RemoteAttributeSetRequest(tsn_msg_s *msg)
 static tsn_err_e 
 do_FRAME_TYPE_RemoteAttributeSetResponse(tsn_msg_s *msg)
 {
-  return -TSN_err_unsupport;
+  tsn_buffer_s *b = &msg->b;
+  dlme_information_set_response_s res;
+
+  if (TSN_BUFFER_LEN(b) < 8)
+    return -TSN_err_tooshort;
+
+  TSN_event("Received FRAME_TYPE_RemoteAttributeSetResponse.\n");
+
+  tsn_buffer_get8(b, &res.AttributeOption);
+  tsn_buffer_get8(b, &res.AttributeID);
+  tsn_buffer_get8(b, &res.MemberID);
+  tsn_buffer_get16(b, &res.FirstStoreIndex);
+  tsn_buffer_get8(b, &res.Count);
+  tsn_buffer_get8(b, &res.Status);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("\tFRAME_TYPE_RemoteAttributeSetResponse.\n");
+    tsn_print("\tAttributeOption: %s.\n", dlme_info_op2string(res.AttributeOption));
+    tsn_print("\tAttributeID: %u.\n", res.AttributeID);
+    tsn_print("\tMemeberID: %u.\n", res.MemberID);
+    tsn_print("\tFirstStoreIndex: %u.\n", res.FirstStoreIndex);
+    tsn_print("\tCount: %u.\n", res.Count);
+    tsn_print("\tStatus: %s.\n", dlme_info_set_res_status2string(res.Status));
+  }
+
+  return TSN_err_none;
 }
 static tsn_err_e 
 do_FRAME_TYPE_KeyEstablishRequest(tsn_msg_s *msg)
@@ -309,13 +640,13 @@ tsn_dlpdu_dllhdr_print(tsn_dlpdu_dllhdr_s *n)
     tsn_dlpdu_dllhdr_print_flags(n);
     tsn_print_addr(&n->addr);
     tsn_print("\tNetworkID: %u\n", n->networkID);
-    tsn_print("\tSequence: %u\n", TSN_ntohs(n->seq));
+    tsn_print("\tSequence: %u\n", n->seq);
     if (n->is_segment)
     {
       tsn_print("\tSegment Count: %u\n", n->segment_count);
       tsn_print("\tSegment Sequence: %u\n", n->segment_seq);
     }
-    tsn_print("\tLength: %u\n", TSN_ntohs(n->length));
+    tsn_print("\tLength: %u\n", n->length);
   }
 }
 

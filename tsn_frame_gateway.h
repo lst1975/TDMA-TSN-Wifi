@@ -90,60 +90,83 @@ struct AdJoinResponse {
   Unsigned16 ADAddr;
 };
 typedef struct AdJoinResponse tsn_ad_join_response_s;
+static inline const char *AdJoinResponseStatus2String(int status)
+{
+  switch (status) {
+    case TSN_AD_JOIN_ACK_SUCCESS:
+      return "SUCCESS";
+    case TSN_AD_JOIN_ACK_UNMATCHED_NetworkID:
+      return "UNMATCHED NetworkID";
+    case TSN_AD_JOIN_ACK_AUTHENTICATION_Failed:
+      return "AUTHENTICATION Failed";
+    case TSN_AD_JOIN_ACK_EXCEEDED:
+      return "EXCEEDED";
+    case TSN_AD_JOIN_ACK_NETWORK_SCALE_ERROR:
+      return "NETWORK SCALE ERROR";
+    case TSN_AD_JOIN_ACK_INVALID_DeviceID:
+      return "INVALID DeviceID";
+    case TSN_AD_JOIN_ACK_SYSTEM_ERROR:
+      return "SYSTEM ERROR";
+    default:
+      return "<Unknown>";
+  }
+}
+struct GACKInfo{
+  tsn_addr_s Addr;
+  uint16_t Seq;
+};
+typedef struct GACKInfo gack_info_s;
 
-struct GAckInformation_addru8{
-  Unsigned8  DstAddr8;
-  Unsigned16 SequenceNumber;
+struct GAckIndication {
+  Unsigned8   DeviceCount;
+  gack_info_s GAckInfo[0];
 };
-typedef struct GAckInformation_addru8 tsn_gack_info_addru8_s;
+typedef struct GAckIndication tsn_gack_indication_s;
 
-struct GAckInformation_addru16{
-  Unsigned16 DstAddr16;
-  Unsigned16 SequenceNumber;
-};
-typedef struct GAckInformation_addru16 tsn_gack_info_addru16_s;
-
-struct GAckInformation_addru64{
-  Unsigned64 DstAddr64;
-  Unsigned16 SequenceNumber;
-};
-typedef struct GAckInformation_addru64 tsn_gack_info_addru64_s;
-
-struct GAckIndication_addru8 {
-  Unsigned8       DeviceCount;
-  tsn_gack_info_addru8_s GAckInfo[0];
-};
-struct GAckIndication_addru16 {
-  Unsigned8       DeviceCount;
-  tsn_gack_info_addru16_s GAckInfo[0];
-};
-struct GAckIndication_addru64 {
-  Unsigned8       DeviceCount;
-  tsn_gack_info_addru64_s GAckInfo[0];
-};
-typedef struct GAckIndication_addru8  tsn_gack_indication_addru8_s;
-typedef struct GAckIndication_addru16 tsn_gack_indication_addru16_s;
-typedef struct GAckIndication_addru64 tsn_gack_indication_addru64_s;
-
-struct NAckIndication_addru8 {
+struct NAckIndication {
   Unsigned8 RetryDeviceCount;
-  Unsigned8 DstAddressList[0];
+  tsn_addr_s DstAddressList[0];
 };
-struct NAckIndication_addru16 {
-  Unsigned8  RetryDeviceCount;
-  Unsigned16 DstAddressList[0];
-};
-typedef struct NAckIndication_addru8  tsn_nack_indication_addru8_s;
-typedef struct NAckIndication_addru16 tsn_nack_indication_addru16_s;
+typedef struct NAckIndication tsn_nack_indication_s;
 
 tsn_err_e tsn_dlpdu_process_adgw(tsn_msg_s *msg);
-tsn_err_e make_TSN_DLME_JOIN_response(tsn_msg_s *msg, 
+tsn_err_e
+make_TSN_AD_JOIN_response(tsn_msg_s *msg,
+  Unsigned8 Status, Unsigned64 ADLongAddr,
+  Unsigned8 AdID, Unsigned16 ADAddr);
+
+tsn_err_e
+make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
+    Unsigned8   AdID,
+    Unsigned16  DstAddr,
+    Unsigned16  VCR_ID,
+    Unsigned8   DataType,
+    Unsigned8   Priority,
+    Unsigned16  PayloadLength,
+    OctetString Payload);
+
+tsn_err_e
+make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
   Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr);
+tsn_err_e
+make_TSN_GACK_indication(tsn_msg_s *msg,
+  Unsigned8 count, Unsigned8 AdID, Unsigned8 addType,
+  gack_info_s *gack);
+
+tsn_err_e
+make_TSN_NACK_indication(tsn_msg_s *msg,
+  Unsigned8 count, Unsigned8 AdID, Unsigned8 addType,
+  tsn_addr_s *nack);
+
 tsn_err_e make_TSN_information_set_request(tsn_msg_s *msg, 
   void *_req, Unsigned8 AdID, 
   tsn_buffer_s *data);
 tsn_err_e make_TSN_information_get_request(tsn_msg_s *msg, 
   void *_req, Unsigned8 AdID, 
   tsn_buffer_s *data __TSN_UNUSED);
+
+tsn_err_e
+make_TSN_DLME_LEAVE_request(tsn_msg_s *msg,
+  Unsigned8 AdID, Unsigned16 ShortAddr);
 
 #endif

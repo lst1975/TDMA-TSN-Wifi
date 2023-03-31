@@ -58,19 +58,92 @@ static tsn_connection_s tsn_udp_ad = {
   .tsn_send   = NULL,
 };
 
-void __tsn_test_gw(int id)
+void __tsn_test_ad(int id)
 {
 #if TSN_TEST_AD
   //TODO
+  tsn_msg_s *msg;
+  msg = tsn_create_msg(&tsn_udp_ad, TSN_BUFF_LEN_MAX);
+  struct sockaddr_in addr;
+  memset(&addr, 0, sizeof(addr));
+  addr.sin_family      = AF_INET;
+  addr.sin_port        = TSN_htons(8765);
+  addr.sin_addr.s_addr = TSN_htonl(INADDR_ANY);
+  msg->from.sa = (struct sockaddr *)&addr;
+  msg->from.slen = 16;
   switch (id)
   {
-    case 0:
+    case TSN_AD_JOIN_request:
+      Unsigned64 ADAddr0    = 0x0000010001000001;
+      Unsigned8  NetworkID0 = 0;
+      Unsigned64 PhyAddr0   = 0x0000010001000001;
+      make_TSN_AD_JOIN_request(msg, ADAddr0, NetworkID0, PhyAddr0);
       break;
-    case 1:
+    case TSN_DLME_JOIN_indication:
+      Unsigned8  AdID6        = 1;
+      Unsigned64 PhyAddr6     = 0x0000010002000001;
+      Unsigned64 SecMaterial6 = 0;
+      make_TSN_DLME_JOIN_indication(msg, AdID6, PhyAddr6, SecMaterial6);
       break;
+    case TSN_DLME_DEV_STATUS_indication:
+      Unsigned8  AdID8              = 2;
+      Unsigned16 ShortAddr8         = 3;
+      Unsigned8  PowerSupplyStatus8 = 4;
+      make_TSN_DLME_DEV_STATUS_indication(msg, AdID8, ShortAddr8, PowerSupplyStatus8);
+      break;
+
+    case TSN_DLME_CHAN_COND_indication:
+      Unsigned8  AdID9    = 2;
+      Unsigned16 SrcAddr9 = 3;
+      Unsigned8  Count9   = 4;
+      channel_condition_infomation_s ChannelConditionInfo[4];
+      for (int i = 0;i < 4;i++)
+      {
+          ChannelConditionInfo[i].ChannelID = i;
+          ChannelConditionInfo[i].LinkQuality = i*2;
+          float cf = i*0.5;
+          ChannelConditionInfo[i].PacketLossRate = *(SingleFloat *)&cf;
+          ChannelConditionInfo[i].RetryNumber = i*i;
+      }
+      make_TSN_DLME_CHAN_COND_indication(msg, AdID9, SrcAddr9, Count9, ChannelConditionInfo);
+      break;
+
+    case TSN_DLME_TIME_SYNC_indication:
+      Unsigned8  AdID10                 = 2;
+      Unsigned16 SrcAddr10              = 3;
+      Unsigned64 FieldDeviceTimeValue10 = 4;
+      make_TSN_DLME_TIME_SYNC_indication(msg, AdID10, SrcAddr10, FieldDeviceTimeValue10);
+      break;
+
+    case TSN_DLME_INFO_GET_confirm:
+      dlme_information_get_confirm_s cfm13;
+      cfm13.Handle = 10;
+      cfm13.SrcAddr = 23;
+      cfm13.Status = 0;
+      cfm13.AttributeID = 234;
+      cfm13.MemberID = 34;
+      cfm13.FirstStoreIndex = 123;
+      cfm13.Count = 3;
+      Unsigned8 AdID13 = 1;
+      tsn_buffer_s *data = malloc(1);
+      Unsigned8 abc = 123;
+      tsn_buffer_init(data, &abc, 1);
+      data->len += 1;
+      make_TSN_DLME_INFO_GET_confirm(msg, &cfm13, AdID13, data);
+      break;
+
+    case TSN_DLME_INFO_SET_confirm:
+      dlme_information_set_confirm_s cfm15;
+      cfm15.Handle = 10;
+      cfm15.Status = 0;
+      Unsigned8 AdID15 = 1;
+      make_TSN_DLME_INFO_SET_confirm(msg, &cfm15, AdID15);
+      break;
+
     default:
       break;
   }
+  tsn_send_udp_msg(msg);
 #endif
 }
 
@@ -100,7 +173,7 @@ int main(int argc, char **argv)
     goto clean2;
   }
 
-  __tsn_test_gw(0);
+  __tsn_test_ad(TSN_DLME_CHAN_COND_indication);
 
   while (sysCfg.run)
   {

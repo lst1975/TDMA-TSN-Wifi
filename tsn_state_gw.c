@@ -31,6 +31,11 @@
  */
 #include "tsn_private.h"
 
+
+static tsn_boolean_e 
+__gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap, 
+  tsn_dmap_trigger_e trigger, void *dlpdu);
+
 void __ReleaseResources(uint16_t *_Addr)
 {
   TSN_FreeShortAddr(_Addr);
@@ -515,7 +520,7 @@ ret_free_msg_false:
  *
  *
  ***********************************************************************************/
-tsn_boolean_e 
+static tsn_boolean_e 
 __gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap, 
    tsn_dmap_trigger_e trigger, void *dlpdu)
 {
@@ -524,7 +529,6 @@ __gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
     case DMAP_STATE_init:
       if (trigger != DMAP_TRIGGER_T0)
         return TSN_FALSE;
-      TSN_SetDmapInitializationDone();
       sysCfg.State = DMAP_STATE_active;
       /* FALLTHROUGH */
       
@@ -547,6 +551,7 @@ TSN_IsDmapInitializationDone(void)
 void
 TSN_SetDmapInitializationDone(void)
 {
+  __gw_dmap_state_machine(NULL, NULL, DMAP_TRIGGER_T0, NULL);
   sysCfg.Initialized = TSN_TRUE;
 }
 

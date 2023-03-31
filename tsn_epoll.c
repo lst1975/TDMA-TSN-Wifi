@@ -584,13 +584,13 @@ tsn_unix_sendto(tsn_connection_s *c, tsn_msg_s *m)
   b = &m->b;
   for ( ;; ) 
   {
-    n = sendto(c->fd, b->data, b->size, 0, m->from.sa, m->from.slen);
+    n = sendto(c->fd, b->data, b->len, 0, m->from.sa, m->from.slen);
 
-    TSN_debug("sendto: fd:%d %z of %uz.\n", c->fd, n, b->size);
+    TSN_debug("sendto: fd:%d %zu of %zu.\n", c->fd, n, b->len);
 
     if (n >= 0) 
     {
-      if ((size_t) n != b->size) 
+      if ((size_t) n != b->len)
       {
         wev->error = TSN_TRUE;
         return -errno;
@@ -649,7 +649,7 @@ tsn_unix_recv(tsn_connection_s *c, tsn_msg_s *m)
     else
       n = recv(c->fd, b->ptr, b->size, 0);
 
-    TSN_debug("recv: fd:%d %z of %uz.\n", c->fd, n, b->size);
+    TSN_debug("recv: fd:%d %zu of %zu.\n", c->fd, n, b->size);
 
     if (n == 0) 
     {

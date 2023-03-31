@@ -50,13 +50,6 @@ gw_dmap_T5_receive_information_set_confirm(
   tsn_device_s *dmap, 
   dlme_information_set_confirm_s *cfm);
 
-tsn_boolean_e 
-__gw_dmap_state_machine(
-  tsn_msg_s *msg, 
-  tsn_device_s *dmap, 
-  tsn_dmap_trigger_e trigger, 
-  void *dlpdu);
-
 tsn_boolean_e TSN_IsDmapInitializationDone(void);
 void TSN_SetDmapInitializationDone(void);
 

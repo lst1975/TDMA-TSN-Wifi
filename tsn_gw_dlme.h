@@ -68,6 +68,23 @@ struct DlmeJoinConfirm{
 };
 typedef struct DlmeJoinConfirm dlme_join_confirm_s;
 
+
+static inline const char *dlmeJoinStatus2String(int status)
+{
+  switch (status) {
+    case DLME_JOIN_SUCCESS:
+      return "SUCCESS";
+    case DLME_JOIN_UNMATCHED_NetworkID:
+      return "UNMATCHED NetworkID";
+    case DLME_JOIN_AUTHENTICATION_Failed:
+      return "AUTHENTICATION Failed";
+    case DLME_JOIN_EXCEEDED:
+      return "EXCEEDED";
+    default:
+      return "<Unknown>";
+  }
+}
+
 enum{
   DLME_Device_PowerSupplyStatus_FixedPower = 0,
   DLME_Device_PowerSupplyStatus_Level_1,  /* | low, insufficiant power supply */
@@ -172,9 +189,22 @@ struct DlmeInformationGetResponse{
   uint8_t  AttributeID;
   uint8_t  MemberID;
   uint16_t FirstStoreIndex;
+  uint16_t Count;
   uint8_t  AttributeValue[0];
 };
 typedef struct DlmeInformationGetResponse dlme_information_get_response_s;
+
+static inline const char *dlmeInformationGetResponseStatus2String(int status)
+{
+  switch (status) {
+    case DLME_information_get_response_SUCCESS:
+      return "SUCCESS";
+    case DLME_information_get_response_UNSUPPORTED_ATTRIBUTE:
+      return "UNSUPPORTED ATTRIBUTE";
+    default:
+      return "<Unknown>";
+  }
+}
 
 enum{
   DLME_channel_condition_confirm_SUCCESS = 0,
@@ -213,7 +243,6 @@ enum{
 struct DlmeInformationGetConfirm{
   uint8_t  Handle;
   uint16_t SrcAddr;
-  uint16_t DstAddr;
   uint8_t  Status;
   uint8_t  AttributeID;
   uint8_t  MemberID;
@@ -334,6 +363,20 @@ struct DlmeInformationSetResponse{
 };
 typedef struct DlmeInformationSetResponse dlme_information_set_response_s;
 
+static const char *dlme_info_set_res_status2string(uint8_t Status)
+{
+  switch (Status)
+  {
+    case DLME_information_set_response_SUCCESS:
+      return "SUCCESS";
+    case DLME_information_set_response_UNSUPPORTED_ATTRIBUTE:
+      return "UNSUPPORTED ATTRIBUTE";
+    case DLME_information_set_response_INVALID_PARAMETER:
+      return "INVALID PARAMETER";
+    default:
+      return "<UNKNOWN>";
+  }
+}
 enum{
   DLME_information_set_confirm_SUCCESS = 0,
   DLME_information_set_confirm_UNSUPPORTED_ATTRIBUTE,

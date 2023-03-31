@@ -75,7 +75,10 @@ struct tsn_msg {
   tsn_buffer_s b;
   tsn_sockaddr_s from;
   void *priv;
-  tsn_gw_dlpdu_normal_s _dlpdu;
+  union {
+    tsn_gw_dlpdu_normal_s _dlpdu;
+    tsn_gw_dlpdu_normal_s _dllhdr;
+  };
   void *dlpdu;
   tsn_msg_f cb;
   TimeData stamp;

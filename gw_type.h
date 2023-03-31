@@ -98,15 +98,9 @@ struct _TsnFloat{
 typedef struct _TsnFloat TsnFloat;
 
 struct _SingleFloat{
-#if __BYTE_ORDER==__BIG_ENDIAN
   uint32_t SN:1;
   uint32_t E:8;
   uint32_t F:23;
-#else
-  uint32_t F:23;
-  uint32_t E:8;
-  uint32_t SN:1;
-#endif  
 };
 typedef struct _SingleFloat SingleFloat;
 #define SingleFloatNaN 0x7FA00000
@@ -122,8 +116,8 @@ SINGLE_FLOAT_to_tsn_float(TsnFloat *v, SingleFloat f)
   v->integerPart = f.E;
   if (f.SN)
     v->integerPart = -f.E;
-  v->fractionPart = f.F/0x800000;
-  v->value = v->integerPart + v->fractionPart;
+  v->fractionPart = f.F;
+  v->value = v->integerPart + v->fractionPart/0x800000;
 }
 
 static inline void 
@@ -136,19 +130,13 @@ tsn_float_to_SINGLE_FLOAT(TsnFloat *v, SingleFloat f)
   }
   f.SN = (v->integerPart < 0);
   f.E = f.SN ? -v->integerPart : v->integerPart;
-  f.F = v->fractionPart*0x800000;
+  f.F = v->fractionPart;
 }
 
 struct _DoubleFloat{
-#if __BYTE_ORDER==__BIG_ENDIAN
   uint64_t SN:1;
   uint64_t E:11;
   uint64_t F:52;
-#else
-  uint64_t F:52;
-  uint64_t E:11;
-  uint64_t SN:1;
-#endif  
 };
 typedef struct _DoubleFloat DoubleFloat;
 #define DoubleFloatNaN 0x7FA0000000000000
@@ -164,8 +152,8 @@ DOUBLE_FLOAT_to_tsn_float(TsnFloat *v, SingleFloat f)
   v->integerPart = f.E;
   if (f.SN)
     v->integerPart = -f.E;
-  v->fractionPart = f.F/0x10000000000000;
-  v->value = v->integerPart + v->fractionPart;
+  v->fractionPart = f.F;
+  v->value = v->integerPart + v->fractionPart/0x10000000000000;
 }
 
 static inline void 
@@ -178,7 +166,7 @@ tsn_float_to_DOUBLE_FLOAT(TsnFloat *v, SingleFloat f)
   }
   f.SN = (v->integerPart < 0);
   f.E = f.SN ? -v->integerPart : v->integerPart;
-  f.F = v->fractionPart*0x10000000000000;
+  f.F = v->fractionPart;
 }
 
 struct _OctetString{

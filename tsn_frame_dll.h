@@ -38,29 +38,29 @@
  *
  ***********************************************************************************/
 
-#define FRAME_TYPE_Beacon                            0x00000
-#define FRAME_TYPE_Data                              0x00001
-#define FRAME_TYPE_Aggregation                       0x00010
-#define FRAME_TYPE_GACK                              0x00011
-#define FRAME_TYPE_NACK                              0x00100
-#define FRAME_TYPE_JoinRequest                       0x00101
-#define FRAME_TYPE_JoinResponse                      0x00110
-#define FRAME_TYPE_LeaveRequest                      0x00111
-#define FRAME_TYPE_LeaveResponse                     0x01000
-#define FRAME_TYPE_DeviceStatusReport                0x01001
-#define FRAME_TYPE_ChannelConditionReport            0x01010
-#define FRAME_TYPE_TwoWayTimeSynchronizationRequest  0x01011
-#define FRAME_TYPE_TwoWayTimeSynchronizationResponse 0x01100
-#define FRAME_TYPE_RemoteAttributeGetRequest         0x01101
-#define FRAME_TYPE_RemoteAttributeGetResponse        0x01110
-#define FRAME_TYPE_RemoteAttributeSetRequest         0x01111
-#define FRAME_TYPE_RemoteAttributeSetResponse        0x10000
-#define FRAME_TYPE_KeyEstablishRequest               0x10001
-#define FRAME_TYPE_KeyEstablishResponse              0x10010
-#define FRAME_TYPE_KeyUpdateRequest                  0x10011
-#define FRAME_TYPE_KeyUpdateResponse                 0x10100
-#define FRAME_TYPE_SecurityAlarm                     0x10101
-#define FRAME_TYPE_MAX                               0x10110
+#define FRAME_TYPE_Beacon                            0
+#define FRAME_TYPE_Data                              1
+#define FRAME_TYPE_Aggregation                       2
+#define FRAME_TYPE_GACK                              3
+#define FRAME_TYPE_NACK                              4
+#define FRAME_TYPE_JoinRequest                       5
+#define FRAME_TYPE_JoinResponse                      6
+#define FRAME_TYPE_LeaveRequest                      7
+#define FRAME_TYPE_LeaveResponse                     8
+#define FRAME_TYPE_DeviceStatusReport                9
+#define FRAME_TYPE_ChannelConditionReport            10
+#define FRAME_TYPE_TwoWayTimeSynchronizationRequest  11
+#define FRAME_TYPE_TwoWayTimeSynchronizationResponse 12
+#define FRAME_TYPE_RemoteAttributeGetRequest         13
+#define FRAME_TYPE_RemoteAttributeGetResponse        14
+#define FRAME_TYPE_RemoteAttributeSetRequest         15
+#define FRAME_TYPE_RemoteAttributeSetResponse        16
+#define FRAME_TYPE_KeyEstablishRequest               17
+#define FRAME_TYPE_KeyEstablishResponse              18
+#define FRAME_TYPE_KeyUpdateRequest                  19
+#define FRAME_TYPE_KeyUpdateResponse                 20
+#define FRAME_TYPE_SecurityAlarm                     21
+#define FRAME_TYPE_MAX                               22
 
 static inline int GetFrameType(void *dlpdu)
 {
@@ -105,6 +105,23 @@ struct tsn_dlpdu_dllhdr{
   Unsigned16 length;
 };
 typedef struct tsn_dlpdu_dllhdr tsn_dlpdu_dllhdr_s;
+
+struct BeaconPayload {
+  Unsigned8 UpSharedTimeslotNumber:4;
+  Unsigned8 DownSharedTimeslotNumber:4;
+};
+typedef struct BeaconPayload  tsn_beacon_payload_s;
+
+struct BeaconInformation {
+  uint16_t SuperframeLength;
+  uint16_t TimeslotDuration;
+  uint16_t BeaconRelativeTimeslotNum;
+  uint16_t FirstSharedTimeslotNumber;
+  uint8_t  SharedTimeslotNumber;
+  TimeData AbsoluteTimeValue;
+  tsn_beacon_payload_s BeaconPayload;
+};
+typedef struct BeaconInformation  tsn_beacon_information_s;
 
 #define tsn_dlpdu_dllhdr_min_len 7
 

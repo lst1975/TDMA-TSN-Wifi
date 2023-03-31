@@ -37,7 +37,8 @@
 #include <stdlib.h>
 
 #define TSN_TEST 0
-#define TSN_TEST_AD 1
+#define TSN_TEST_AD 0
+#define TSN_TEST_GW 0
 #include "gw_log.h"
 
 #define tsn_malloc(size) malloc(size)
