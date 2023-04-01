@@ -482,7 +482,6 @@ __wia_epoll_process_events(tsn_sys_config_s *sys,
     {
       if (c->fd == -1 || wev->instance != instance) 
       {
-
         /*
          * the stale event from a file descriptor
          * that was just closed in this iteration

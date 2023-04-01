@@ -178,7 +178,8 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       break;
       
     case DMAP_STATE_end:
-      goto ret_free_msg_false;
+      dmap->MachineState = DMAP_STATE_init;
+      /* FALLTHROUGH */
 
     case DMAP_STATE_init:
       if (trigger != DMAP_TRIGGER_T1_join)
@@ -290,6 +291,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
       if (trigger == DMAP_TRIGGER_T4_ResAlloc)
       {
         tsn_buffer_s b;
+        tsn_boolean_e r;
         dlme_information_set_request_s req;
         
         {
@@ -304,8 +306,17 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           DeviceState  = DMAP_mib_id_device_DeviceState_AllocatingResources;
           dmap->Flags |= DLME_STATE_information_set_DeviceList;
           tsn_buffer_set(&b, &DeviceState, 1);
-          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, dmap->Network, &b);
+          
+          r = DLME_information_set_request(
+                  msg, 
+                  &req, 
+                  dmap->AccessDeviceID, 
+                  dmap->Network, 
+                  &b);
+          if (r == TSN_FALSE)
+            goto ret_free_msg_false;
 
+          dmap->Handle131 = msg->handle;
           TSN_event("Try to send DeviceState : AllocatingResources.\n");
         }
         
@@ -326,8 +337,17 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           s.ActiveFlag   = c->ActiveFlag;
           tsn_memcpy(&s.ActiveSlot, &c->ActiveSlot, sizeof(c->ActiveSlot));
           tsn_buffer_set(&b, (Unsigned8 *)&s, sizeof(s));
-          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, dmap->Network, &b);
-
+          
+          r = DLME_information_set_request(
+                    msg, 
+                    &req, 
+                    dmap->AccessDeviceID, 
+                    dmap->Network, 
+                    &b);
+          if (r == TSN_FALSE)
+            goto ret_free_msg_false;
+          
+          dmap->Handle128 = msg->handle;
           TSN_event("Try to send SuperframeList.\n");
         }
 
@@ -351,8 +371,17 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           s.ChannelIndex         = c->ChannelIndex;
           s.SuperframeID         = c->SuperframeID;
           tsn_buffer_set(&b, (Unsigned8 *)&s, sizeof(s));
-          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, dmap->Network, &b);
+          
+          r = DLME_information_set_request(
+                    msg, 
+                    &req, 
+                    dmap->AccessDeviceID, 
+                    dmap->Network, 
+                    &b);
+          if (r == TSN_FALSE)
+            goto ret_free_msg_false;
 
+          dmap->Handle129 = msg->handle;
           TSN_event("Try to send DllLinkList.\n");
         }
 
@@ -371,21 +400,23 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           goto ret_free_msg_false;
         }
 
-        switch (cfm->Handle & DLME_STATE_information_set_handle_mask) 
+        if (cfm->Handle == dmap->Handle131) 
         {
-          case DLME_STATE_information_set_DeviceList:
-            dmap->Flags &= ~DLME_STATE_information_set_DeviceList;
-            break;
-          case DLME_STATE_information_set_SuperframeList:
-            dmap->Flags &= ~DLME_STATE_information_set_SuperframeList;
-            break;
-          case DLME_STATE_information_set_DllLinkList:
-            dmap->Flags &= ~DLME_STATE_information_set_DllLinkList;
-            break;
-          default:
-            dmap->MachineState = DMAP_STATE_end;
-            goto ret_free_msg_false;
+          dmap->Flags &= ~DLME_STATE_information_set_DeviceList;
         }
+        else if (cfm->Handle == dmap->Handle128)
+        {
+          dmap->Flags &= ~DLME_STATE_information_set_SuperframeList;
+        }
+        else if (cfm->Handle == dmap->Handle129)
+        {
+          dmap->Flags &= ~DLME_STATE_information_set_DllLinkList;
+        }
+        else
+        {
+          goto ret_free_msg_false;
+        }
+        
         if (!dmap->Flags)
           dmap->MachineState = DMAP_STATE_operation;
 

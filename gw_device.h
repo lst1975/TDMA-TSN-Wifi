@@ -56,6 +56,9 @@ struct tsn_device{
   Unsigned8  MachineState;
   Unsigned8  Network;
   Unsigned16 Flags;
+  Unsigned16 Handle128;
+  Unsigned16 Handle129;
+  Unsigned16 Handle131;
 };
 typedef struct tsn_device tsn_device_s;
 
