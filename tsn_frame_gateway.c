@@ -719,9 +719,45 @@ __do_TSN_DLME_CHAN_COND_indication(tsn_msg_s *msg)
  *     |<-------------------- |                   |                         |
  *     |                      |                   |                         |
  ***********************************************************************************/
+  
+tsn_err_e 
+make_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg, 
+  uint8_t AdID, uint16_t SrcAddr, TimeData FieldDeviceTimeValue)
+{
+  tsn_err_e r;
+  TimeData timeData;
+  tsn_buffer_s *b = &msg->b;
+
+  r = ___make_TSN_Buffer(b, 14);
+  if (TSN_err_none != r)
+    return r;
+
+  TSN_event("Make TSN_information_set_request.\n");
+
+  tsn_buffer_put8(b, TSN_DLME_INFO_SET_request);
+  tsn_buffer_put8(b, AdID);
+  tsn_buffer_put16(b, 10);
+  tsn_buffer_put16(b, SrcAddr);
+  tsn_buffer_put64(b, FieldDeviceTimeValue);
+  timeData = tsn_system_time();
+  tsn_buffer_put64(b, timeData);
+
+  if (sysCfg.dumpPacket || sysCfg.logDebug)
+  {
+    tsn_print("TSN_DLME_TIME_SYNC_response.\n");
+    tsn_print("\tAdID: %u\n", AdID);
+    tsn_print("\tAttrLen: %u\n", 10);
+    tsn_print("\tDstAddr: %u\n", SrcAddr);
+    tsn_print("\tFieldDeviceTimeValue: %"PRIu64"\n", FieldDeviceTimeValue);
+    tsn_print("\tFieldDeviceTimeValue: %"PRIu64"\n", timeData);
+  }
+  return TSN_err_none;
+}
+
 static tsn_err_e 
 __do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
 {
+  tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
   dlme_time_sync_indication_s ind;
   
@@ -740,7 +776,16 @@ __do_TSN_DLME_TIME_SYNC_indication(tsn_msg_s *msg)
     tsn_print("\tFieldDeviceTimeValue: %"PRIu64".\n", 
       ind.FieldDeviceTimeValue);
   }
-  
+
+  r = make_TSN_DLME_TIME_SYNC_response(msg, msg->_dlpdu.AdID,
+    ind.SrcAddr, ind.FieldDeviceTimeValue);
+  if (r != TSN_err_none)
+  {
+    tsn_free_msg(msg);
+    return r;
+  }
+
+  tsn_send_udp_msg(msg);
   return TSN_err_none;
 }
 
@@ -791,8 +836,7 @@ __do_TSN_DLME_TIME_SYNC_response(tsn_msg_s *msg)
  ***********************************************************************************/
 tsn_err_e 
 make_TSN_information_get_request(tsn_msg_s *msg, 
-  void *_req, Unsigned8 AdID, 
-  tsn_buffer_s *data __TSN_UNUSED)
+  void *_req, Unsigned8 AdID, tsn_buffer_s *data __TSN_UNUSED)
 {
   int AttrLen;
   tsn_err_e r;
@@ -911,8 +955,7 @@ __do_TSN_DLME_INFO_GET_confirm(tsn_msg_s *msg)
 
 tsn_err_e 
 make_TSN_information_set_request(tsn_msg_s *msg, 
-  void *_req, Unsigned8 AdID, 
-  tsn_buffer_s *data)
+  void *_req, Unsigned8 AdID, Unsigned8 NetworkID, tsn_buffer_s *data)
 {
   int AttrLen;
   tsn_err_e r;
@@ -933,6 +976,10 @@ make_TSN_information_set_request(tsn_msg_s *msg,
   tsn_buffer_put16(b, AttrLen);
   tsn_buffer_putlen(b, (uint8_t *)req, sizeof(*req));
   tsn_buffer_putlen(b, data->data, data->len);
+
+  msg->NetworkID     = NetworkID;
+  msg->_dlpdu.ADAddr = req->DstAddr;
+  msg->_dlpdu.AdID   = AdID;
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
@@ -958,23 +1005,46 @@ __do_TSN_DLME_INFO_SET_request(tsn_msg_s *msg)
 static tsn_err_e 
 __do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
 {
-  int NetworkID;
   tsn_err_e r;
   tsn_buffer_s *b = &msg->b;
   tsn_device_s *dev;
+  tsn_msg_s *msgWaiting;
   dlme_information_set_confirm_s cfm;
 
   TSN_event("Received TSN_DLME_INFO_SET_confirm.\n");
 
-  if (TSN_BUFFER_LEN(b) < 3)
-    return -TSN_err_tooshort;
+  if (TSN_BUFFER_LEN(b) != 2)
+  {
+    if (TSN_BUFFER_LEN(b) < 2)
+    {
+      TSN_debug("Received malformed packet: too short.\n");
+      return -TSN_err_tooshort;
+    }
+    else
+    {
+      TSN_debug("Received malformed packet: too long.\n");
+      return -TSN_err_toolong;
+    }
+  }
   
-  tsn_buffer_get16(b, &cfm.Handle);
+  tsn_buffer_get8(b, &cfm.Handle);
   tsn_buffer_get8(b, &cfm.Status);
 
-  if (cfm.Handle == TSN_ShorAddress_INVALID)
+  if (cfm.Status != DLME_information_set_confirm_SUCCESS)
+  {
+    TSN_error("Failed to set information.\n");
+    return -TSN_err_system;
+  }
+
+  TSN_event("Set information successfully.\n");
+
+  msgWaiting = TSN_GetMsgByHandle(cfm.Handle);
+  if (msgWaiting == NULL)
+  {
+    TSN_debug("Received malformed packet: too short.\n");
     return -TSN_err_invalid;
-    
+  }
+  
   if (sysCfg.dumpPacket || sysCfg.logDebug)
   {
     tsn_print("\tDLME_INFO_SET_confirm.\n");
@@ -982,26 +1052,19 @@ __do_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg)
     tsn_print("\tStatus: %s.\n", dlme_info_set_cfm_status2string(cfm.Status));
   }
 
-  if (cfm.Status != DLME_information_set_confirm_SUCCESS)
-    return -TSN_err_system;
-
-  NetworkID = tsn_network_id_by_Sockaddr(&msg->from);
-  if (NetworkID == TSN_NetworkID_MAX)
-  {
-    TSN_error("Received packet from unknown AD.\n");
-    if (sysCfg.logError)
-    {
-      tsn_sockaddr_print(&msg->from, "AD IP Address is ", "\n");
-    }
-    return -TSN_err_existed;
-  }
-  r = TSN_device_find_ByShortAddr(&dev, NetworkID, cfm.Handle);
+  r = TSN_device_find_ByShortAddr(&dev, msgWaiting->NetworkID, 
+    msgWaiting->_dlpdu.ADAddr);
   if (r != TSN_err_none)
   {
-    TSN_error("Not find FD device with short address %u.\n", cfm.Handle);
+    TSN_error("Not find FD device with short address %u.\n", 
+      msgWaiting->_dlpdu.ADAddr);
     return -TSN_err_existed;
   }
 
+  msg->from = msgWaiting->from;
+  TSN_FreeHandle(msgWaiting);
+  tsn_free_msg(msgWaiting);
+  
   if (TSN_TRUE != gw_dmap_T5_receive_information_set_confirm(msg, dev, &cfm))
     return -TSN_err_system;
   else

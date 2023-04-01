@@ -33,7 +33,7 @@
 #define _GW_MIB_H_
 
 struct DsnDmapMibGetRequest{
-  Unsigned16 Handle;
+  Unsigned8 Handle;
   Unsigned16 ShortAddr;
   Unsigned8  AttributeID;
   Unsigned8  MemberID;
@@ -45,7 +45,7 @@ typedef struct DsnDmapMibGetRequest TsnDmapMibGetRequestS;
 #define INVALID_STORE_INDEX Unsigned16Max
 
 struct TsnDmapMibGetConfirm{
-  Unsigned16 Handle;
+  Unsigned8 Handle;
   Unsigned8  Status;
   Unsigned16 Count;
   Unsigned8  AttributeValue[0];
@@ -60,7 +60,7 @@ enum{
 };
 
 struct DmapMibSetRequest{
-  Unsigned16 Handle;
+  Unsigned8 Handle;
   Unsigned16 ShortAddr;
   Unsigned8  AttributeID;
   Unsigned8  MemberID;
@@ -545,32 +545,6 @@ struct tsn_channel{
   Unsigned8   RetryNumber;
 };
 typedef struct tsn_channel tsn_channel_s;
-
-struct tsn_device{
-  Unsigned64 LongAddress;
-  TimeData   TimeValue;
-  Unsigned16 Version;
-  Unsigned16 NumberOfSuperframeUAO;
-  Unsigned16 NumberOfConfiguredUAO;
-  Unsigned16 TransmitDelay;
-  Unsigned16 DeviceShortAddress;
-  Unsigned8  AggregationSupportFlag;
-  Unsigned8  ProbeTime;
-  Unsigned8  RedundantDeviceFlag;
-  Unsigned8  AccessDeviceID;
-  Unsigned8  DeviceState;
-  Unsigned8  PowerSupplyStatus;
-  union {
-    void *AdDevice;
-    tsn_sockaddr_s *SockAddr;
-  };
-  list_head_s link;
-  Unsigned64 SequenceNumber;
-  Unsigned8  MachineState;
-  Unsigned8  Network;
-  Unsigned16 Flags;
-};
-typedef struct tsn_device tsn_device_s;
 
 struct tsn_key{
   Unsigned16  KeyID;

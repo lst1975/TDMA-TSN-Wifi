@@ -29,17 +29,18 @@
  *                              
  **************************************************************************************
  */
-#ifndef __TSN_HANDLE_H__
-#define __TSN_HANDLE_H__
+ 
+#ifndef __TSN_UTILS_H__
+#define __TSN_UTILS_H__
 
-#define TSN_HANDLE_MAX 255
-#define TSN_HANDLE_INVALID ((tsn_handle_t)(-1))
+void tsn_sockaddr_print(tsn_sockaddr_s *s, 
+      const char *head, const char *tail);
+int tsn_sockaddr_salen(tsn_sockaddr_s *s);
 
-tsn_boolean_e TSN_AllocateHandle(tsn_msg_s *msg);
-void TSN_FreeHandle(tsn_msg_s *msg);
-tsn_msg_s *TSN_GetMsgByHandle(tsn_handle_t Handle);
-void TSN_CheckHandle(void);
-void TSN_HandleListInit(void);
+#define TSN_error(fmt, ...) do { if (sysCfg.logError) ___TSN_string("Error", fmt, ##__VA_ARGS__); } while(0)
+#define TSN_event(fmt, ...) do { if (sysCfg.logEvent) ___TSN_string("Event", fmt, ##__VA_ARGS__); } while(0)
+#define TSN_warn(fmt, ...)  do { if (sysCfg.logWarn)  ___TSN_string("Warn",  fmt, ##__VA_ARGS__); } while(0)
+#define TSN_debug(fmt, ...) do { if (sysCfg.logDebug) ___TSN_string("Debug", fmt, ##__VA_ARGS__); } while(0)
 
 #endif
 

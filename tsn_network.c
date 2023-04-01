@@ -29,17 +29,90 @@
  *                              
  **************************************************************************************
  */
-#ifndef __TSN_HANDLE_H__
-#define __TSN_HANDLE_H__
+#include "tsn_private.h"
 
-#define TSN_HANDLE_MAX 255
-#define TSN_HANDLE_INVALID ((tsn_handle_t)(-1))
+tsn_err_e
+tsn_network_find(tsn_network_s **net, 
+  unsigned int network)
+{
+  tsn_network_s *n;
+  if (network >= TSN_NetworkID_MAX)
+    return -TSN_err_exceeded;
 
-tsn_boolean_e TSN_AllocateHandle(tsn_msg_s *msg);
-void TSN_FreeHandle(tsn_msg_s *msg);
-tsn_msg_s *TSN_GetMsgByHandle(tsn_handle_t Handle);
-void TSN_CheckHandle(void);
-void TSN_HandleListInit(void);
+  n = &sysCfg.network[network];
+  if (n->Active != TSN_TRUE)
+    return -TSN_err_existed;
 
-#endif
+  *net = n;
+  return TSN_err_none;
+}
+
+tsn_err_e
+tsn_network_init(tsn_network_s *net, int index)
+{
+  int i;
+
+  net->Index = index;
+  net->AcceptedPhyAddr = NULL;
+  net->AdID            = 0;
+  net->Active          = TSN_FALSE;
+  net->FDNumber        = 0;
+  tsn_memset(net->Devices, 0, sizeof(net->Devices));
+
+  INIT_LIST_HEAD(&net->Ads);
+  INIT_LIST_HEAD(&net->Fds);
+  INIT_LIST_HEAD(&net->All);
+  __list_poison_entry(&net->link);
+  
+  for (i=0;i<TSN_ADID_MAX;i++)
+  {
+    tsn_sockaddr_s *a = &net->ads[i];
+    tsn_memset(a, 0, sizeof(*a));
+    a->sa = (struct sockaddr *)a;
+  }
+  
+  {
+    tsn_sockaddr_s *a;
+    struct sockaddr_in *a4;
+
+    a = &net->ads[0];
+    a->sa   = (struct sockaddr *)a;
+    a->slen = sizeof(a->u.addr4);
+
+    a4 = &a->u.addr4;
+    a4->sin_family      = AF_INET;
+    a4->sin_port        = TSN_htons(8848);
+    a4->sin_addr.s_addr = inet_addr("10.0.2.15");
+  }
+  
+  return TSN_err_none;
+}
+
+tsn_err_e
+tsn_network_actiate(unsigned int network)
+{
+  tsn_network_s *n;
+
+  if (tsn_network_find(&n, network) != TSN_err_none)
+    return -TSN_err_existed;
+
+  n->Active = TSN_TRUE;
+  list_add_tail(&n->link, &sysCfg.Nets);
+  
+  return TSN_err_none;
+}
+
+tsn_err_e
+tsn_network_release(unsigned int network)
+{
+  tsn_network_s *n;
+
+  if (tsn_network_find(&n, network) != TSN_err_none)
+    return -TSN_err_existed;
+
+  n->Active = TSN_FALSE;
+  list_del(&n->link);
+  
+  return TSN_err_none;
+}
 

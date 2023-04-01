@@ -90,6 +90,7 @@ struct AdJoinResponse {
   Unsigned16 ADAddr;
 };
 typedef struct AdJoinResponse tsn_ad_join_response_s;
+
 static inline const char *AdJoinResponseStatus2String(int status)
 {
   switch (status) {
@@ -129,44 +130,79 @@ struct NAckIndication {
 };
 typedef struct NAckIndication tsn_nack_indication_s;
 
-tsn_err_e tsn_dlpdu_process_adgw(tsn_msg_s *msg);
-tsn_err_e
-make_TSN_AD_JOIN_response(tsn_msg_s *msg,
-  Unsigned8 Status, Unsigned64 ADLongAddr,
-  Unsigned8 AdID, Unsigned16 ADAddr);
+tsn_err_e 
+tsn_dlpdu_process_adgw(
+  tsn_msg_s *msg
+);
 
 tsn_err_e
-make_TSN_DLDE_DATA_request(tsn_msg_s *msg,
-    Unsigned8   AdID,
-    Unsigned16  DstAddr,
-    Unsigned16  VCR_ID,
-    Unsigned8   DataType,
-    Unsigned8   Priority,
-    Unsigned16  PayloadLength,
-    OctetString Payload);
+make_TSN_AD_JOIN_response(
+  tsn_msg_s *msg,
+  Unsigned8 Status, 
+  Unsigned64 ADLongAddr,
+  Unsigned8 AdID, 
+  Unsigned16 ADAddr);
 
 tsn_err_e
-make_TSN_DLME_JOIN_response(tsn_msg_s *msg,
-  Unsigned8 AdID, Unsigned8 Status, Unsigned16 ShortAddr);
-tsn_err_e
-make_TSN_GACK_indication(tsn_msg_s *msg,
-  Unsigned8 count, Unsigned8 AdID, Unsigned8 addType,
-  gack_info_s *gack);
+make_TSN_DLDE_DATA_request(
+  tsn_msg_s *msg,
+  Unsigned8   AdID,
+  Unsigned16  DstAddr,
+  Unsigned16  VCR_ID,
+  Unsigned8   DataType,
+  Unsigned8   Priority,
+  Unsigned16  PayloadLength,
+  OctetString Payload
+);
 
 tsn_err_e
-make_TSN_NACK_indication(tsn_msg_s *msg,
-  Unsigned8 count, Unsigned8 AdID, Unsigned8 addType,
-  tsn_addr_s *nack);
-
-tsn_err_e make_TSN_information_set_request(tsn_msg_s *msg, 
-  void *_req, Unsigned8 AdID, 
-  tsn_buffer_s *data);
-tsn_err_e make_TSN_information_get_request(tsn_msg_s *msg, 
-  void *_req, Unsigned8 AdID, 
-  tsn_buffer_s *data __TSN_UNUSED);
+make_TSN_DLME_JOIN_response(
+  tsn_msg_s *msg,
+  Unsigned8 AdID, 
+  Unsigned8 Status, 
+  Unsigned16 ShortAddr
+);
 
 tsn_err_e
-make_TSN_DLME_LEAVE_request(tsn_msg_s *msg,
-  Unsigned8 AdID, Unsigned16 ShortAddr);
+make_TSN_GACK_indication(
+  tsn_msg_s *msg,
+  Unsigned8 count, 
+  Unsigned8 AdID, 
+  Unsigned8 addType,
+  gack_info_s *gack
+);
+
+tsn_err_e
+make_TSN_NACK_indication(
+  tsn_msg_s *msg,
+  Unsigned8 count, 
+  Unsigned8 AdID, 
+  Unsigned8 addType,
+  tsn_addr_s *nack
+);
+
+tsn_err_e 
+make_TSN_information_set_request(
+  tsn_msg_s *msg, 
+  void *_req, 
+  Unsigned8 AdID, 
+  Unsigned8 NetworkID, 
+  tsn_buffer_s *data
+);
+
+tsn_err_e 
+make_TSN_information_get_request(
+  tsn_msg_s *msg, 
+  void *_req, 
+  Unsigned8 AdID, 
+  tsn_buffer_s *data __TSN_UNUSED
+);
+
+tsn_err_e
+make_TSN_DLME_LEAVE_request(
+  tsn_msg_s *msg,
+  Unsigned8 AdID, 
+  Unsigned16 ShortAddr
+);
 
 #endif

@@ -29,17 +29,34 @@
  *                              
  **************************************************************************************
  */
-#ifndef __TSN_HANDLE_H__
-#define __TSN_HANDLE_H__
+#ifndef __TSN_MSG_H__
+#define __TSN_MSG_H__
 
-#define TSN_HANDLE_MAX 255
-#define TSN_HANDLE_INVALID ((tsn_handle_t)(-1))
+typedef uint8_t tsn_handle_t;
+typedef struct tsn_msg tsn_msg_s;
+typedef void (*tsn_msg_f)(tsn_msg_s *m);
 
-tsn_boolean_e TSN_AllocateHandle(tsn_msg_s *msg);
-void TSN_FreeHandle(tsn_msg_s *msg);
-tsn_msg_s *TSN_GetMsgByHandle(tsn_handle_t Handle);
-void TSN_CheckHandle(void);
-void TSN_HandleListInit(void);
+struct tsn_msg {
+  list_head_s link;
+  list_head_s wait;
+  tsn_buffer_s b;
+  tsn_sockaddr_s from;
+  void *priv;
+  union {
+    tsn_gw_dlpdu_normal_s _dlpdu;
+    tsn_gw_dlpdu_normal_s _dllhdr;
+  };
+  void *dlpdu;
+  tsn_msg_f cb;
+  TimeData stamp;
+  tsn_handle_t handle;
+  uint8_t isInQ;
+  uint8_t NetworkID;
+};
+
+tsn_msg_s *tsn_create_msg(void *priv, int len);
+void tsn_free_msg(tsn_msg_s *m);
+tsn_msg_s *tsn_duplicate_msg(tsn_msg_s *_msg, int len);
 
 #endif
 

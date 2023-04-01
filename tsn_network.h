@@ -29,17 +29,50 @@
  *                              
  **************************************************************************************
  */
-#ifndef __TSN_HANDLE_H__
-#define __TSN_HANDLE_H__
+#ifndef __TSN_NETWORK_H__
+#define __TSN_NETWORK_H__
 
-#define TSN_HANDLE_MAX 255
-#define TSN_HANDLE_INVALID ((tsn_handle_t)(-1))
+#define TSN_ADID_MAX 32
+#define TSN_ADID_INVALID TSN_ADID_MAX
+#define TSN_ShorAddress_MAX 1024
+#define TSN_ShorAddress_INVALID ((uint16_t)(0))
+#define TSN_NetworkID_MAX 8
 
-tsn_boolean_e TSN_AllocateHandle(tsn_msg_s *msg);
-void TSN_FreeHandle(tsn_msg_s *msg);
-tsn_msg_s *TSN_GetMsgByHandle(tsn_handle_t Handle);
-void TSN_CheckHandle(void);
-void TSN_HandleListInit(void);
+typedef struct tsn_network tsn_network_s;
+
+struct tsn_network{
+  uint64_t AdID:8;
+  uint64_t FDNumber:24;
+  uint64_t Active:1;
+  uint64_t Index:24;
+  uint64_t *AcceptedPhyAddr;
+  tsn_device_s *Devices[TSN_ShorAddress_MAX];
+  list_head_s Ads;
+  list_head_s Fds;
+  list_head_s All;
+  list_head_s link;
+  tsn_sockaddr_s ads[TSN_ADID_MAX];
+};
+
+tsn_err_e 
+tsn_network_find(
+  tsn_network_s **net, 
+  unsigned int network);
+
+tsn_err_e
+tsn_network_init(
+  tsn_network_s *net, 
+  int index
+);
+
+tsn_err_e
+tsn_network_release(
+  unsigned int network
+);
+
+tsn_err_e
+tsn_network_actiate(
+  unsigned int network
+);
 
 #endif
-

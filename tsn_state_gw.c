@@ -294,17 +294,17 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
         
         {
           uint8_t DeviceState;
-          req.Handle          = TSN_htons(dmap->DeviceShortAddress|DLME_STATE_information_set_DeviceList);
+          
           req.DstAddr         = TSN_htons(dmap->DeviceShortAddress);
           req.AttributeOption = DLME_information_set_option_UPDATE;
-          req.AttributeID     = 131; /* DMAP_mib_id_list_DeviceList */
-          req.MemberID        = 12;  /* DMAP_mib_id_device_DeviceState */
+          req.AttributeID     = DMAP_mib_id_list_DeviceList; /* 131 */
+          req.MemberID        = DMAP_mib_id_device_DeviceState;  /* 12 */
           req.FirstStoreIndex = TSN_htons(dmap->DeviceShortAddress);
           req.Count           = TSN_htons(1);
           DeviceState  = DMAP_mib_id_device_DeviceState_AllocatingResources;
           dmap->Flags |= DLME_STATE_information_set_DeviceList;
           tsn_buffer_set(&b, &DeviceState, 1);
-          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, &b);
+          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, dmap->Network, &b);
 
           TSN_event("Try to send DeviceState : AllocatingResources.\n");
         }
@@ -313,10 +313,9 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           tsn_superframe_s s, *c;
           
           c = &sysCfg.config.SuperframeList;
-          req.Handle          = TSN_htons(dmap->DeviceShortAddress|DLME_STATE_information_set_SuperframeList);
           req.DstAddr         = TSN_htons(dmap->DeviceShortAddress);
           req.AttributeOption = DLME_information_set_option_ADD;
-          req.AttributeID     = 128; /* DMAP_mib_id_list_SuperframeList */
+          req.AttributeID     = DMAP_mib_id_list_SuperframeList; /* 128 */
           req.MemberID        = DMAP_mib_id_ALL;
           req.FirstStoreIndex = TSN_htons(dmap->DeviceShortAddress);
           req.Count           = TSN_htons(1);
@@ -327,7 +326,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           s.ActiveFlag   = c->ActiveFlag;
           tsn_memcpy(&s.ActiveSlot, &c->ActiveSlot, sizeof(c->ActiveSlot));
           tsn_buffer_set(&b, (Unsigned8 *)&s, sizeof(s));
-          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, &b);
+          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, dmap->Network, &b);
 
           TSN_event("Try to send SuperframeList.\n");
         }
@@ -336,10 +335,9 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           tsn_dll_link_s s, *c;
           
           c = &sysCfg.config.DllLinkList;
-          req.Handle          = TSN_htons(dmap->DeviceShortAddress|DLME_STATE_information_set_DllLinkList);
           req.DstAddr         = TSN_htons(dmap->DeviceShortAddress);
           req.AttributeOption = DLME_information_set_option_ADD;
-          req.AttributeID     = 129; /* DMAP_mib_id_list_DllLinkList */
+          req.AttributeID     = DMAP_mib_id_list_DllLinkList; /* 129 */
           req.MemberID        = DMAP_mib_id_ALL;
           req.FirstStoreIndex = TSN_htons(dmap->DeviceShortAddress);
           req.Count           = TSN_htons(1);
@@ -353,11 +351,12 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
           s.ChannelIndex         = c->ChannelIndex;
           s.SuperframeID         = c->SuperframeID;
           tsn_buffer_set(&b, (Unsigned8 *)&s, sizeof(s));
-          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, &b);
+          DLME_information_set_request(msg, &req, dmap->AccessDeviceID, dmap->Network, &b);
 
           TSN_event("Try to send DllLinkList.\n");
         }
-        
+
+        tsn_free_msg(msg);
         return TSN_TRUE;
       }
       else if (trigger == DMAP_TRIGGER_T5_infoSetConfirm)

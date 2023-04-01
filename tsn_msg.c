@@ -1,3 +1,4 @@
+
 /**************************************************************************************
  *               TDMA Time-Sensitive-Network Wifi V1.0.1
  * Copyright (C) 2022 Songtao Liu, 980680431@qq.com.  All Rights Reserved.
@@ -29,17 +30,38 @@
  *                              
  **************************************************************************************
  */
-#ifndef __TSN_HANDLE_H__
-#define __TSN_HANDLE_H__
+#include "tsn_private.h"
 
-#define TSN_HANDLE_MAX 255
-#define TSN_HANDLE_INVALID ((tsn_handle_t)(-1))
+tsn_msg_s *
+tsn_create_msg(void *priv, int len)
+{
+  tsn_msg_s *m = (tsn_msg_s *)tsn_malloc(sizeof(*m)+len);
+  if (m == NULL)
+    return NULL;
+  m->priv   = priv;
+  m->handle = TSN_HANDLE_INVALID;
+  m->isInQ  = TSN_FALSE;
+  m->stamp  = 0;
+  m->cb     = NULL;
+  m->dlpdu  = &m->_dlpdu;
+  tsn_buffer_init(&m->b, (Unsigned8 *)(m+1), len);
+  return m;
+}
 
-tsn_boolean_e TSN_AllocateHandle(tsn_msg_s *msg);
-void TSN_FreeHandle(tsn_msg_s *msg);
-tsn_msg_s *TSN_GetMsgByHandle(tsn_handle_t Handle);
-void TSN_CheckHandle(void);
-void TSN_HandleListInit(void);
+void
+tsn_free_msg(tsn_msg_s *m)
+{
+  tsn_free(m);
+}
 
-#endif
+tsn_msg_s *
+tsn_duplicate_msg(tsn_msg_s *_msg, int len)
+{
+  tsn_msg_s *msg;
 
+  msg = tsn_create_msg(_msg->priv, len);
+  if (msg == NULL)
+    return NULL;
+  msg->from = _msg->from;
+  return msg;
+}

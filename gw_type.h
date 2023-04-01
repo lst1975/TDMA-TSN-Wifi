@@ -302,6 +302,7 @@ enum tsn_err{
   TSN_err_none=0,
   TSN_err_malformed,
   TSN_err_tooshort,
+  TSN_err_toolong,
   TSN_err_unsupport,
   TSN_err_existed,
   TSN_err_nomem,

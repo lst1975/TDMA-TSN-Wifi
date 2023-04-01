@@ -29,17 +29,20 @@
  *                              
  **************************************************************************************
  */
-#ifndef __TSN_HANDLE_H__
-#define __TSN_HANDLE_H__
+#include "tsn_private.h"
 
-#define TSN_HANDLE_MAX 255
-#define TSN_HANDLE_INVALID ((tsn_handle_t)(-1))
+void
+tsn_sockaddr_print(tsn_sockaddr_s *s, const char *head, const char *tail)
+{
+  char ipstr[INET6_ADDRSTRLEN];
+  tsn_print("%s%s%s", head, inet_ntop(s->sa->sa_family, s, ipstr, 
+    s->sa->sa_family == AF_INET ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN), tail);
+}
 
-tsn_boolean_e TSN_AllocateHandle(tsn_msg_s *msg);
-void TSN_FreeHandle(tsn_msg_s *msg);
-tsn_msg_s *TSN_GetMsgByHandle(tsn_handle_t Handle);
-void TSN_CheckHandle(void);
-void TSN_HandleListInit(void);
+int
+tsn_sockaddr_salen(tsn_sockaddr_s *s)
+{
+  return s->sa->sa_family == AF_INET ? sizeof(s->u.addr4) : sizeof(s->u.addr6);
+}
 
-#endif
 

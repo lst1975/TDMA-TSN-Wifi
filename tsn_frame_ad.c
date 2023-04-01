@@ -309,7 +309,7 @@ make_TSN_DLME_INFO_SET_confirm(tsn_msg_s *msg,
   tsn_buffer_put8(b, TSN_DLME_INFO_SET_confirm);
   tsn_buffer_put8(b, AdID);
   tsn_buffer_put16(b, AttrLen);
-  tsn_buffer_put16(b, cfm->Handle);
+  tsn_buffer_put8(b, cfm->Handle);
   tsn_buffer_put8(b, cfm->Status);
 
   if (sysCfg.dumpPacket || sysCfg.logDebug)

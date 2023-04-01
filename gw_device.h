@@ -29,17 +29,66 @@
  *                              
  **************************************************************************************
  */
-#ifndef __TSN_HANDLE_H__
-#define __TSN_HANDLE_H__
+#ifndef __GW_DEVICE_H__
+#define __GW_DEVICE_H__
 
-#define TSN_HANDLE_MAX 255
-#define TSN_HANDLE_INVALID ((tsn_handle_t)(-1))
+struct tsn_device{
+  Unsigned64 LongAddress;
+  TimeData   TimeValue;
+  Unsigned16 Version;
+  Unsigned16 NumberOfSuperframeUAO;
+  Unsigned16 NumberOfConfiguredUAO;
+  Unsigned16 TransmitDelay;
+  Unsigned16 DeviceShortAddress;
+  Unsigned8  AggregationSupportFlag;
+  Unsigned8  ProbeTime;
+  Unsigned8  RedundantDeviceFlag;
+  Unsigned8  AccessDeviceID;
+  Unsigned8  DeviceState;
+  Unsigned8  PowerSupplyStatus;
+  union {
+    void *AdDevice;
+    tsn_sockaddr_s *SockAddr;
+  };
+  list_head_s link;
+  list_head_s all;
+  Unsigned64 SequenceNumber;
+  Unsigned8  MachineState;
+  Unsigned8  Network;
+  Unsigned16 Flags;
+};
+typedef struct tsn_device tsn_device_s;
 
-tsn_boolean_e TSN_AllocateHandle(tsn_msg_s *msg);
-void TSN_FreeHandle(tsn_msg_s *msg);
-tsn_msg_s *TSN_GetMsgByHandle(tsn_handle_t Handle);
-void TSN_CheckHandle(void);
-void TSN_HandleListInit(void);
+tsn_err_e
+TSN_device_find_ByLongAddr(
+  tsn_device_s **_dev, 
+  unsigned int NetworkID, 
+  Unsigned64 PhyAddr);
+
+tsn_err_e
+TSN_device_find_ByShortAddr(
+  tsn_device_s **_dev, 
+  unsigned int NetworkID, 
+  Unsigned16 ShortAddress);
+
+void
+TSN_device_init(
+  tsn_device_s *dev,
+  Unsigned64 LongAddress, 
+  Unsigned8 AdID, 
+  Unsigned8 DeviceState, 
+  Unsigned16 DeviceShortAddress);
+
+tsn_err_e
+TSN_device_create(
+  tsn_device_s **_dev,
+  unsigned int NetworkID, 
+  Unsigned64 LongAddress, 
+  Unsigned8 AdID, 
+  Unsigned8 DeviceState, 
+  Unsigned16 DeviceShortAddress);
+
+tsn_err_e
+TSN_device_destroy(tsn_device_s *dev);
 
 #endif
-

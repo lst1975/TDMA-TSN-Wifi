@@ -35,13 +35,13 @@
 #define TSN_HANDLE_TIMEOUT 30000
 
 struct _res_handle{
-  uint16_t Handle;
+  tsn_handle_t Handle;
   list_head_s link;
 };
 typedef struct _res_handle TsnHandle;
 
 struct _res_handle_s{
-  uint16_t Handle;
+  tsn_handle_t Handle;
   list_head_s head;
 };
 typedef struct _res_handle_s tsn_handle_s;
@@ -54,7 +54,7 @@ static tsn_handle_s tsn_handle_list = {
 };
  
 static tsn_boolean_e 
-__TSN_AllocateHandle(uint16_t *Handle)
+__TSN_AllocateHandle(tsn_handle_t *Handle)
 {
   tsn_handle_s *s = &tsn_handle_list;
   if (s->Handle >= TSN_HANDLE_MAX - 1)
@@ -74,9 +74,9 @@ __TSN_AllocateHandle(uint16_t *Handle)
 }
 
 static void 
-__TSN_FreeHandle(uint16_t *_Handle)
+__TSN_FreeHandle(tsn_handle_t *_Handle)
 {
-  uint16_t Handle = *_Handle;
+  tsn_handle_t Handle = *_Handle;
 
   if (Handle == TSN_HANDLE_INVALID)
     return;
@@ -99,6 +99,7 @@ TSN_AllocateHandle(tsn_msg_s *msg)
   tsn_handle_msg_array[msg->handle] = msg;
   list_add_tail(&msg->wait, &tsn_handle_msg_list);
   msg->stamp = tsn_system_time();
+  msg->isInQ = TSN_TRUE;
   return TSN_TRUE;
 }
 
@@ -115,10 +116,14 @@ TSN_FreeHandle(tsn_msg_s *msg)
 }
 
 tsn_msg_s * 
-TSN_GetMsgByHandle(uint16_t Handle)
+TSN_GetMsgByHandle(tsn_handle_t Handle)
 {
   TimeData stamp;
-  tsn_msg_s *msg = tsn_handle_msg_array[Handle];
+  tsn_msg_s *msg;
+
+  if (msg->handle == TSN_HANDLE_INVALID)
+    return NULL;
+  msg = tsn_handle_msg_array[Handle];
   if (msg == NULL)
     return NULL;
   stamp = tsn_system_time();

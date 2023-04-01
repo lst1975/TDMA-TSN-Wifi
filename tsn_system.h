@@ -48,14 +48,12 @@ struct tsn_sys_config {
   uint64_t State: 3;
   list_head_s posted_accept_events;
   list_head_s posted_events;
+  list_head_s Nets;
   
   tsn_network_s network[TSN_NetworkID_MAX];
   tsn_static_config_s config;
 };
 typedef struct tsn_sys_config tsn_sys_config_s;
-
-#define TSN_HANDLE_MAX 256
-#define TSN_HANDLE_INVALID ((uint16_t)(-1))
 
 struct tsn_gw_dlpdu_normal{
   Unsigned8   ServID;
@@ -66,66 +64,9 @@ struct tsn_gw_dlpdu_normal{
 };
 typedef struct tsn_gw_dlpdu_normal tsn_gw_dlpdu_normal_s;
 
-typedef struct tsn_msg tsn_msg_s;
-typedef void (*tsn_msg_f)(tsn_msg_s *m);
-
-struct tsn_msg {
-  list_head_s link;
-  list_head_s wait;
-  tsn_buffer_s b;
-  tsn_sockaddr_s from;
-  void *priv;
-  union {
-    tsn_gw_dlpdu_normal_s _dlpdu;
-    tsn_gw_dlpdu_normal_s _dllhdr;
-  };
-  void *dlpdu;
-  tsn_msg_f cb;
-  TimeData stamp;
-  uint16_t handle;
-  uint8_t isInQ;
-};
-
-static inline tsn_msg_s *
-tsn_create_msg(void *priv, int len)
-{
-  tsn_msg_s *m = (tsn_msg_s *)tsn_malloc(sizeof(*m)+len);
-  if (m == NULL)
-    return NULL;
-  m->priv   = priv;
-  m->handle = TSN_HANDLE_INVALID;
-  m->isInQ  = TSN_FALSE;
-  m->stamp  = 0;
-  m->cb     = NULL;
-  m->dlpdu  = &m->_dlpdu;
-  tsn_buffer_init(&m->b, (Unsigned8 *)(m+1), len);
-  return m;
-}
-
-static inline void
-tsn_free_msg(tsn_msg_s *m)
-{
-  tsn_free(m);
-}
-
-static inline tsn_msg_s *
-tsn_duplicate_msg(tsn_msg_s *_msg, int len)
-{
-  tsn_msg_s *msg;
-
-  msg = tsn_create_msg(_msg->priv, len);
-  if (msg == NULL)
-    return NULL;
-  msg->from = _msg->from;
-  return msg;
-}
-
 extern tsn_sys_config_s sysCfg;
 
 __TSN_INTERFACE TimeData tsn_system_time(void);
-tsn_err_e tsn_system_get_network(tsn_network_s **net, unsigned int network);
-void tsn_sockaddr_print(tsn_sockaddr_s *s, const char *head, const char *tail);
-int tsn_sockaddr_salen(tsn_sockaddr_s *s);
 tsn_boolean_e tsn_system_init(void);
 
 #endif

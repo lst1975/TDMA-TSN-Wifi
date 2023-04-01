@@ -32,13 +32,14 @@
 #include "tsn_private.h"
 
 tsn_device_s *
-tsn_network_ad_find_by_PhyAddr(Unsigned8 NetworkID, Unsigned64 PhyAddr)
+tsn_network_ad_find_by_PhyAddr(Unsigned8 NetworkID, 
+  Unsigned64 PhyAddr)
 {
   tsn_err_e r;
   tsn_device_s *dev;
   tsn_network_s *net;
 
-  r = tsn_system_get_network(&net, NetworkID);
+  r = tsn_network_find(&net, NetworkID);
   if (r != TSN_err_none)
     return NULL;
 
@@ -54,38 +55,41 @@ tsn_network_ad_find_by_PhyAddr(Unsigned8 NetworkID, Unsigned64 PhyAddr)
 int
 tsn_network_id_by_Sockaddr(tsn_sockaddr_s *s)
 {
-  int i;
+  tsn_network_s *n;
 
-  for (i=0;i<TSN_NetworkID_MAX;i++)
+  list_for_each_entry(n,tsn_network_s,&sysCfg.Nets,link)
   {
     int j;
     tsn_network_s *n;
 
-    n = &sysCfg.network[i];
     for (j=0;j<TSN_ADID_MAX;j++)
     {
-      tsn_sockaddr_s *a = &n->ads[i];
+      tsn_sockaddr_s *a = &n->ads[j];
       if (!a->slen)
-        continue;
+        break;
       if (tsn_sockaddr_isequal(a, (struct sockaddr *)s))
-        return i;
+        return n->Index;
     }
   }
+  
   return TSN_NetworkID_MAX;
 }
 
 tsn_sockaddr_s *
-tsn_system_cfg_ad_find(unsigned int NetworkID, tsn_sockaddr_s *s)
+tsn_system_cfg_ad_find(unsigned int NetworkID, 
+  tsn_sockaddr_s *s)
 {
   int i;
   tsn_network_s *net;
 
-  if (TSN_err_none != tsn_system_get_network(&net, NetworkID))
+  if (TSN_err_none != tsn_network_find(&net, NetworkID))
     return NULL;
 
   for (i=0;i<TSN_ADID_MAX;i++)
   {
     tsn_sockaddr_s *a = &net->ads[i];
+    if (!a->slen)
+      break;
     if (tsn_sockaddr_isequal(a, (struct sockaddr *)s))
       return a;
   }
@@ -94,13 +98,14 @@ tsn_system_cfg_ad_find(unsigned int NetworkID, tsn_sockaddr_s *s)
 }
 
 tsn_boolean_e
-tsn_system_cfg_ad_add(unsigned int NetworkID, tsn_sockaddr_s *s)
+tsn_system_cfg_ad_add(unsigned int NetworkID, 
+  tsn_sockaddr_s *s)
 {
   int i;
   tsn_network_s *net;
   tsn_sockaddr_s *a;
 
-  if (TSN_err_none != tsn_system_get_network(&net, NetworkID))
+  if (TSN_err_none != tsn_network_find(&net, NetworkID))
     return TSN_FALSE;
 
   a = tsn_system_cfg_ad_find(NetworkID, s);
@@ -122,7 +127,8 @@ tsn_system_cfg_ad_add(unsigned int NetworkID, tsn_sockaddr_s *s)
 }
 
 tsn_boolean_e
-tsn_system_cfg_ad_del(unsigned int NetworkID, tsn_sockaddr_s *s)
+tsn_system_cfg_ad_del(unsigned int NetworkID, 
+  tsn_sockaddr_s *s)
 {
   tsn_sockaddr_s *a = tsn_system_cfg_ad_find(NetworkID, s);
   if (a == NULL)

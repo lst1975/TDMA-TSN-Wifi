@@ -67,6 +67,7 @@ tsn_sys_config_s sysCfg = {
   .config.AlarmReportDuration              = 1     /* in ms */,   
   .config.ChannelNumber                    = 1, 
   .config.AggregationEnableFlag            = TSN_FALSE, 
+  .Nets                                    = LIST_HEAD_INIT(sysCfg.Nets)
 };
 
 __TSN_INTERFACE TimeData tsn_system_time(void)
@@ -88,70 +89,17 @@ tsn_boolean_e tsn_system_init(void)
 
   for (i=0;i<TSN_NetworkID_MAX;i++)
   {
-    int j;
-    
-    s = &sysCfg.network[i];
-    s->AcceptedPhyAddr = NULL;
-    s->AdID = 0;
-    s->Active = TSN_FALSE;
-    s->FDNumber = 0;
-    tsn_memset(s->Devices, 0, sizeof(s->Devices));
-    INIT_LIST_HEAD(&s->Ads);
-
-    for (j=0;j<TSN_ADID_MAX;j++)
-    {
-      tsn_sockaddr_s *a = &s->ads[i];
-      tsn_memset(a, 0, sizeof(*a));
-      a->sa = (struct sockaddr *)a;
-    }
-    {
-      tsn_sockaddr_s *a;
-      struct sockaddr_in *a4;
-
-      a = &s->ads[0];
-      a->sa   = (struct sockaddr *)a;
-      a->slen = sizeof(a->u.addr4);
-
-      a4 = &a->u.addr4;
-      a4->sin_family      = AF_INET;
-      a4->sin_port        = TSN_htons(8848);
-      a4->sin_addr.s_addr = inet_addr("10.0.2.15");
-    }
-
+    tsn_err_e r;
+    r = tsn_network_init(&sysCfg.network[i], i);
+    if (r != TSN_err_none)
+      goto error;
   }
-  sysCfg.network[0].Active = TSN_TRUE;
+
+  if (tsn_network_actiate(0) != TSN_err_none)
+    goto error;
+  
   return TSN_TRUE;
 
 error:
   return TSN_FALSE;
 }
-
-tsn_err_e
-tsn_system_get_network(tsn_network_s **net, unsigned int network)
-{
-  tsn_network_s *n;
-  if (network >= TSN_NetworkID_MAX)
-    return -TSN_err_exceeded;
-
-  n = &sysCfg.network[network];
-  if (n->Active != TSN_TRUE)
-    return -TSN_err_existed;
-
-  *net = n;
-  return TSN_err_none;
-}
-
-void
-tsn_sockaddr_print(tsn_sockaddr_s *s, const char *head, const char *tail)
-{
-  char ipstr[INET6_ADDRSTRLEN];
-  tsn_print("%s%s%s", head, inet_ntop(s->sa->sa_family, s, ipstr, 
-    s->sa->sa_family == AF_INET ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN), tail);
-}
-
-int
-tsn_sockaddr_salen(tsn_sockaddr_s *s)
-{
-  return s->sa->sa_family == AF_INET ? sizeof(s->u.addr4) : sizeof(s->u.addr6);
-}
-
