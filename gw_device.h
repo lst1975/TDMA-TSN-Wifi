@@ -91,6 +91,23 @@ TSN_device_create(
   Unsigned8 DeviceState, 
   Unsigned16 DeviceShortAddress);
 
+tsn_boolean_e 
+tsn_device_mib_get(
+  unsigned short networkID, 
+  unsigned short memberID, 
+  unsigned short firstIndex, 
+  unsigned short count, 
+  void **data);
+
+tsn_boolean_e 
+tsn_device_mib_set(
+  unsigned short networkID, 
+  unsigned short memberID, 
+  unsigned short firstIndex, 
+  unsigned short count, 
+  void *data, 
+  unsigned short *len);
+
 tsn_err_e
 TSN_device_destroy(tsn_device_s *dev);
 

@@ -40,6 +40,7 @@ void __ReleaseResources(uint16_t *_Addr)
 {
   TSN_FreeShortAddr(_Addr);
 }
+
 /* DMAP ---> Device Management Application Process */
 static inline tsn_boolean_e 
 __DLME_join_response(tsn_msg_s *msg, Unsigned8 AdID, 
@@ -53,6 +54,7 @@ __DLME_join_response(tsn_msg_s *msg, Unsigned8 AdID,
   tsn_send_udp_msg(msg);
   return TSN_TRUE;
 }
+
 /***********************************************************************************
  * GB/T26790.2-2015, 6.2.5.1, Page 18, Table 12, Graph 13 
  *                   GW Device DMAP State Machine 
@@ -323,7 +325,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
         {
           tsn_superframe_s s, *c;
           
-          c = &sysCfg.config.SuperframeList;
+          c = sysCfg.config.SuperframeList;
           req.DstAddr         = TSN_htons(dmap->DeviceShortAddress);
           req.AttributeOption = DLME_information_set_option_ADD;
           req.AttributeID     = DMAP_mib_id_list_SuperframeList; /* 128 */
@@ -354,7 +356,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
         {
           tsn_dll_link_s s, *c;
           
-          c = &sysCfg.config.DllLinkList;
+          c = sysCfg.config.DllLinkList;
           req.DstAddr         = TSN_htons(dmap->DeviceShortAddress);
           req.AttributeOption = DLME_information_set_option_ADD;
           req.AttributeID     = DMAP_mib_id_list_DllLinkList; /* 129 */
@@ -365,7 +367,7 @@ gw_dmap_state_machine(tsn_msg_s *msg, tsn_device_s *dmap,
 
           s.LinkID               = TSN_htons(c->LinkID);
           s.LinkType             = c->LinkType;
-          *(uint32_t*)&s.PacketLossRate = TSN_htonl(*(uint32_t*)&c->PacketLossRate);
+          tsn_memcpy(s.ActiveSlot, c->ActiveSlot, 6);
           s.PeerAddr             = TSN_htons(c->PeerAddr);
           s.RelativeSlotNumber   = TSN_htons(c->RelativeSlotNumber);
           s.ChannelIndex         = c->ChannelIndex;

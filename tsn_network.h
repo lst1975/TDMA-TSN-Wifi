@@ -44,7 +44,8 @@ struct tsn_network{
   uint64_t AdID:8;
   uint64_t FDNumber:24;
   uint64_t Active:1;
-  uint64_t Index:24;
+  uint64_t Index:10;
+  uint64_t DevCount:16;
   uint64_t *AcceptedPhyAddr;
   tsn_device_s *Devices[TSN_ShorAddress_MAX];
   list_head_s Ads;

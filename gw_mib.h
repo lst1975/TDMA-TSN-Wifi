@@ -34,6 +34,7 @@
 
 struct DsnDmapMibGetRequest{
   Unsigned8 Handle;
+  Unsigned8 NetworkID;
   Unsigned16 ShortAddr;
   Unsigned8  AttributeID;
   Unsigned8  MemberID;
@@ -117,25 +118,99 @@ static inline int DMAP_mib_get_confirm(void *cfm)
 #define DMAP_mib_permission_read  0x02
 
 typedef struct TSN_DMAP_mib_attribute TSN_DMAP_mib_attribute_s;
-typedef void * (*tsn_mib_get_f)(int *len);
-typedef tsn_boolean_e (*tsn_mib_set_f)(void *data, int len);
 
-void * tsn_mib_get(int *len __TSN_UNUSED);
-tsn_boolean_e tsn_mib_set(void *data __TSN_UNUSED, int len __TSN_UNUSED);
+#define TSN_mib_get_type_check  0
+#define TSN_mib_get_type_data   1
+
+typedef tsn_boolean_e (*tsn_mib_get_f)(
+  unsigned short networkID, 
+  unsigned short memberID,
+  unsigned short firstIndex,
+  unsigned short count, 
+  void **data
+);
+
+typedef tsn_boolean_e (*tsn_mib_set_f)(
+  unsigned short networkID, 
+  unsigned short memberID, 
+  unsigned short firstIndex,
+  unsigned short count, 
+  void *data, 
+  unsigned short *len
+);
 
 struct TSN_DMAP_mib_attribute{
   const char *Name;
   const char *Description;
-  uint16_t AttributeID;
-  uint16_t MibType:2;
-  uint16_t DataType:3;
-  uint16_t Access:2;
-  uint16_t Device:2;
-  uint16_t DefaultEntryCount:7;
-  uint32_t Offset;
-  uint64_t DefaultValueStatic;
-  uint64_t ValueMin;
-  uint64_t ValueMax;
+  
+  uint64_t AttributeID:10;
+  uint64_t DefaultEntryCount:7;
+  uint64_t MibType:5;
+  uint64_t DataType:5;
+  uint64_t Access:2;
+  uint64_t Device:4;
+  uint64_t Offset:31;
+
+  union{
+    Unsigned8     DefaultValue_Unsigned8;
+    Unsigned16    DefaultValue_Unsigned16;
+    Unsigned24    DefaultValue_Unsigned24;
+    Unsigned32    DefaultValue_Unsigned32;
+    Unsigned40    DefaultValue_Unsigned40;
+    Unsigned48    DefaultValue_Unsigned48;
+    Unsigned64    DefaultValue_Unsigned64;
+    Unsigned80    DefaultValue_Unsigned80;
+    Unsigned8     DefaultValue_BitField8;
+    Unsigned16    DefaultValue_BitField16;
+    Unsigned24    DefaultValue_BitField24;
+    TimeData      DefaultValue_TimeData;
+    KeyData       DefaultValue_KeyData;
+    OctetString   DefaultValue_OctetString;
+    BitsString    DefaultValue_BitsString;
+    double   DefaultValue_SingleFloat;
+    double   DefaultValue_DoubleFloat;
+  };
+  
+  union{
+    Unsigned8     ValueMin_Unsigned8;
+    Unsigned16    ValueMin_Unsigned16;
+    Unsigned24    ValueMin_Unsigned24;
+    Unsigned32    ValueMin_Unsigned32;
+    Unsigned40    ValueMin_Unsigned40;
+    Unsigned48    ValueMin_Unsigned48;
+    Unsigned64    ValueMin_Unsigned64;
+    Unsigned80    ValueMin_Unsigned80;
+    Unsigned8     ValueMin_BitField8;
+    Unsigned16    ValueMin_BitField16;
+    Unsigned24    ValueMin_BitField24;
+    TimeData      ValueMin_TimeData;
+    KeyData       ValueMin_KeyData;
+    OctetString   ValueMin_OctetString;
+    BitsString    ValueMin_BitsString;
+    double   ValueMin_SingleFloat;
+    double   ValueMin_DoubleFloat;
+  };
+  
+  union{
+    Unsigned8     ValueMax_Unsigned8;
+    Unsigned16    ValueMax_Unsigned16;
+    Unsigned24    ValueMax_Unsigned24;
+    Unsigned32    ValueMax_Unsigned32;
+    Unsigned40    ValueMax_Unsigned40;
+    Unsigned48    ValueMax_Unsigned48;
+    Unsigned64    ValueMax_Unsigned64;
+    Unsigned80    ValueMax_Unsigned80;
+    Unsigned8     ValueMax_BitField8;
+    Unsigned16    ValueMax_BitField16;
+    Unsigned24    ValueMax_BitField24;
+    TimeData      ValueMax_TimeData;
+    KeyData       ValueMax_KeyData;
+    OctetString   ValueMax_OctetString;
+    BitsString    ValueMax_BitsString;
+    double   ValueMax_SingleFloat;
+    double   ValueMax_DoubleFloat;
+  };
+  
   tsn_mib_get_f MibGet;
   tsn_mib_set_f MibSet;
   TSN_DMAP_mib_attribute_s *DefaultEntryAddr;
@@ -157,8 +232,8 @@ struct TSN_DMAP_mib_attribute{
     KeyData       value_KeyData;
     OctetString   value_OctetString;
     BitsString    value_BitsString;
-    SingleFloat   value_SingleFloat;
-    DoubleFloat   value_DoubleFloat;
+    double        value_SingleFloat;
+    double        value_DoubleFloat;
   }Value;
 };
 
@@ -202,42 +277,40 @@ TSN_DMAP_mib_entry_get_data(TSN_DMAP_mib_attribute_s *mib)
   }
 }
 
-#define __DECL_MIB_ATTR_OFFSET(prefix,id,dataType,mi,mx,permission,mibType,dftValue,devices,description,offset) { \
-  .Name        = #id, \
-  .Description = description, \
-  .AttributeID = prefix ## id, \
-  .MibType     = mibType, \
-  .DataType    = DATA_TYPE_ ## dataType, \
-  .Access      = permission, \
-  .Device      = devices, \
-  .ValueMin    = mi, \
-  .ValueMax    = mx, \
+#define __DECL_MIB_ATTR_OFFSET(prefix,id,dataType,mi,mx,permission,\
+  mibType,dftValue,devices,description,offset,get,set) { \
+  .Name         = #id, \
+  .Description  = description, \
+  .AttributeID  = prefix ## id, \
+  .MibType      = mibType, \
+  .DataType     = DATA_TYPE_ ## dataType, \
+  .Access       = permission, \
+  .Device       = devices, \
+  .ValueMin_##dataType     = mi, \
+  .ValueMax_##dataType     = mx, \
   .Value.value_##dataType  = dftValue, \
-  .DefaultValueStatic = (uint64_t)dftValue, \
+  .DefaultValue_##dataType = dftValue, \
   .DefaultEntryAddr   = NULL, \
   .DefaultEntryCount  = 0, \
   .Offset             = offset, \
-  .MibGet             = tsn_mib_get, \
-  .MibSet             = tsn_mib_set, \
+  .MibGet             = get, \
+  .MibSet             = set, \
 }
     
-#define __DECL_MIB_ATTR_OFFSET_LIST(defaultEntry,prefix,id,dataType,mi,mx,permission,mibType,dftValue,devices,description,offset) { \
-  .Name        = #id, \
-  .Description = description, \
-  .AttributeID = prefix ## id, \
-  .MibType     = mibType, \
-  .DataType    = DATA_TYPE_ ## dataType, \
-  .Access      = permission, \
-  .Device      = devices, \
-  .ValueMin    = mi, \
-  .ValueMax    = mx, \
-  .Value.value_##dataType  = dftValue, \
-  .DefaultValueStatic = (uint64_t)dftValue, \
+#define __DECL_MIB_ATTR_OFFSET_LIST(defaultEntry,prefix,id,dataType,mi,mx,\
+  permission,mibType,dftValue,devices,description,offset,get,set) { \
+  .Name         = #id, \
+  .Description  = description, \
+  .AttributeID  = prefix ## id, \
+  .MibType      = mibType, \
+  .DataType     = DATA_TYPE_ ## dataType, \
+  .Access       = permission, \
+  .Device       = devices, \
   .DefaultEntryAddr   = defaultEntry, \
   .DefaultEntryCount  = sizeof(defaultEntry)/sizeof(TSN_DMAP_mib_attribute_s), \
   .Offset             = offset, \
-  .MibGet             = tsn_mib_get, \
-  .MibSet             = tsn_mib_set, \
+  .MibGet             = get, \
+  .MibSet             = set, \
 }
         
 static inline tsn_boolean_e
@@ -311,7 +384,7 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
 #define DMAP_mib_id_list_DeviceList                          (DMAP_mib_id_list_MIN+3) 
 #define DMAP_mib_id_list_KeyList                             (DMAP_mib_id_list_MIN+4) 
 #define DMAP_mib_id_list_VCRList                             (DMAP_mib_id_list_MIN+5) 
-#define DMAP_mib_id_list_SuperframeUAOList                   (DMAP_mib_id_list_MIN+6) 
+#define DMAP_mib_id_list_SupportedUAOList                    (DMAP_mib_id_list_MIN+6) 
 #define DMAP_mib_id_list_ConfiguredUAOList                   (DMAP_mib_id_list_MIN+7) 
 #define DMAP_mib_id_list_MAX                                 (DMAP_mib_id_list_MIN+8) 
 
@@ -406,6 +479,7 @@ TSN_DMAP_mib_entry_iswritable(const TSN_DMAP_mib_attribute_s *mib)
   #define DMAP_mib_id_device_DeviceState_AllocatingResources 4 
   #define DMAP_mib_id_device_DeviceState_Running             5 
   #define DMAP_mib_id_device_DeviceState_MAX                 6 
+#define DMAP_mib_id_device_MAX                               12 
 static inline const char *dlmeDeviceState2String(unsigned int state)
 {
   const char *DeviceState[] = {
@@ -441,6 +515,37 @@ static inline const char *dlmeDeviceState2String(unsigned int state)
   #define DMAP_mib_id_key_KeyState_Using                                  1 
   #define DMAP_mib_id_key_KeyState_Expired                                2 
   #define DMAP_mib_id_key_KeyState_Invalid                                3 
+
+/***********************************************************************************
+ * GB/T26790.2-2015, 6.7.1.2.2, Page 40 
+ *                   Process Data Description Struct 
+ *
+************************************************************************************/
+#define DMAP_mib_id_uao_ParameterDataType                  0
+  #define DMAP_mib_id_uao_ParameterDataType_Unsigned8      0x8000
+  #define DMAP_mib_id_uao_ParameterDataType_Unsigned16     0x4000
+  #define DMAP_mib_id_uao_ParameterDataType_Unsigned32     0x2000
+  #define DMAP_mib_id_uao_ParameterDataType_SingleFloat    0x1000
+  #define DMAP_mib_id_uao_ParameterDataType_DoubleFloat    0x0800
+  #define DMAP_mib_id_uao_ParameterDataType_Bitstring      0x0400
+  #define DMAP_mib_id_uao_ParameterDataType_Count_MASK     0x03ff
+
+/***********************************************************************************
+ * GB/T26790.2-2015, 6.7.1.2.2, Page 39 
+ *                   UAO Class Description Struct 
+ *
+***********************************************************************************/
+#define DMAP_mib_id_supported_uao_ClassID                                0
+#define DMAP_mib_id_supported_uao_UAOType                                1 
+   #define DMAP_mib_id_supported_uao_UAOType_AI                0 
+   #define DMAP_mib_id_supported_uao_UAOType_AO                1 
+   #define DMAP_mib_id_supported_uao_UAOType_DI                2 
+   #define DMAP_mib_id_supported_uao_UAOType_DO                3 
+#define DMAP_mib_id_supported_uao_MaxInputDatalen                        2 
+#define DMAP_mib_id_supported_uao_MaxOutputDatalen                       3 
+#define DMAP_mib_id_supported_uao_MinDataUpdateRate                      4 
+#define DMAP_mib_id_supported_uao_SupperInputType                        5 
+#define DMAP_mib_id_supported_uao_SupperOutputType                       6 
 
 /***********************************************************************************
  * GB/T26790.2-2015, 6.7.1.2.2, Page 38 
@@ -530,7 +635,7 @@ typedef struct tsn_superframe tsn_superframe_s;
 struct tsn_dll_link{
   Unsigned16  LinkID;
   Unsigned8   LinkType;
-  SingleFloat PacketLossRate;
+  Unsigned48  ActiveSlot;
   Unsigned16  PeerAddr;
   Unsigned16  RelativeSlotNumber;
   Unsigned8   ChannelIndex;
@@ -579,6 +684,7 @@ struct tsn_supported_uao_description{
   Unsigned8   ClassID;
   Unsigned8   UAOType;
   Unsigned16  MaxInputDatalen;
+  Unsigned16  MaxOutputDatalen;
   Unsigned32  MinDataUpdateRate;
   tsn_uao_parameter_datatype_s SupperInputType;
   tsn_uao_parameter_datatype_s SupperOutputType;
@@ -621,14 +727,16 @@ struct tsn_static_config{
   Unsigned8   AlarmReportDuration;
   Unsigned8   ChannelNumber;
   Unsigned8   AggregationEnableFlag;
-  tsn_superframe_s SuperframeList;
-  tsn_dll_link_s   DllLinkList;
-  tsn_channel_s    ChannelConditionList;
+  char pad0[0] ____TSN_ALIGN___;
+  tsn_superframe_s *SuperframeList;
+  tsn_dll_link_s   *DllLinkList;
+  tsn_channel_s    *ChannelConditionList;
   tsn_device_s     *DeviceList;
   tsn_key_s        *KeyList;
-  tsn_vcrEP_s      VCRList;
-  tsn_supported_uao_description_s SupportedUAOList;
-  tsn_uao_instance_description_s  ConfiguredUAOList;
+  tsn_vcrEP_s      *VCRList;
+  tsn_supported_uao_description_s *SupportedUAOList;
+  tsn_uao_instance_description_s  *ConfiguredUAOList;
+  char pad1[0] ____TSN_ALIGN___;
 };
 typedef struct tsn_static_config tsn_static_config_s;
 

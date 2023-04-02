@@ -150,7 +150,7 @@ TSN_device_create(tsn_device_s **_dev,
   }
   
   list_add_tail(&dev->all, &net->All);
-  
+  net->DevCount++;
   dev->Network = NetworkID;
   net->Devices[DeviceShortAddress] = dev;
   *_dev = dev;
@@ -171,6 +171,7 @@ TSN_device_destroy(tsn_device_s *dev)
   
   list_del(&dev->link);
   list_del(&dev->all);
+  net->DevCount--;
 
   net->Devices[dev->DeviceShortAddress] = NULL;
   TSN_FreeShortAddr(&dev->DeviceShortAddress);
@@ -179,3 +180,41 @@ TSN_device_destroy(tsn_device_s *dev)
   return TSN_err_none;
 }
 
+tsn_boolean_e tsn_device_mib_get(
+  unsigned short networkID, 
+  unsigned short memberID, 
+  unsigned short firstIndex, 
+  unsigned short count, 
+  void **data)
+{
+  if (memberID <= DMAP_mib_id_device_MAX)
+  {
+    tsn_device_s *dev;
+    tsn_network_s *net;
+
+    if (TSN_err_none != tsn_network_find(&net, networkID))
+    {
+      if (firstIndex + count >= net->DevCount)
+        return TSN_FALSE;
+      
+      dev = net->Devices[firstIndex];
+      if (dev->DeviceShortAddress == TSN_ShorAddress_INVALID)
+        return TSN_FALSE;
+
+      *data = dev;
+      return TSN_TRUE;
+    }
+  }
+  return TSN_FALSE;
+}
+
+tsn_boolean_e tsn_device_mib_set(
+  unsigned short networkID, 
+  unsigned short memberID, 
+  unsigned short firstIndex, 
+  unsigned short count, 
+  void *data, 
+  unsigned short *len)
+{
+  return TSN_FALSE;
+}

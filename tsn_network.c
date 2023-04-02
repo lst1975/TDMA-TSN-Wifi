@@ -57,6 +57,7 @@ tsn_network_init(tsn_network_s *net, int index)
   net->AdID            = 0;
   net->Active          = TSN_FALSE;
   net->FDNumber        = 0;
+  net->DevCount        = 0;
   tsn_memset(net->Devices, 0, sizeof(net->Devices));
 
   INIT_LIST_HEAD(&net->Ads);

@@ -34,6 +34,10 @@
 
 #define __TSN_INTERFACE
 #define __TSN_UNUSED __attribute__((unused))
+#define __TSN_ALIGN(x) __attribute__ ((aligned (x)))
+
+#define __TSN_ALIGN_default 128
+#define ____TSN_ALIGN___ __attribute__ ((aligned (__TSN_ALIGN_default)))
 
 static inline uint64_t __htonll(uint64_t val) 
 {
