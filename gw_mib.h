@@ -151,90 +151,14 @@ struct TSN_DMAP_mib_attribute{
   uint64_t Device:4;
   uint64_t Offset:31;
 
-  union{
-    Unsigned8     DefaultValue_Unsigned8;
-    Unsigned16    DefaultValue_Unsigned16;
-    Unsigned24    DefaultValue_Unsigned24;
-    Unsigned32    DefaultValue_Unsigned32;
-    Unsigned40    DefaultValue_Unsigned40;
-    Unsigned48    DefaultValue_Unsigned48;
-    Unsigned64    DefaultValue_Unsigned64;
-    Unsigned80    DefaultValue_Unsigned80;
-    Unsigned8     DefaultValue_BitField8;
-    Unsigned16    DefaultValue_BitField16;
-    Unsigned24    DefaultValue_BitField24;
-    TimeData      DefaultValue_TimeData;
-    KeyData       DefaultValue_KeyData;
-    OctetString   DefaultValue_OctetString;
-    BitsString    DefaultValue_BitsString;
-    double   DefaultValue_SingleFloat;
-    double   DefaultValue_DoubleFloat;
-  };
-  
-  union{
-    Unsigned8     ValueMin_Unsigned8;
-    Unsigned16    ValueMin_Unsigned16;
-    Unsigned24    ValueMin_Unsigned24;
-    Unsigned32    ValueMin_Unsigned32;
-    Unsigned40    ValueMin_Unsigned40;
-    Unsigned48    ValueMin_Unsigned48;
-    Unsigned64    ValueMin_Unsigned64;
-    Unsigned80    ValueMin_Unsigned80;
-    Unsigned8     ValueMin_BitField8;
-    Unsigned16    ValueMin_BitField16;
-    Unsigned24    ValueMin_BitField24;
-    TimeData      ValueMin_TimeData;
-    KeyData       ValueMin_KeyData;
-    OctetString   ValueMin_OctetString;
-    BitsString    ValueMin_BitsString;
-    double   ValueMin_SingleFloat;
-    double   ValueMin_DoubleFloat;
-  };
-  
-  union{
-    Unsigned8     ValueMax_Unsigned8;
-    Unsigned16    ValueMax_Unsigned16;
-    Unsigned24    ValueMax_Unsigned24;
-    Unsigned32    ValueMax_Unsigned32;
-    Unsigned40    ValueMax_Unsigned40;
-    Unsigned48    ValueMax_Unsigned48;
-    Unsigned64    ValueMax_Unsigned64;
-    Unsigned80    ValueMax_Unsigned80;
-    Unsigned8     ValueMax_BitField8;
-    Unsigned16    ValueMax_BitField16;
-    Unsigned24    ValueMax_BitField24;
-    TimeData      ValueMax_TimeData;
-    KeyData       ValueMax_KeyData;
-    OctetString   ValueMax_OctetString;
-    BitsString    ValueMax_BitsString;
-    double   ValueMax_SingleFloat;
-    double   ValueMax_DoubleFloat;
-  };
-  
+  tsn_value_type_u DefaultValue;
+  tsn_value_type_u ValueMin;
+  tsn_value_type_u ValueMax;
+  tsn_value_type_u Value;
+
   tsn_mib_get_f MibGet;
   tsn_mib_set_f MibSet;
   TSN_DMAP_mib_attribute_s *DefaultEntryAddr;
-  union{
-    TSN_DMAP_mib_attribute_s **value_List;
-    TSN_DMAP_mib_attribute_s *value_Attrs;
-    Unsigned8     value_Unsigned8;
-    Unsigned16    value_Unsigned16;
-    Unsigned24    value_Unsigned24;
-    Unsigned32    value_Unsigned32;
-    Unsigned40    value_Unsigned40;
-    Unsigned48    value_Unsigned48;
-    Unsigned64    value_Unsigned64;
-    Unsigned80    value_Unsigned80;
-    Unsigned8     value_BitField8;
-    Unsigned16    value_BitField16;
-    Unsigned24    value_BitField24;
-    TimeData      value_TimeData;
-    KeyData       value_KeyData;
-    OctetString   value_OctetString;
-    BitsString    value_BitsString;
-    double        value_SingleFloat;
-    double        value_DoubleFloat;
-  }Value;
 };
 
 static inline void *
@@ -286,10 +210,10 @@ TSN_DMAP_mib_entry_get_data(TSN_DMAP_mib_attribute_s *mib)
   .DataType     = DATA_TYPE_ ## dataType, \
   .Access       = permission, \
   .Device       = devices, \
-  .ValueMin_##dataType     = mi, \
-  .ValueMax_##dataType     = mx, \
+  .ValueMin.value_##dataType     = mi, \
+  .ValueMax.value_##dataType     = mx, \
   .Value.value_##dataType  = dftValue, \
-  .DefaultValue_##dataType = dftValue, \
+  .DefaultValue.value_##dataType = dftValue, \
   .DefaultEntryAddr   = NULL, \
   .DefaultEntryCount  = 0, \
   .Offset             = offset, \

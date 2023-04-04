@@ -94,8 +94,8 @@ typedef enum tsn_boolean tsn_boolean_e;
 #define TsnFloat_TYPE_double_float 1
 #define TsnFloat_TYPE_invalid      2 
 struct _TsnFloat{
-  double integerPart;
-  double fractionPart;
+  int64_t integerPart;
+  uint64_t fractionPart;
   uint64_t type;
   double   value;
 };
@@ -137,6 +137,23 @@ tsn_float_to_SINGLE_FLOAT(TsnFloat *v, SingleFloat f)
   f.F = v->fractionPart;
 }
 
+static inline void 
+__float_to_tsn_FLOAT(double v, TsnFloat *f)
+{
+  f->type = TsnFloat_TYPE_single_float;
+  f->value = v;
+  f->integerPart  = (int64_t)v;
+  f->fractionPart = (uint64_t)((v-(int64_t)v)*0x800000);
+}
+
+static inline void 
+__single_to_DOUBLE_FLOAT(double v, SingleFloat f)
+{
+  f.SN = v < 0;
+  f.E = f.SN ? (uint32_t)-v : (uint32_t)v;
+  f.F = (uint32_t)((v-(int32_t)v)*0x800000);
+}
+
 struct _DoubleFloat{
   uint64_t SN:1;
   uint64_t E:11;
@@ -146,22 +163,20 @@ typedef struct _DoubleFloat DoubleFloat;
 #define DoubleFloatNaN 0x7FA0000000000000
 
 static inline void 
-DOUBLE_FLOAT_to_tsn_float(TsnFloat *v, SingleFloat f)
+DOUBLE_FLOAT_to_tsn_float(TsnFloat *v, DoubleFloat f)
 {
   if (*((uint64_t*)&f) == DoubleFloatNaN)
   {
     v->type = TsnFloat_TYPE_invalid;
     return;
   }
-  v->integerPart = f.E;
-  if (f.SN)
-    v->integerPart = -f.E;
+  v->integerPart = f.SN ? -f.E : f.E;
   v->fractionPart = f.F;
   v->value = v->integerPart + v->fractionPart/0x10000000000000;
 }
 
 static inline void 
-tsn_float_to_DOUBLE_FLOAT(TsnFloat *v, SingleFloat f)
+tsn_float_to_DOUBLE_FLOAT(TsnFloat *v, DoubleFloat f)
 {
   if (v->type == TsnFloat_TYPE_invalid)
   {
@@ -169,8 +184,25 @@ tsn_float_to_DOUBLE_FLOAT(TsnFloat *v, SingleFloat f)
     return;
   }
   f.SN = (v->integerPart < 0);
-  f.E = f.SN ? -v->integerPart : v->integerPart;
-  f.F = v->fractionPart;
+  f.E  = f.SN ? -v->integerPart : v->integerPart;
+  f.F  = v->fractionPart;
+}
+
+static inline void 
+__double_to_tsn_FLOAT(double v, TsnFloat *f)
+{
+  f->type = TsnFloat_TYPE_double_float;
+  f->value = v;
+  f->integerPart  = (int64_t)v;
+  f->fractionPart = (uint64_t)((v-(int64_t)v)*0x10000000000000);
+}
+
+static inline void 
+__double_to_DOUBLE_FLOAT(double v, DoubleFloat f)
+{
+  f.SN = v < 0;
+  f.E = f.SN ? (uint64_t)-v : (uint64_t)v;
+  f.F = (uint64_t)((v-(int64_t)v)*0x10000000000000);
 }
 
 struct _OctetString{
@@ -208,6 +240,29 @@ enum{
   DATA_TYPE_Struct,
   DATA_TYPE_MAX,
 };
+
+union __tsn_value_type{
+  void         *value_List;
+  void         *value_Attrs;
+  Unsigned8     value_Unsigned8;
+  Unsigned16    value_Unsigned16;
+  Unsigned24    value_Unsigned24;
+  Unsigned32    value_Unsigned32;
+  Unsigned40    value_Unsigned40;
+  Unsigned48    value_Unsigned48;
+  Unsigned64    value_Unsigned64;
+  Unsigned80    value_Unsigned80;
+  Unsigned8     value_BitField8;
+  Unsigned16    value_BitField16;
+  Unsigned24    value_BitField24;
+  TimeData      value_TimeData;
+  KeyData       value_KeyData;
+  OctetString   value_OctetString;
+  BitsString    value_BitsString;
+  double        value_SingleFloat;
+  double        value_DoubleFloat;
+};
+typedef union __tsn_value_type tsn_value_type_u;
 
 static inline tsn_boolean_e
 tsn_data_is_equal(int type, void *value1, void *value2, size_t len)
@@ -273,7 +328,7 @@ tsn_data_is_equal(int type, void *value1, void *value2, size_t len)
 #define Unsigned16Max 0xFFFF
 #define Unsigned8Max  0xFF
 #define TimeDataMax   Unsigned64Max
-#define _D8M Unsigned8Max
+#define _D8M          Unsigned8Max
 #define Unsigned24Max  { _D8M, _D8M, _D8M }
 #define Unsigned40Max  { _D8M, _D8M, _D8M, _D8M, _D8M }
 #define Unsigned48Max  { _D8M, _D8M, _D8M, _D8M, _D8M, _D8M }
@@ -301,68 +356,5 @@ struct tsn_primative{
   tsn_primative_f confirm;
 };
 typedef struct tsn_primative tsn_primative_s;
-
-enum tsn_err{
-  TSN_err_none=0,
-  TSN_err_malformed,
-  TSN_err_tooshort,
-  TSN_err_toolong,
-  TSN_err_unsupport,
-  TSN_err_existed,
-  TSN_err_nomem,
-  TSN_err_invalid,
-  TSN_err_exceeded,
-  TSN_err_system,
-  TSN_err_permission,
-  TSN_err_eagain,
-  TSN_err_eintr,
-  TSN_err_max,
-};
-
-struct tsn_sockaddr{
-  union {
-    struct sockaddr_in  addr4;
-    struct sockaddr_in6 addr6;
-  }u;
-  struct sockaddr  *sa;
-  socklen_t slen;
-};
-
-typedef struct tsn_sockaddr tsn_sockaddr_s;
-
-static inline tsn_boolean_e
-tsn_sockaddr_isequal(tsn_sockaddr_s *u, struct sockaddr *sa)
-{
-  if (sa->sa_family != u->sa->sa_family)
-  {
-    return TSN_FALSE;
-  }
-  else
-  {
-    tsn_sockaddr_s *s = (tsn_sockaddr_s *)sa;
-    s->sa = sa;
-    
-    switch (sa->sa_family)
-    {
-      case AF_INET:
-        if (u->u.addr4.sin_port != s->u.addr4.sin_port)
-          return TSN_FALSE;
-        if (u->u.addr4.sin_addr.s_addr != s->u.addr4.sin_addr.s_addr)
-          return TSN_FALSE;
-        break;
-        
-      case AF_INET6:
-        if (u->u.addr6.sin6_port != s->u.addr6.sin6_port)
-          return TSN_FALSE;
-        if (tsn_memcmp(&u->u.addr6.sin6_addr, &s->u.addr6.sin6_addr, 16))
-          return TSN_FALSE;
-        break;
-        
-      default:
-        return TSN_FALSE;
-    }
-  }
-  return TSN_TRUE;
-}
 
 #endif

@@ -32,6 +32,23 @@
 #ifndef _GW_LOG_H_
 #define _GW_LOG_H_
 
+enum tsn_err{
+  TSN_err_none=0,
+  TSN_err_malformed,
+  TSN_err_tooshort,
+  TSN_err_toolong,
+  TSN_err_unsupport,
+  TSN_err_existed,
+  TSN_err_nomem,
+  TSN_err_invalid,
+  TSN_err_exceeded,
+  TSN_err_system,
+  TSN_err_permission,
+  TSN_err_eagain,
+  TSN_err_eintr,
+  TSN_err_max,
+};
+
 const char *TSN_err2str(int err);
 void ___TSN_string(const char *type, const char *fmt, ...);
 void ___TSN_print(const char *fmt, ...);

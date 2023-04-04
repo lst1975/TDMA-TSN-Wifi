@@ -33,9 +33,21 @@
 #ifndef __TSN_UTILS_H__
 #define __TSN_UTILS_H__
 
+struct tsn_sockaddr{
+  union {
+    struct sockaddr_in  addr4;
+    struct sockaddr_in6 addr6;
+  }u;
+  struct sockaddr  *sa;
+  socklen_t slen;
+};
+
+typedef struct tsn_sockaddr tsn_sockaddr_s;
+
 void tsn_sockaddr_print(tsn_sockaddr_s *s, 
       const char *head, const char *tail);
 int tsn_sockaddr_salen(tsn_sockaddr_s *s);
+tsn_boolean_e tsn_sockaddr_isequal(tsn_sockaddr_s *u, struct sockaddr *sa);
 
 #define TSN_error(fmt, ...) do { if (sysCfg.logError) ___TSN_string("Error", fmt, ##__VA_ARGS__); } while(0)
 #define TSN_event(fmt, ...) do { if (sysCfg.logEvent) ___TSN_string("Event", fmt, ##__VA_ARGS__); } while(0)

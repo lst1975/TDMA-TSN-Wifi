@@ -45,4 +45,37 @@ tsn_sockaddr_salen(tsn_sockaddr_s *s)
   return s->sa->sa_family == AF_INET ? sizeof(s->u.addr4) : sizeof(s->u.addr6);
 }
 
-
+tsn_boolean_e
+tsn_sockaddr_isequal(tsn_sockaddr_s *u, struct sockaddr *sa)
+{
+  if (sa->sa_family != u->sa->sa_family)
+  {
+    return TSN_FALSE;
+  }
+  else
+  {
+    tsn_sockaddr_s *s = (tsn_sockaddr_s *)sa;
+    s->sa = sa;
+    
+    switch (sa->sa_family)
+    {
+      case AF_INET:
+        if (u->u.addr4.sin_port != s->u.addr4.sin_port)
+          return TSN_FALSE;
+        if (u->u.addr4.sin_addr.s_addr != s->u.addr4.sin_addr.s_addr)
+          return TSN_FALSE;
+        break;
+        
+      case AF_INET6:
+        if (u->u.addr6.sin6_port != s->u.addr6.sin6_port)
+          return TSN_FALSE;
+        if (tsn_memcmp(&u->u.addr6.sin6_addr, &s->u.addr6.sin6_addr, 16))
+          return TSN_FALSE;
+        break;
+        
+      default:
+        return TSN_FALSE;
+    }
+  }
+  return TSN_TRUE;
+}

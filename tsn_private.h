@@ -62,11 +62,11 @@
 
 #include "gw_list.h"
 #include "gw_buffer.h"
+#include "tsn_utils.h"
 #include "gw_device.h"
 #include "gw_mib.h"
 #include "gw_addr.h"
 #include "gw_state.h"
-#include "tsn_utils.h"
 #include "tsn_resource.h"
 #include "tsn_network.h"
 #include "tsn_system.h"

@@ -31,8 +31,6 @@
  */
 #include "tsn_private.h"
 
-const Unsigned48 test48 = Unsigned48Max;
-
 static TSN_DMAP_mib_attribute_s *
 __TSN_DMAP_mib_create(const TSN_DMAP_mib_attribute_s *srcMib, int size);
 
